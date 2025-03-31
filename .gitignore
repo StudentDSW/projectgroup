@@ -1,0 +1,6 @@
+backend/venv
+**/__pycache__/
+*.log
+*.pyc
+*.pyo
+testdbapp.db
