@@ -103,31 +103,23 @@ async def react_to_post(
     db.commit()
     return {"status": "Reaction added"}
 
-@router.delete("/group/{group_id}")
-async def delete_group_with_posts(
+@router.delete("/post/{post_id}")
+async def delete_post_with_comments_reactions(
     db: db_dependency,
-    group_id: int,
+    post_id: int,
     current_user: dict = Depends(verify_token)
 ):
-    group = db.get(Group, group_id)
-    if not group:
-        raise HTTPError(404, "Group does not exist")
+    post = db.get(Post, post_id)
+    if not post:
+        raise HTTPError(404, "Post does not exist")
 
     user_id = current_user["id"]
-    member = get_group_member(db, user_id, group_id)
+    
+    if post.user_id != user_id:
+        raise HTTPError(403, "You don't have permission to delete this post")
 
-    if not member or member.role not in ["admin", "owner"]:
-        raise HTTPError(403, "You don't have permission to delete this group")
-
-    # Usuwanie postów, komentarzy i reakcji
-    post_ids_stmt = select(Post.id).where(Post.group_id == group_id)
-    post_ids = [row[0] for row in db.execute(post_ids_stmt).all()]
-
-    db.execute(delete(Reaction).where(Reaction.post_id.in_(post_ids)))
-    db.execute(delete(Comment).where(Comment.post_id.in_(post_ids)))
-    db.execute(delete(Post).where(Post.id.in_(post_ids)))
-    db.execute(delete(GroupMember).where(GroupMember.group_id == group_id))
-    db.delete(group)
-
+    db.delete(post)
     db.commit()
-    return {"status": "Group and related data deleted"}
+
+    return {"status": "Success", "result": "Removed"}
+
