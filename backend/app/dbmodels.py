@@ -52,11 +52,43 @@ class GroupMember(Base):
     group: Mapped["Group"] = relationship(back_populates="member_associations")
 
 
-# tbd
-# class Posts(Base):
-#     __tablename__ = "posts"
 
-#     id: Mapped[int] = mapped_column(primary_key=True, index=True)
-#     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
-#     group_id: Mapped[int] = mapped_column(ForeignKey("groups.id", ondelete="CASCADE"), primary_key=True)
-    
+class Post(Base):
+    __tablename__ = 'posts'
+
+    id:Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    group_id: Mapped[int] = mapped_column(ForeignKey('groups.id', ondelete='CASCADE'), index=True)
+    user_id:  Mapped[int] = mapped_column(ForeignKey('users.id', ondelete='CASCADE'), index=True)
+    content: Mapped[str] = mapped_column(String)
+    image: Mapped[LargeBinary] = mapped_column(LargeBinary, nullable=True)
+    created_at: Mapped[DateTime] = mapped_column(DateTime)
+
+    group: Mapped["Group"] = relationship()
+    user: Mapped["User"] = relationship()
+
+    comments: Mapped[List["Comment"]] = relationship(back_populates="post", cascade="all, delete")
+    reactions: Mapped[List["Reaction"]] = relationship(back_populates="post", cascade="all, delete")
+
+class Comment(Base):
+    __tablename__ = "comments"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    post_id: Mapped[int] = mapped_column(ForeignKey('posts.id', ondelete='CASCADE'))
+    user_id: Mapped[int] = mapped_column(ForeignKey('users.id', ondelete='CASCADE'))
+    text: Mapped[str] = mapped_column(String)
+    created_at: Mapped[DateTime] = mapped_column(DateTime)
+
+    post: Mapped["Post"] = relationship(back_populates="comments")
+    user: Mapped["User"] = relationship()
+
+class Reaction(Base):
+    __tablename__ = "reactions"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    post_id: Mapped[int] = mapped_column(ForeignKey("posts.id", ondelete="CASCADE"))
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    type: Mapped[str] = mapped_column(String)  # np. "like", "heart", "laugh"
+    created_at: Mapped[DateTime] = mapped_column(DateTime)
+
+    post: Mapped["Post"] = relationship(back_populates="reactions")
+    user: Mapped["User"] = relationship()    
