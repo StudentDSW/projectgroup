@@ -50,3 +50,13 @@ class GroupMember(Base):
 
     user: Mapped["User"] = relationship(back_populates="group_associations")
     group: Mapped["Group"] = relationship(back_populates="member_associations")
+
+
+# tbd
+# class Posts(Base):
+#     __tablename__ = "posts"
+
+#     id: Mapped[int] = mapped_column(primary_key=True, index=True)
+#     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
+#     group_id: Mapped[int] = mapped_column(ForeignKey("groups.id", ondelete="CASCADE"), primary_key=True)
+    

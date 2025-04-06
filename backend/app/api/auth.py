@@ -14,8 +14,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 SECRET_KEY = "7f3c9e6b8a4d1f57e2b8c6d3a9e4f781c2d5b6a7f8e9c0d1b2a3c4d5e6f7g8h9"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60
-
+ACCESS_TOKEN_EXPIRE_MINUTES = 600
 
 def authenticate_user(username: str, password: str, db: Session):
     stmt = Select(User).where(User.username == username)

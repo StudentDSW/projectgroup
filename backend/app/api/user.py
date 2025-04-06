@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends, File, UploadFile
+from fastapi import APIRouter, HTTPException, Depends, File, UploadFile, Form
 from pydantic import BaseModel
 from app.db import db_dependency
 from app.dbmodels import User
@@ -21,6 +21,10 @@ class UserCreateBM(BaseModel):
     username: str 
     password: str
     email: str
+
+class UserUpdateBM(BaseModel):
+    password: Optional[str] = None
+    email: Optional[str] = None
 
 def get_user(db: Session, username: str = None, email: str = None, id: int = None):
     filters = []
@@ -118,6 +122,28 @@ async def get_users(
     return users_list
 
 
+@router.get("/me")
+async def user_me(
+    db: db_dependency, 
+    current_user: dict = Depends(auth.verify_token)
+):
+    try:
+        user = get_user(db=db,id=current_user.get("id"))
+        if not user:
+            raise HTTPError(404,"User does not exist")
+        
+        user_dict = user.__dict__.copy()
+        user_dict.pop("hashed_password", None)
+        if user.avatar:
+            avatar_base64 = base64.b64encode(user.avatar).decode("utf-8")
+            user_dict["avatar"] = f"data:image/png;base64,{avatar_base64}"
+
+        return user_dict
+    except Exception as e:
+        raise HTTPError(500, f"Internal server error: {str(e)}")
+
+
+
 @router.get("/{user_id}")
 async def get_specific_user(
     user_id: int,
@@ -140,23 +166,13 @@ async def get_specific_user(
 
 
 
-# @router.get("/details/me")
-# async def user_me(db: db_dependency, current_user: dict = Depends(auth.verify_token)):
-#     try:
-#         return get_user(db=db,id=current_user.get("id"))
-#     except Exception as e:
-#         raise HTTPError(500, f"Internal server error: {str(e)}")
-
-
-
-
 @router.put("/{user_id}")
 async def get_specific_user(
     user_id: int,
     db: db_dependency,
     current_user: dict = Depends(auth.verify_token),
-    password: Optional[str] = None,
-    email: Optional[str] = None,
+    password: Optional[str] = Form(None),
+    email: Optional[str] = Form(None),
     avatar: Optional[UploadFile] = File(None) 
 ):
     if current_user.get("role") != "admin" and current_user.get("id") != user_id:
