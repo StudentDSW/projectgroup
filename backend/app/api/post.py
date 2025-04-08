@@ -51,6 +51,85 @@ async def create_post(
     db.refresh(post)
     return {"status": "success", "post_id": post.id}
 
+@router.get("/my")
+async def get_my_posts(
+    db: db_dependency,
+    current_user: dict = Depends(verify_token)
+):
+    user_id = current_user['id']
+    stmt = select(Post).where(Post.user_id == user_id).order_by(Post.created_at.desc())
+    posts = db.scalars(stmt).all()
+    return posts
+
+@router.get("/group/{group_id}")
+async def get_group_posts(
+    group_id: int,
+    db: db_dependency,
+    current_user: dict = Depends(verify_token)
+):
+    member = get_group_member(db, current_user['id'], group_id)
+    if not member:
+        raise HTTPError(403, "Not a member of this group")
+
+    stmt = select(Post).where(Post.group_id == group_id).order_by(Post.created_at.desc())
+    posts = db.scalars(stmt).all()
+    return posts
+
+@router.get("/admin/all")
+async def get_all_posts_admin(
+    db: db_dependency,
+    current_user: dict = Depends(verify_token)
+):
+    if not current_user.get("is_admin"):
+        raise HTTPError(403, "Admin only")
+
+    stmt = select(Post).order_by(Post.created_at.desc())
+    posts = db.scalars(stmt).all()
+    return posts
+
+@router.put("/{post_id}")
+async def edit_post(
+    post_id: int,
+    content: str,
+    db: db_dependency,
+    current_user: dict = Depends(verify_token)
+):
+    post = db.get(Post, post_id)
+    if not post:
+        raise HTTPError(404, "Post not found")
+
+    if post.user_id != current_user["id"]:
+        raise HTTPError(403, "You can only edit your own post")
+
+    post.content = content
+    db.commit()
+    db.refresh(post)
+    return {"status": "Post updated", "post": post}
+
+@router.get("/{post_id}")
+async def get_post_detail(
+    post_id: int,
+    db: db_dependency,
+    current_user: dict = Depends(verify_token)
+):
+    post = db.get(Post, post_id)
+    if not post:
+        raise HTTPError(404, "Post not found")
+
+    member = get_group_member(db, current_user['id'], post.group_id)
+    if not member:
+        raise HTTPError(403, "You must be in the group")
+
+    comments = db.scalars(select(Comment).where(Comment.post_id == post_id)).all()
+    reactions = db.scalars(select(Reaction).where(Reaction.post_id == post_id)).all()
+    
+    return {
+        "post": post,
+        "comments": comments,
+        "reactions": reactions
+    }
+
+
 @router.post('/{post_id}/comment')
 async def comment_on_post(
     db: db_dependency,
@@ -102,6 +181,67 @@ async def react_to_post(
     db.add(reaction)
     db.commit()
     return {"status": "Reaction added"}
+
+@router.post("/comments/{comment_id}/reaction")
+async def react_to_comment(
+    db: db_dependency,
+    comment_id: int,
+    reaction_type: str,
+    current_user: dict = Depends(verify_token)
+):
+    comment = db.get(Comment, comment_id)
+    if not comment:
+        raise HTTPError(404, "Comment does not exist")
+
+    post = db.get(Post, comment.post_id)
+    member = get_group_member(db, current_user["id"], post.group_id)
+    if not member:
+        raise HTTPError(403, "Not in group")
+
+    reaction = Reaction(
+        comment_id=comment_id,
+        user_id=current_user["id"],
+        type=reaction_type,
+        created_at=datetime.now(timezone.utc)
+    )
+    db.add(reaction)
+    db.commit()
+    return {"status": "Reaction added"}
+
+
+@router.delete("/comment/{comment_id}")
+async def delete_comment(
+    comment_id: int,
+    db: db_dependency,
+    current_user: dict = Depends(verify_token)
+):
+    comment = db.get(Comment, comment_id)
+    if not comment:
+        raise HTTPError(404, "Comment not found")
+
+    if comment.user_id != current_user["id"]:
+        raise HTTPError(403, "You can delete only your own comment")
+
+    db.delete(comment)
+    db.commit()
+    return {"status": "Comment deleted"}
+
+@router.delete("/reaction/{reaction_id}")
+async def delete_reaction(
+    reaction_id: int,
+    db: db_dependency,
+    current_user: dict = Depends(verify_token)
+):
+    reaction = db.get(Reaction, reaction_id)
+    if not reaction:
+        raise HTTPError(404, "Reaction not found")
+
+    if reaction.user_id != current_user["id"]:
+        raise HTTPError(403, "You can delete only your own reaction")
+
+    db.delete(reaction)
+    db.commit()
+    return {"status": "Reaction deleted"}
 
 @router.delete("/post/{post_id}")
 async def delete_post_with_comments_reactions(

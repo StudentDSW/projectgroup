@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import String, Integer, LargeBinary, DateTime, Boolean, ForeignKey
 from app.db import Base
-from typing import List
+from typing import List, Optional
 
 
 class User(Base):
@@ -83,7 +83,8 @@ class Reaction(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     post_id: Mapped[int] = mapped_column(ForeignKey("posts.id", ondelete="CASCADE"), index=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
-    type: Mapped[str] = mapped_column(String)  # np. "like", "heart", "laugh"
+    comment_id: Mapped[Optional[int]] = mapped_column(ForeignKey("comments.id", ondelete="CASCADE"), index=True, nullable=True)
+    type: Mapped[str] = mapped_column(String)  
     created_at: Mapped[DateTime] = mapped_column(DateTime)
 
     post: Mapped["Post"] = relationship(back_populates="reactions")
