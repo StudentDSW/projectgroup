@@ -1,0 +1,42 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+button {
+    display: block;
+}
+
+.wrapper {
+    width: 440px;
+    background-color: gray;
+    padding: 50px 32px;
+}
+
+form {
+    font-size: 20px;
+}
+
+h2 {
+    margin-bottom: 30px;
+}
+
+.form-box {
+    margin-bottom: 15px;
+}
+
+.form-box label {
+    display: inline-block;
+    margin-bottom: 5px;
+}
+
+.form-box input {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid gray;
+    border-radius: 5px;
+}
+
+
