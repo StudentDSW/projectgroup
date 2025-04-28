@@ -8,13 +8,13 @@ import './App.css'
 function App() {
 
   return (
-    <>
+    <div className='wrapper-main'>
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/registration" element={<Registration />} />
         <Route path="/reset-password" element={<ResetPassword />} />
       </Routes>
-    </>
+    </div>
   )
 }
 

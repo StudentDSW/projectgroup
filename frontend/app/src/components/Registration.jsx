@@ -75,7 +75,7 @@ export const Registration = () => {
                         name="username"
                         onChange={handleChange}
                         />
-                        {errors.username && <span>{errors.username}</span>} 
+                        {errors.username && <span className='errors'>{errors.username}</span>} 
                 </div>
                 <div className="form-box">
                     <label htmlFor="email">Email</label>
@@ -84,7 +84,7 @@ export const Registration = () => {
                         name="email"
                         onChange={handleChange}
                         /> 
-                        {errors.email && <span>{errors.email}</span>} 
+                        {errors.email && <span className='errors'>{errors.email}</span>} 
                 </div>
                 <div className="form-box">
                     <label htmlFor="password">Hasło</label>
@@ -93,7 +93,7 @@ export const Registration = () => {
                         name="password"
                         onChange={handleChange} 
                         />
-                        {errors.password && <span>{errors.password}</span>} 
+                        {errors.password && <span className='errors'>{errors.password}</span>} 
                 </div>
                 <div className="form-box">
                     <label htmlFor="confirmPassword">Powtórz hasło</label>
@@ -102,10 +102,10 @@ export const Registration = () => {
                         name="confirmPassword" 
                         onChange={handleChange}
                         />
-                        {errors.confirmPassword && <span>{errors.confirmPassword}</span>} 
+                        {errors.confirmPassword && <span className='errors'>{errors.confirmPassword}</span>} 
                 </div>
-                <button type="submit" onClick={handleSubmit} className="login__button">Zarejestruj się</button>
-                <div className="register">Masz już konto? <Link to="/" className="link">Zaloguj się</Link></div>
+                <button type="submit" onClick={handleSubmit} className="buttons login__button">Zarejestruj się</button>
+                <div className="register">Masz już konto? <Link to="/" className="register-link">Zaloguj się</Link></div>
             </form>
         </div>
         {isPopupVisible && (

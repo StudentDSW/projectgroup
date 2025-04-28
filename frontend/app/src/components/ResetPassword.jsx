@@ -59,8 +59,9 @@ export const ResetPassword = () => {
                         placeholder="jan.kowalski@gmail.com"
                         onChange={handleChange}
                         />
-                        {errors.email && <span>{errors.email}</span>}
-                        <button className="reset-password__button">Wyślij instrukcje resetowania</button>
+                        {errors.email && <span className='errors'>{errors.email}</span>}
+                        <button className="buttons reset-password__button">Wyślij instrukcje resetowania</button>
+                        
                 </div>
             </div>  
         </form>

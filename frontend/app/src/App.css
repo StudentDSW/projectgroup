@@ -1,0 +1,68 @@
+.wrapper {
+	background-color: rgb(190, 188, 188);
+	border-radius: 5%;
+}
+.wrapper-main {
+	height: 100vh;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+.link {
+	color: royalblue;
+	text-decoration: none;
+	transition: 0.3s;
+}
+button {
+	display: block;
+
+	border-radius: 5px;
+	height: 40px;
+	width: 376px;
+	border: none;
+	font-size: 20px;
+	cursor: pointer;
+}
+button:hover {
+	background-color: rgb(151, 240, 151);
+	transition: 0.3s;
+}
+.errors {
+	font-size: 15px;
+	font-weight: 600;
+	color: red;
+}
+@media screen and (max-width: 1980px) {
+	.wrapper {
+		width: 381px;
+	}
+	.buttons {
+		width: 317px;
+	}
+}
+
+@media screen and (max-width: 430px) {
+	.wrapper {
+		width: 370px;
+	}
+	.buttons {
+		width: 306px;
+	}
+}
+
+@media screen and (max-width: 375px) {
+	.wrapper {
+		width: 350px;
+	}
+	.buttons {
+		width: 286px;
+	}
+}
+@media screen and (max-width: 360px) {
+	.wrapper {
+		width: 330px;
+	}
+	.buttons {
+		width: 266px;
+	}
+}

@@ -1,42 +1,52 @@
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-button {
-    display: block;
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+	font-family: sans-serif;
 }
 
 .wrapper {
-    width: 440px;
-    background-color: gray;
-    padding: 50px 32px;
+	width: 440px;
+	padding: 50px 32px;
 }
 
 form {
-    font-size: 20px;
+	font-size: 20px;
 }
 
 h2 {
-    margin-bottom: 30px;
+	margin-bottom: 30px;
+	text-align: center;
+	color: rgb(93, 124, 214);
 }
 
 .form-box {
-    margin-bottom: 15px;
+	margin-bottom: 15px;
 }
 
 .form-box label {
-    display: inline-block;
-    margin-bottom: 5px;
+	display: inline-block;
+	margin-bottom: 5px;
 }
 
 .form-box input {
-    width: 100%;
-    padding: 10px;
-    font-size: 16px;
-    border: 1px solid gray;
-    border-radius: 5px;
+	width: 100%;
+	padding: 10px;
+	font-size: 16px;
+	border: 1px solid gray;
+	border-radius: 5px;
+	height: 40px;
 }
 
-
+.link__password {
+	display: block;
+	margin-top: 20px;
+}
+.link__password:hover {
+	color: rgb(60, 226, 60);
+	transition: 0.3s;
+}
+.register-link:hover {
+	color: rgb(60, 226, 60);
+	transition: 0.3s;
+}

@@ -56,7 +56,7 @@ export const Login = () => {
                             placeholder="Twój adres email"
                             onChange={handleChange}
                             />
-                            {errors.email && <span>{errors.email}</span>}
+                            {errors.email && <span className='errors'>{errors.email}</span>}
                            
                     </div>
                     <div className="form-box">
@@ -67,11 +67,11 @@ export const Login = () => {
                             placeholder="Hasło"
                             onChange={handleChange}
                             />
-                        {errors.password && <span>{errors.password}</span>}
+                        {errors.password && <span className='errors'>{errors.password}</span>}
                     </div>
+                    <button onClick={handleSubmit} type="submit" className="buttons login__button">Zaloguj się</button>
                     <Link to="/reset-password" className="link link__password"><span>Nie pamiętasz hasła?</span></Link>
-                    <button onClick={handleSubmit} type="submit" className="login__button">Zaloguj się</button>
-                    <div className="register">Nie masz konta? <Link to="/registration" className="link">Zarejestruj się</Link></div>
+                    <div className="register">Nie masz konta? <Link to="/registration" className="link register-link">Zarejestruj się</Link></div>
                 </form>
             </div>
         </>
