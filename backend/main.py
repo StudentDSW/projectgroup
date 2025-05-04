@@ -13,8 +13,7 @@ app.include_router(APIpost.router)
 Base.metadata.create_all(bind=engine)
 
 origins = [
-    "http://localhost:5173",
-    "http://localhost:3000"
+    "*"
 ]
 
 app.add_middleware(
