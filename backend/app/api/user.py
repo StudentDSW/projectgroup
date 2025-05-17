@@ -64,7 +64,7 @@ async def add_user(user: UserCreateBM, db: db_dependency):
     )
     db.add(db_user)
     db.commit()
-    return("User Created")
+    return {"username": user.username, "message": "user created"}
 
 
 @router.post("/login")
@@ -79,7 +79,7 @@ def login(db: db_dependency, form_data: OAuth2PasswordRequestForm = Depends()):
               "role": user.role},
         expires_delta = access_token_expires
     )
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {"access_token": access_token, "token_type": "bearer", "username": user.username}
 
 
 
