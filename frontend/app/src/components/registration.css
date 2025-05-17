@@ -4,6 +4,14 @@
 	box-sizing: border-box;
 }
 
+.body {
+	width: 100%;
+	height: 100vh;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
 .create-account__popup {
 	background-color: #fff;
 	padding: 20px;

@@ -96,90 +96,92 @@ export const Registration = () => {
 
   return (
     <>
-      <div className="wrapper">
-        <form onSubmit={handleSubmit}>
-          <h2>Zarejestruj się</h2>
-          <div className="form-box">
-            <label htmlFor="username">Nazwa użytkownika</label>
-            <input
-              type="text"
-              name="username"
-              placeholder="Nazwa użytkownika"
-              onChange={handleChange}
-              value={formData.username}
-            />
-            {errors.username && (
-              <span className="errors">{errors.username}</span>
+      <div className="body">
+        <div className="wrapper">
+          <form onSubmit={handleSubmit}>
+            <h2>Zarejestruj się</h2>
+            <div className="form-box">
+              <label htmlFor="username">Nazwa użytkownika</label>
+              <input
+                type="text"
+                name="username"
+                placeholder="Nazwa użytkownika"
+                onChange={handleChange}
+                value={formData.username}
+              />
+              {errors.username && (
+                <span className="errors">{errors.username}</span>
+              )}
+            </div>
+
+            <div className="form-box">
+              <label htmlFor="email">Email</label>
+              <input
+                type="email"
+                name="email"
+                placeholder="Twój adres email"
+                onChange={handleChange}
+                value={formData.email}
+              />
+              {errors.email && <span className="errors">{errors.email}</span>}
+            </div>
+
+            <div className="form-box">
+              <label htmlFor="password">Hasło</label>
+              <input
+                type="password"
+                name="password"
+                placeholder="Hasło"
+                onChange={handleChange}
+                value={formData.password}
+              />
+              {errors.password && (
+                <span className="errors">{errors.password}</span>
+              )}
+            </div>
+
+            <div className="form-box">
+              <label htmlFor="confirmPassword">Potwierdź hasło</label>
+              <input
+                type="password"
+                name="confirmPassword"
+                placeholder="Potwierdź hasło"
+                onChange={handleChange}
+                value={formData.confirmPassword}
+              />
+              {errors.confirmPassword && (
+                <span className="errors">{errors.confirmPassword}</span>
+              )}
+            </div>
+
+            <button type="submit" className="buttons login__button">
+              Zarejestruj się
+            </button>
+
+            {errors.registration && (
+              <span className="errors">{errors.registration}</span>
             )}
-          </div>
 
-          <div className="form-box">
-            <label htmlFor="email">Email</label>
-            <input
-              type="email"
-              name="email"
-              placeholder="Twój adres email"
-              onChange={handleChange}
-              value={formData.email}
-            />
-            {errors.email && <span className="errors">{errors.email}</span>}
-          </div>
-
-          <div className="form-box">
-            <label htmlFor="password">Hasło</label>
-            <input
-              type="password"
-              name="password"
-              placeholder="Hasło"
-              onChange={handleChange}
-              value={formData.password}
-            />
-            {errors.password && (
-              <span className="errors">{errors.password}</span>
-            )}
-          </div>
-
-          <div className="form-box">
-            <label htmlFor="confirmPassword">Potwierdź hasło</label>
-            <input
-              type="password"
-              name="confirmPassword"
-              placeholder="Potwierdź hasło"
-              onChange={handleChange}
-              value={formData.confirmPassword}
-            />
-            {errors.confirmPassword && (
-              <span className="errors">{errors.confirmPassword}</span>
-            )}
-          </div>
-
-          <button type="submit" className="buttons login__button">
-            Zarejestruj się
-          </button>
-
-          {errors.registration && (
-            <span className="errors">{errors.registration}</span>
-          )}
-
-          <div className="register">
-            Masz już konto?{" "}
-            <Link to="/login" className="link register-link">
-              Zaloguj się
-            </Link>
-          </div>
-        </form>
-      </div>
-      {isPopupVisible && (
-        <div className="create-account__popup">
-          <h3 className="account__created">Konto utworzone pomyślnie</h3>
-          <button
-            className="create-account__popup-close"
-            onClick={handleClosePopup}
-          >
-            Ok
-          </button>
+            <div className="register">
+              Masz już konto?{" "}
+              <Link to="/login" className="link register-link">
+                Zaloguj się
+              </Link>
+            </div>
+          </form>
         </div>
-      )}
+        {isPopupVisible && (
+          <div className="create-account__popup">
+            <h3 className="account__created">Konto utworzone pomyślnie</h3>
+            <button
+              className="create-account__popup-close"
+              onClick={handleClosePopup}
+            >
+              Ok
+            </button>
+          </div>
+        )}
+      </div>
     </>
   );
 };

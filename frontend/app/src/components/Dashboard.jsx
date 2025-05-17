@@ -16,7 +16,7 @@ export const Dashboard = () => {
         return;
       }
       try {
-        const response = await fetch("http://localhost:8000/group/all", {
+        const response = await fetch("http://localhost:8000/group/mygroups", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
