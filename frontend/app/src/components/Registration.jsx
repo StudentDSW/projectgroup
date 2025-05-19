@@ -1,6 +1,8 @@
 import { useState } from "react";
 import "./login.css";
 import { Link, useNavigate } from "react-router-dom";
+import { AiOutlineCheck } from "react-icons/ai";
+
 
 export const Registration = () => {
   const [formData, setFormData] = useState({
@@ -97,78 +99,99 @@ export const Registration = () => {
   return (
     <>
       <div className="body">
-        <div className="wrapper">
-          <form onSubmit={handleSubmit}>
-            <h2>Zarejestruj się</h2>
-            <div className="form-box">
-              <label htmlFor="username">Nazwa użytkownika</label>
-              <input
-                type="text"
-                name="username"
-                placeholder="Nazwa użytkownika"
-                onChange={handleChange}
-                value={formData.username}
-              />
-              {errors.username && (
-                <span className="errors">{errors.username}</span>
+        <div className="container left">
+          <div className="wrapper-left">
+            <h2 className="title">Nasza Grupa</h2>
+            <p className="desc">
+              Łączymy ludzi. Wspieramy współpracę. Budujemy społeczność
+            </p>
+            <div className="dashes">
+              <div className="dash">
+                <AiOutlineCheck /> Bezpieczna komunikacja
+              </div>
+              <div className="dash">
+                <AiOutlineCheck /> Wydajne zarządzanie projektami
+              </div>
+              <div className="dash">
+                <AiOutlineCheck /> Dostęp z dowolnego urządzenia
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="container right">
+          <div className="wrapper">
+            <form onSubmit={handleSubmit}>
+              <h2>Zarejestruj się</h2>
+              <div className="form-box">
+                <label htmlFor="username">Nazwa użytkownika</label>
+                <input
+                  type="text"
+                  name="username"
+                  placeholder="Nazwa użytkownika"
+                  onChange={handleChange}
+                  value={formData.username}
+                />
+                {errors.username && (
+                  <span className="errors">{errors.username}</span>
+                )}
+              </div>
+
+              <div className="form-box">
+                <label htmlFor="email">Email</label>
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="Twój adres email"
+                  onChange={handleChange}
+                  value={formData.email}
+                />
+                {errors.email && <span className="errors">{errors.email}</span>}
+              </div>
+
+              <div className="form-box">
+                <label htmlFor="password">Hasło</label>
+                <input
+                  type="password"
+                  name="password"
+                  placeholder="Hasło"
+                  onChange={handleChange}
+                  value={formData.password}
+                />
+                {errors.password && (
+                  <span className="errors">{errors.password}</span>
+                )}
+              </div>
+
+              <div className="form-box">
+                <label htmlFor="confirmPassword">Potwierdź hasło</label>
+                <input
+                  type="password"
+                  name="confirmPassword"
+                  placeholder="Potwierdź hasło"
+                  onChange={handleChange}
+                  value={formData.confirmPassword}
+                />
+                {errors.confirmPassword && (
+                  <span className="errors">{errors.confirmPassword}</span>
+                )}
+              </div>
+
+              <button type="submit" className="buttons login__button">
+                Zarejestruj się
+              </button>
+
+              {errors.registration && (
+                <span className="errors">{errors.registration}</span>
               )}
-            </div>
 
-            <div className="form-box">
-              <label htmlFor="email">Email</label>
-              <input
-                type="email"
-                name="email"
-                placeholder="Twój adres email"
-                onChange={handleChange}
-                value={formData.email}
-              />
-              {errors.email && <span className="errors">{errors.email}</span>}
-            </div>
-
-            <div className="form-box">
-              <label htmlFor="password">Hasło</label>
-              <input
-                type="password"
-                name="password"
-                placeholder="Hasło"
-                onChange={handleChange}
-                value={formData.password}
-              />
-              {errors.password && (
-                <span className="errors">{errors.password}</span>
-              )}
-            </div>
-
-            <div className="form-box">
-              <label htmlFor="confirmPassword">Potwierdź hasło</label>
-              <input
-                type="password"
-                name="confirmPassword"
-                placeholder="Potwierdź hasło"
-                onChange={handleChange}
-                value={formData.confirmPassword}
-              />
-              {errors.confirmPassword && (
-                <span className="errors">{errors.confirmPassword}</span>
-              )}
-            </div>
-
-            <button type="submit" className="buttons login__button">
-              Zarejestruj się
-            </button>
-
-            {errors.registration && (
-              <span className="errors">{errors.registration}</span>
-            )}
-
-            <div className="register">
-              Masz już konto?{" "}
-              <Link to="/login" className="link register-link">
-                Zaloguj się
-              </Link>
-            </div>
-          </form>
+              <div className="register">
+                Masz już konto?{" "}
+                <Link to="/login" className="link register-link">
+                  Zaloguj się
+                </Link>
+              </div>
+            </form>
+          </div>
         </div>
         {isPopupVisible && (
           <div className="create-account__popup">

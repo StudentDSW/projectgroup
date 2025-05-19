@@ -1,6 +1,8 @@
 import { useState } from "react";
 import "./login.css";
 import { Link, useNavigate } from "react-router-dom";
+import { AiOutlineCheck } from "react-icons/ai";
+
 
 export const Login = () => {
   const [formData, setFormData] = useState({
@@ -69,47 +71,66 @@ export const Login = () => {
 
   return (
     <div className="body">
-      <div className="wrapper">
-        <form onSubmit={handleSubmit}>
-          <h2>Zaloguj się</h2>
-          <div className="form-box">
-            <label htmlFor="username">Nazwa użytkownika</label>
-            <input
-              type="text"
-              name="username"
-              placeholder="Twój login"
-              onChange={handleChange}
-            />
-            {errors.username && (
-              <span className="errors">{errors.username}</span>
-            )}
+      <div className="container left">
+        <div className="wrapper-left">
+          <h2 className="title">Nasza Grupa</h2>
+          <p className="desc">Łączymy ludzi. Wspieramy współpracę. Budujemy społeczność</p>
+          <div className="dashes">
+            <div className="dash">
+              <AiOutlineCheck /> Bezpieczna komunikacja
+            </div>
+            <div className="dash">
+              <AiOutlineCheck /> Wydajne zarządzanie projektami
+            </div>
+            <div className="dash">
+              <AiOutlineCheck /> Dostęp z dowolnego urządzenia
+            </div>
           </div>
-          <div className="form-box">
-            <label htmlFor="password">Hasło</label>
-            <input
-              type="password"
-              name="password"
-              placeholder="Hasło"
-              onChange={handleChange}
-            />
-            {errors.password && (
-              <span className="errors">{errors.password}</span>
-            )}
-            {errors.login && <span className="errors">{errors.login}</span>}
-          </div>
-          <button type="submit" className="buttons login__button">
-            Zaloguj się
-          </button>
-          <Link to="/reset-password" className="link link__password">
-            <span>Nie pamiętasz hasła?</span>
-          </Link>
-          <div className="register">
-            Nie masz konta?{" "}
-            <Link to="/registration" className="link register-link">
-              Zarejestruj się
+        </div>
+      </div>
+      <div className="container right">
+        <div className="wrapper">
+          <form onSubmit={handleSubmit}>
+            <h2>Zaloguj się</h2>
+            <div className="form-box">
+              <label htmlFor="username">Nazwa użytkownika</label>
+              <input
+                type="text"
+                name="username"
+                placeholder="Twój login"
+                onChange={handleChange}
+              />
+              {errors.username && (
+                <span className="errors">{errors.username}</span>
+              )}
+            </div>
+            <div className="form-box">
+              <label htmlFor="password">Hasło</label>
+              <input
+                type="password"
+                name="password"
+                placeholder="Hasło"
+                onChange={handleChange}
+              />
+              {errors.password && (
+                <span className="errors">{errors.password}</span>
+              )}
+              {errors.login && <span className="errors">{errors.login}</span>}
+            </div>
+            <button type="submit" className="buttons login__button">
+              Zaloguj się
+            </button>
+            <Link to="/reset-password" className="link link__password">
+              <span>Nie pamiętasz hasła?</span>
             </Link>
-          </div>
-        </form>
+            <div className="register">
+              Nie masz konta?{" "}
+              <Link to="/registration" className="link register-link">
+                Zarejestruj się
+              </Link>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );
