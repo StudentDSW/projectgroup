@@ -29,6 +29,9 @@ export const Navbar = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const showProfile = () => {
+    navigate("/account")
+  }
 
   const handleLogout = () => {
     localStorage.removeItem("username");
@@ -80,6 +83,7 @@ export const Navbar = () => {
 
               {dropdownOpen && (
                 <div className="dropdown-menu">
+                  <button onClick={showProfile}>Pokaż profil</button>
                   <button onClick={handleLogout}>Wyloguj się</button>
                 </div>
               )}

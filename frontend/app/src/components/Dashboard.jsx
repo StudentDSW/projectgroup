@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Navbar } from "./Navbar";
 import { AddGroupPopup } from "./AddGroupPopup";
@@ -55,13 +54,27 @@ export const Dashboard = () => {
         />
       )}
 
-      <div className="group-list">
+      {/* <div className="group-list">
         {groups.map((group) => (
           <div key={group.id} className="group-item">
             <h3>{group.name}</h3>
             <p>{group.description}</p>
           </div>
         ))}
+      </div> */}
+      <div className="dashboard-container">
+        <div className="sidebar">
+          <h2 className="group-title">Twoje grupy</h2>
+          <div className="group-list">
+            {[...groups]
+              .sort((a, b) => a.name.localeCompare(b.name))
+              .map((group) => (
+                <div key={group.id} className="group-item">
+                  <h4>{group.name}</h4>
+                </div>
+              ))}
+          </div>
+        </div>
       </div>
     </div>
   );

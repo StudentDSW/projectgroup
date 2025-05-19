@@ -5,6 +5,7 @@ import { Registration } from "./components/Registration"
 import { ResetPassword } from "./components/ResetPassword"
 import { Dashboard } from "./components/Dashboard";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import { Profile } from "./components/Profile"
 
 import './App.css'
 
@@ -24,6 +25,7 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route path="/account" element={<Profile />} />
       </Routes>
     </div>
   );
