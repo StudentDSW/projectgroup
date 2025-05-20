@@ -57,7 +57,7 @@ export const Profile = () => {
         reader.onloadend = () => {
           const base64 = reader.result;
           setAvatar(base64);
-          localStorage.setItem(`avatar_${userId}`, base64); // zapis z userId
+          localStorage.setItem(`avatar_${userId}`, base64);
         };
         reader.readAsDataURL(file);
       })
