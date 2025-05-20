@@ -42,7 +42,14 @@ export const Dashboard = () => {
 
   return (
     <div className="wrapper-dashboard">
-      <Navbar />
+      <Navbar
+        onJoinGroup={(newGroup) => {
+          setGroups((prev) => {
+            if (prev.some((g) => g.id === newGroup.id)) return prev;
+            return [...prev, newGroup];
+          });
+        }}
+      />
       <button className="add-group" onClick={openPopup}>
         + Utwórz nową grupę
       </button>
@@ -54,14 +61,6 @@ export const Dashboard = () => {
         />
       )}
 
-      {/* <div className="group-list">
-        {groups.map((group) => (
-          <div key={group.id} className="group-item">
-            <h3>{group.name}</h3>
-            <p>{group.description}</p>
-          </div>
-        ))}
-      </div> */}
       <div className="dashboard-container">
         <div className="sidebar">
           <h2 className="group-title">Twoje grupy</h2>

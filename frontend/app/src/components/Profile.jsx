@@ -24,6 +24,10 @@ export const Profile = () => {
         setUsername(data.username);
         setEmail(data.email);
         setAvatar(data.avatar || null);
+
+        localStorage.setItem("user_id", data.id);
+        localStorage.setItem("username", data.username);
+        localStorage.setItem(`avatar_${data.id}`, data.avatar || "");
       } catch (err) {
         console.error("Błąd pobierania profilu:", err);
       }
@@ -51,7 +55,9 @@ export const Profile = () => {
 
         const reader = new FileReader();
         reader.onloadend = () => {
-          setAvatar(reader.result);
+          const base64 = reader.result;
+          setAvatar(base64);
+          localStorage.setItem(`avatar_${userId}`, base64); // zapis z userId
         };
         reader.readAsDataURL(file);
       })
@@ -80,5 +86,3 @@ export const Profile = () => {
     </div>
   );
 };
-
-
