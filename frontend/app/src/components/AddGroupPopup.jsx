@@ -1,11 +1,10 @@
-
 import { useState } from "react";
 import "./AddGroupPopup.css";
 
 export const AddGroupPopup = ({ closePopup, onGroupCreated }) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [isPublic, setIsPublic] = useState(false);
+  const [isPublic, setIsPublic] = useState(true);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -18,6 +17,7 @@ export const AddGroupPopup = ({ closePopup, onGroupCreated }) => {
     const token = localStorage.getItem("access_token");
 
     if (!token) {
+      alert("Please log in");
       return;
     }
 
@@ -56,42 +56,53 @@ export const AddGroupPopup = ({ closePopup, onGroupCreated }) => {
 
   return (
     <div className="popup">
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label htmlFor="groupName">Nazwa grupy</label>
-          <input
-            type="text"
-            id="groupName"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-          />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="groupDescription">Opis</label>
-          <textarea
-            id="groupDescription"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            required
-          />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="groupPublic">
-            Publiczna:
+      <div className="popup-content">
+        <h2>Create New Group</h2>
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="groupName">Group Name</label>
             <input
-              type="checkbox"
-              id="groupPublic"
-              checked={isPublic}
-              onChange={(e) => setIsPublic(e.target.checked)}
+              type="text"
+              id="groupName"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
             />
-          </label>
-        </div>
+          </div>
 
-        <button type="submit">Utwórz grupę</button>
-      </form>
+          <div className="form-group">
+            <label htmlFor="groupDescription">Description</label>
+            <textarea
+              id="groupDescription"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="form-group checkbox-group">
+            <label>
+              <input
+                type="checkbox"
+                id="groupPublic"
+                checked={isPublic}
+                onChange={(e) => setIsPublic(e.target.checked)}
+              />
+              Public Group
+            </label>
+            <small>Public groups can be found and joined by anyone</small>
+          </div>
+
+          <div className="button-group">
+            <button type="submit" className="submit-button">
+              Create Group
+            </button>
+            <button type="button" className="cancel-button" onClick={closePopup}>
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };

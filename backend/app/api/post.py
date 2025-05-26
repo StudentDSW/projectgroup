@@ -59,7 +59,14 @@ async def get_my_posts(
     user_id = current_user['id']
     stmt = select(Post).where(Post.user_id == user_id).order_by(Post.created_at.desc())
     posts = db.scalars(stmt).all()
-    return posts
+    return [{
+        **post.__dict__,
+        'user': {
+            'id': post.user.id,
+            'username': post.user.username,
+            'avatar': post.user.avatar
+        }
+    } for post in posts]
 
 @router.get("/my-groups")
 async def get_my_groups_posts(
@@ -83,7 +90,14 @@ async def get_my_groups_posts(
     ).order_by(Post.created_at.desc())
     
     posts = db.scalars(stmt).all()
-    return posts
+    return [{
+        **post.__dict__,
+        'user': {
+            'id': post.user.id,
+            'username': post.user.username,
+            'avatar': post.user.avatar
+        }
+    } for post in posts]
 
 @router.get("/group/{group_id}")
 async def get_group_posts(
@@ -97,7 +111,14 @@ async def get_group_posts(
 
     stmt = select(Post).where(Post.group_id == group_id).order_by(Post.created_at.desc())
     posts = db.scalars(stmt).all()
-    return posts
+    return [{
+        **post.__dict__,
+        'user': {
+            'id': post.user.id,
+            'username': post.user.username,
+            'avatar': post.user.avatar
+        }
+    } for post in posts]
 
 @router.get("/admin/all")
 async def get_all_posts_admin(
@@ -109,7 +130,14 @@ async def get_all_posts_admin(
 
     stmt = select(Post).order_by(Post.created_at.desc())
     posts = db.scalars(stmt).all()
-    return posts
+    return [{
+        **post.__dict__,
+        'user': {
+            'id': post.user.id,
+            'username': post.user.username,
+            'avatar': post.user.avatar
+        }
+    } for post in posts]
 
 @router.put("/{post_id}")
 async def edit_post(
@@ -148,8 +176,22 @@ async def get_post_detail(
     reactions = db.scalars(select(Reaction).where(Reaction.post_id == post_id)).all()
     
     return {
-        "post": post,
-        "comments": comments,
+        "post": {
+            **post.__dict__,
+            'user': {
+                'id': post.user.id,
+                'username': post.user.username,
+                'avatar': post.user.avatar
+            }
+        },
+        "comments": [{
+            **comment.__dict__,
+            'user': {
+                'id': comment.user.id,
+                'username': comment.user.username,
+                'avatar': comment.user.avatar
+            }
+        } for comment in comments],
         "reactions": reactions
     }
 

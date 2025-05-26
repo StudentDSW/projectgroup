@@ -18,46 +18,64 @@ export const Dashboard = () => {
   const [newComment, setNewComment] = useState({});
   const [showComments, setShowComments] = useState({});
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const token = localStorage.getItem("access_token");
-      if (!token) {
-        alert("Please log in to continue.");
-        navigate("/");
-        return;
+  const fetchGroups = async () => {
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+      alert("Please log in to continue.");
+      navigate("/");
+      return;
+    }
+
+    try {
+      const groupsResponse = await fetch("http://localhost:8000/group/mygroups", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      
+      if (!groupsResponse.ok) {
+        throw new Error("Failed to fetch groups");
+      }
+      
+      const groupsData = await groupsResponse.json();
+      setGroups(groupsData);
+    } catch (error) {
+      console.error("Fetch error:", error);
+      setError("Failed to load groups. Please try again.");
+    }
+  };
+
+  const fetchPosts = async () => {
+    const token = localStorage.getItem("access_token");
+    if (!token) return;
+
+    try {
+      const postsResponse = await fetch("http://localhost:8000/posts/my-groups", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!postsResponse.ok) {
+        throw new Error("Failed to fetch posts");
       }
 
+      const postsData = await postsResponse.json();
+      setPosts(postsData);
+    } catch (error) {
+      console.error("Fetch error:", error);
+      setError("Failed to load posts. Please try again.");
+    }
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
       setIsLoading(true);
       setError(null);
 
       try {
-        // Fetch groups
-        const groupsResponse = await fetch("http://localhost:8000/group/mygroups", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        
-        if (!groupsResponse.ok) {
-          throw new Error("Failed to fetch groups");
-        }
-        
-        const groupsData = await groupsResponse.json();
-        setGroups(groupsData);
-
-        // Fetch posts from all groups
-        const postsResponse = await fetch("http://localhost:8000/posts/my-groups", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (!postsResponse.ok) {
-          throw new Error("Failed to fetch posts");
-        }
-
-        const postsData = await postsResponse.json();
-        setPosts(postsData);
+        await fetchGroups();
+        await fetchPosts();
       } catch (error) {
         console.error("Fetch error:", error);
         setError("Failed to load data. Please try again.");
@@ -84,10 +102,11 @@ export const Dashboard = () => {
 
   const handleGroupCreated = (newGroup) => {
     setGroups((prev) => [...prev, newGroup]);
+    fetchGroups();
   };
 
-  const handleGroupClick = (groupId) => {
-    navigate(`/group/${groupId}`);
+  const handleGroupClick = (group) => {
+    navigate(`/group/${group.name}`);
   };
 
   const handleLike = async (postId) => {
@@ -190,17 +209,27 @@ export const Dashboard = () => {
   };
 
   const renderPost = (post) => {
-    const group = groups.find(g => g.id === post.group_id);
     const currentUserId = JSON.parse(atob(localStorage.getItem("access_token").split('.')[1])).id;
     const hasLiked = post.reactions?.some(r => r.user_id === currentUserId && r.type === 'like');
     const likeCount = post.reactions?.filter(r => r.type === 'like').length || 0;
     const commentCount = post.comments?.length || 0;
+    const group = groups.find(g => g.id === post.group_id);
 
     return (
-      <div key={post.id} className="post-card" onClick={() => navigate(`/post/${post.id}`)}>
+      <div key={post.id} className="post-card" onClick={() => navigate(`/group/${group?.name}/${post.id}`)}>
         <div className="post-header">
           <div>
-            <h3>{group ? group.name : "Unknown Group"}</h3>
+            <h3 
+              onClick={(e) => {
+                e.stopPropagation();
+                if (group) {
+                  navigate(`/group/${group.name}`);
+                }
+              }}
+              className="group-name-link"
+            >
+              {group ? group.name : "Unknown Group"}
+            </h3>
             <small>Posted by {post.user?.username || "Unknown User"}</small>
           </div>
           {post.user_id === currentUserId && (
@@ -243,15 +272,6 @@ export const Dashboard = () => {
           >
             💬 {commentCount}
           </button>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              handleGroupClick(post.group_id);
-            }}
-            className="view-group-btn"
-          >
-            View Group
-          </button>
         </div>
 
         <div className="post-timestamp">
@@ -290,6 +310,18 @@ export const Dashboard = () => {
     );
   };
 
+  const handleGroupJoined = (newGroup) => {
+    setGroups((prev) => {
+      if (prev.some((g) => g.id === newGroup.id)) return prev;
+      return [...prev, newGroup];
+    });
+    fetchGroups();
+  };
+
+  const handlePostCreated = () => {
+    fetchPosts();
+  };
+
   if (isLoading) {
     return (
       <div className="wrapper-dashboard">
@@ -320,7 +352,7 @@ export const Dashboard = () => {
 
   return (
     <div className="wrapper-dashboard">
-      <Navbar />
+      <Navbar onJoinGroup={handleGroupJoined} />
       <div className="dashboard-container">
         <div className="sidebar">
           <div className="action-buttons">
@@ -347,12 +379,6 @@ export const Dashboard = () => {
             {groups.length === 0 ? (
               <div className="no-groups">
                 <p>You haven't joined any groups yet.</p>
-                <button 
-                  className="create-first-group"
-                  onClick={openGroupPopup}
-                >
-                  Create your first group
-                </button>
               </div>
             ) : (
               <div className="group-list">
@@ -362,7 +388,7 @@ export const Dashboard = () => {
                     <div 
                       key={group.id} 
                       className="group-item"
-                      onClick={() => handleGroupClick(group.id)}
+                      onClick={() => handleGroupClick(group)}
                       title={`View ${group.name}`}
                     >
                       <span className="group-name">{group.name}</span>
@@ -379,7 +405,7 @@ export const Dashboard = () => {
             <h2>Recent Posts from Your Groups</h2>
             {posts.length === 0 ? (
               <div className="no-posts">
-                <p>No posts yet. Create a post or join a group to see posts here.</p>
+                <p>No posts yet. Join a group to see posts here.</p>
               </div>
             ) : (
               <div className="posts-grid">
@@ -399,7 +425,10 @@ export const Dashboard = () => {
 
       {isPostPopupOpen && (
         <CreatePostPopup
-          onClose={closePostPopup}
+          onClose={() => {
+            closePostPopup();
+            handlePostCreated();
+          }}
           defaultGroupId={selectedGroupId}
         />
       )}

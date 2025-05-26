@@ -7,7 +7,7 @@ import { FaCog } from "react-icons/fa";
 import "./GroupPage.css";
 
 const GroupPage = () => {
-  const { groupId } = useParams();
+  const { groupName } = useParams();
   const [groupData, setGroupData] = useState(null);
   const [posts, setPosts] = useState([]);
   const [showPostPopup, setShowPostPopup] = useState(false);
@@ -24,14 +24,22 @@ const GroupPage = () => {
 
   const fetchGroupData = async () => {
     try {
-      if (!groupId || isNaN(parseInt(groupId))) {
-        setError("Invalid group ID");
+      if (!groupName) {
+        setError("Invalid group name");
         return;
       }
 
-      const res = await fetch(`http://localhost:8000/group/${groupId}`, {
+      // Try to fetch by name first
+      let res = await fetch(`http://localhost:8000/group/name/${groupName}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      
+      // If not found by name, try to fetch by ID
+      if (!res.ok && !isNaN(parseInt(groupName))) {
+        res = await fetch(`http://localhost:8000/group/${groupName}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      }
       
       if (!res.ok) {
         if (res.status === 404) {
@@ -46,7 +54,6 @@ const GroupPage = () => {
       }
       
       const data = await res.json();
-      console.log("Group data:", data); // Debug log
       setGroupData(data);
       setError(null);
     } catch (error) {
@@ -57,9 +64,9 @@ const GroupPage = () => {
 
   const fetchUserRole = async () => {
     try {
-      if (!groupId || isNaN(parseInt(groupId))) return;
+      if (!groupData?.id) return;
 
-      const res = await fetch(`http://localhost:8000/group/members/${groupId}`, {
+      const res = await fetch(`http://localhost:8000/group/members/${groupData.id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       
@@ -83,9 +90,13 @@ const GroupPage = () => {
 
   const fetchPosts = async () => {
     try {
-      if (!groupId || isNaN(parseInt(groupId))) return;
+      if (!groupData?.id) {
+        console.log("No group ID available for fetching posts");
+        return;
+      }
 
-      const res = await fetch(`http://localhost:8000/posts/group/${groupId}`, {
+      console.log("Fetching posts for group:", groupData.id);
+      const res = await fetch(`http://localhost:8000/posts/group/${groupData.id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       
@@ -98,6 +109,7 @@ const GroupPage = () => {
       }
       
       const data = await res.json();
+      console.log("Fetched posts:", data);
       setPosts(data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)));
     } catch (error) {
       console.error("Error fetching posts:", error);
@@ -107,15 +119,26 @@ const GroupPage = () => {
 
   const fetchGroupMembers = async () => {
     try {
-      const response = await fetch(`http://localhost:8000/group/members/${groupId}`, {
+      if (!groupData?.id) {
+        console.log("No group ID available for fetching members");
+        return;
+      }
+
+      console.log("Fetching members for group:", groupData.id);
+      const response = await fetch(`http://localhost:8000/group/members/${groupData.id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (response.ok) {
-        const members = await response.json();
-        setGroupMembers(members);
+      
+      if (!response.ok) {
+        throw new Error("Failed to fetch group members");
       }
+      
+      const members = await response.json();
+      console.log("Fetched members:", members);
+      setGroupMembers(members);
     } catch (error) {
       console.error("Error fetching group members:", error);
+      setGroupMembers([]);
     }
   };
 
@@ -123,7 +146,7 @@ const GroupPage = () => {
     if (!window.confirm("Are you sure you want to leave this group?")) return;
     
     try {
-      const res = await fetch(`http://localhost:8000/group/leave/${groupId}`, {
+      const res = await fetch(`http://localhost:8000/group/leave/${groupData.id}`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -145,7 +168,7 @@ const GroupPage = () => {
     if (!window.confirm("Are you sure you want to delete this group? This action cannot be undone.")) return;
     
     try {
-      const res = await fetch(`http://localhost:8000/group/${groupId}`, {
+      const res = await fetch(`http://localhost:8000/group/${groupData.id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -214,6 +237,21 @@ const GroupPage = () => {
     }
   };
 
+  const handlePostCreated = () => {
+    console.log("Post created, refreshing posts");
+    fetchPosts();
+  };
+
+  const handleGroupUpdated = () => {
+    fetchGroupData();
+    fetchGroupMembers();
+  };
+
+  const handleMemberUpdated = () => {
+    fetchGroupMembers();
+    fetchUserRole();
+  };
+
   useEffect(() => {
     const loadData = async () => {
       if (!token) {
@@ -226,7 +264,17 @@ const GroupPage = () => {
       setError(null);
       
       try {
-        await Promise.all([fetchGroupData(), fetchPosts(), fetchUserRole(), fetchGroupMembers()]);
+        // First fetch group data
+        await fetchGroupData();
+        
+        // Only proceed with other fetches if we have group data
+        if (groupData?.id) {
+          await Promise.all([
+            fetchPosts(),
+            fetchUserRole(),
+            fetchGroupMembers()
+          ]);
+        }
       } catch (error) {
         console.error("Error loading data:", error);
         setError("Error loading group data");
@@ -236,7 +284,18 @@ const GroupPage = () => {
     };
 
     loadData();
-  }, [groupId, token, navigate]);
+  }, [groupName, token, navigate]);
+
+  // Add a useEffect to handle groupData changes
+  useEffect(() => {
+    if (groupData?.id) {
+      console.log("Group data updated, fetching data for group:", groupData.id);
+      Promise.all([
+        fetchPosts(),
+        fetchGroupMembers()
+      ]);
+    }
+  }, [groupData]);
 
   useEffect(() => {
     const fetchGroups = async () => {
@@ -264,10 +323,11 @@ const GroupPage = () => {
 
   const handleGroupCreated = (newGroup) => {
     setGroups((prev) => [...prev, newGroup]);
+    handleGroupUpdated();
   };
 
-  const handleGroupClick = (groupId) => {
-    navigate(`/group/${groupId}`);
+  const handleGroupClick = (group) => {
+    navigate(`/group/${group.name}`);
   };
 
   if (isLoading) {
@@ -391,6 +451,8 @@ const GroupPage = () => {
   };
 
   const renderMembersSection = () => {
+    console.log("Rendering members section with:", groupMembers);
+    // Sort members by role
     const owner = groupMembers.find(member => member.role_in_group === "admin");
     const moderators = groupMembers.filter(member => member.role_in_group === "moderator");
     const members = groupMembers.filter(member => member.role_in_group === "user");
@@ -404,6 +466,7 @@ const GroupPage = () => {
           {owner ? (
             <div className="member-item">
               <span className="member-name">{owner.username}</span>
+              <span className="member-role">Admin</span>
             </div>
           ) : (
             <p className="no-members">No owner assigned</p>
@@ -417,6 +480,7 @@ const GroupPage = () => {
               {moderators.map((mod) => (
                 <div key={mod.id} className="member-item">
                   <span className="member-name">{mod.username}</span>
+                  <span className="member-role">Moderator</span>
                 </div>
               ))}
             </div>
@@ -432,6 +496,7 @@ const GroupPage = () => {
               {members.map((member) => (
                 <div key={member.id} className="member-item">
                   <span className="member-name">{member.username}</span>
+                  <span className="member-role">Member</span>
                 </div>
               ))}
             </div>
@@ -451,6 +516,7 @@ const GroupPage = () => {
             if (prev.some((g) => g.id === newGroup.id)) return prev;
             return [...prev, newGroup];
           });
+          handleGroupUpdated();
         }}
       />
 
@@ -494,8 +560,8 @@ const GroupPage = () => {
                   .map((group) => (
                     <div 
                       key={group.id} 
-                      className={`group-item ${group.id === parseInt(groupId) ? 'active' : ''}`}
-                      onClick={() => handleGroupClick(group.id)}
+                      className={`group-item ${group.name === groupName ? 'active' : ''}`}
+                      onClick={() => handleGroupClick(group)}
                       title={`View ${group.name}`}
                     >
                       <span className="group-name">{group.name}</span>
@@ -577,10 +643,10 @@ const GroupPage = () => {
 
       {showPostPopup && (
         <CreatePostPopup
-          defaultGroupId={groupId}
+          defaultGroupId={groupData.id}
           onClose={() => {
             setShowPostPopup(false);
-            fetchPosts();
+            handlePostCreated();
           }}
         />
       )}

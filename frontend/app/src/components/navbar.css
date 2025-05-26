@@ -62,25 +62,46 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 6px 10px;
-  cursor: default;
+  padding: 8px 12px;
+  cursor: pointer;
   transition: background-color 0.2s ease;
   border-bottom: 1px solid #e0e0e0;
 }
 
-.group-name {
+.group-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   flex-grow: 1;
+}
+
+.group-name {
   font-size: 0.9rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
+.member-badge {
+  background-color: #e3f2fd;
+  color: #1976d2;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.member-badge:contains('Admin') {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
 .join-button {
   background-color: #007bff;
   border: none;
   color: white;
-  padding: 4px 10px;
+  padding: 4px 12px;
   border-radius: 6px;
   font-size: 0.75rem;
   cursor: pointer;
@@ -88,6 +109,7 @@
   white-space: nowrap;
   max-width: 80px;
   height: 28px;
+  transition: background-color 0.2s ease;
 }
 
 .join-button:hover {

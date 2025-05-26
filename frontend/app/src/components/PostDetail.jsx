@@ -4,7 +4,7 @@ import { Navbar } from "./Navbar";
 import "./PostDetail.css";
 
 const PostDetail = () => {
-  const { postId } = useParams();
+  const { postId, groupName } = useParams();
   const navigate = useNavigate();
   const [post, setPost] = useState(null);
   const [group, setGroup] = useState(null);
@@ -239,6 +239,14 @@ const PostDetail = () => {
     );
   };
 
+  const handleCommentAdded = () => {
+    fetchPost();
+  };
+
+  const handleReactionUpdated = () => {
+    fetchPost();
+  };
+
   if (isLoading) {
     return (
       <div className="wrapper-post-detail">
@@ -296,9 +304,7 @@ const PostDetail = () => {
           <div className="breadcrumb">
             <Link to="/dashboard">Dashboard</Link>
             <span className="separator">/</span>
-            <Link to={`/group/${post.group_id}`}>{group?.name || "Loading..."}</Link>
-            <span className="separator">/</span>
-            <span>Post</span>
+            <Link to={`/group/${group?.name}`}>{group?.name || "Loading..."}</Link>
           </div>
 
           <div className="post-detail-card">
@@ -345,11 +351,14 @@ const PostDetail = () => {
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
                 placeholder="Write a comment..."
-                rows={3}
+                className="comment-input"
               />
               <button
-                onClick={handleComment}
-                className="submit-comment"
+                onClick={() => {
+                  handleComment();
+                  handleCommentAdded();
+                }}
+                className="comment-button"
               >
                 Comment
               </button>

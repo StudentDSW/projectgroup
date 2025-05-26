@@ -27,15 +27,22 @@ function App() {
           }
         />
         <Route
-          path="/group/:groupId"
+          path="/group/:groupName"
           element={
             <ProtectedRoute>
               <GroupPage />
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/group/:groupName/:postId"
+          element={
+            <ProtectedRoute>
+              <PostDetail />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/account" element={<Profile />} />
-        <Route path="/post/:postId" element={<PostDetail />} />
       </Routes>
     </div>
   );
