@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends, File, UploadFile
+from fastapi import APIRouter, HTTPException, Depends, File, UploadFile, Form
 from sqlalchemy.orm import Session
 from sqlalchemy import select, delete
 from typing import Optional
@@ -24,8 +24,8 @@ def get_group_member(db: Session, user_id: int, group_id: int):
 @router.post('/')
 async def create_post(
     db: db_dependency,
-    group_id: int,
-    content: str,
+    group_id: int = Form(...),
+    content: str = Form(...),
     image: Optional[UploadFile] = File(None),
     current_user: dict = Depends(verify_token)
 ):

@@ -79,8 +79,8 @@ const CreatePostPopup = ({ defaultGroupId, onClose }) => {
 
     try {
       const formData = new FormData();
-      formData.append("content", content);
-      formData.append("group_id", parseInt(groupId, 10));
+      formData.append("content", content.trim());
+      formData.append("group_id", parseInt(groupId));
       if (image) {
         formData.append("image", image);
       }
@@ -98,8 +98,6 @@ const CreatePostPopup = ({ defaultGroupId, onClose }) => {
         throw new Error(errorData.detail || "Failed to create post");
       }
 
-      const responseData = await res.json();
-      console.log("Post created successfully:", responseData);
       onClose();
     } catch (error) {
       console.error("Error creating post:", error);
