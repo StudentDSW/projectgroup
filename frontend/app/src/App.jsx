@@ -6,6 +6,7 @@ import { Dashboard } from "./components/Dashboard";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { Profile } from "./components/Profile"
 import GroupPage from "./components/GroupPage";
+import PostDetail from "./components/PostDetail";
 
 import './App.css'
 
@@ -34,6 +35,7 @@ function App() {
           }
         />
         <Route path="/account" element={<Profile />} />
+        <Route path="/post/:postId" element={<PostDetail />} />
       </Routes>
     </div>
   );

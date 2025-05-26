@@ -61,6 +61,30 @@ async def get_my_posts(
     posts = db.scalars(stmt).all()
     return posts
 
+@router.get("/my-groups")
+async def get_my_groups_posts(
+    db: db_dependency,
+    current_user: dict = Depends(verify_token)
+):
+    user_id = current_user['id']
+    
+    # Get all groups the user is a member of
+    user_groups = db.scalars(
+        select(GroupMember.group_id)
+        .where(GroupMember.user_id == user_id)
+    ).all()
+    
+    if not user_groups:
+        return []
+    
+    # Get all posts from these groups
+    stmt = select(Post).where(
+        Post.group_id.in_(user_groups)
+    ).order_by(Post.created_at.desc())
+    
+    posts = db.scalars(stmt).all()
+    return posts
+
 @router.get("/group/{group_id}")
 async def get_group_posts(
     group_id: int,
