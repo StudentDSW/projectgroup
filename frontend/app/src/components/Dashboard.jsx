@@ -1,11 +1,14 @@
 import { useState, useEffect } from "react";
 import { Navbar } from "./Navbar";
 import { AddGroupPopup } from "./AddGroupPopup";
+import CreatePostPopup from "./CreatePostPopup";
 import "./dashboard.css";
 
 export const Dashboard = () => {
-  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [isGroupPopupOpen, setIsGroupPopupOpen] = useState(false);
+  const [isPostPopupOpen, setIsPostPopupOpen] = useState(false);
   const [groups, setGroups] = useState([]);
+  const [selectedGroupId, setSelectedGroupId] = useState(null);
 
   useEffect(() => {
     const fetchGroups = async () => {
@@ -33,8 +36,16 @@ export const Dashboard = () => {
     fetchGroups();
   }, []);
 
-  const openPopup = () => setIsPopupOpen(true);
-  const closePopup = () => setIsPopupOpen(false);
+  const openGroupPopup = () => setIsGroupPopupOpen(true);
+  const closeGroupPopup = () => setIsGroupPopupOpen(false);
+  const openPostPopup = (groupId = null) => {
+    setSelectedGroupId(groupId);
+    setIsPostPopupOpen(true);
+  };
+  const closePostPopup = () => {
+    setIsPostPopupOpen(false);
+    setSelectedGroupId(null);
+  };
 
   const handleGroupCreated = (newGroup) => {
     setGroups((prev) => [...prev, newGroup]);
@@ -50,19 +61,18 @@ export const Dashboard = () => {
           });
         }}
       />
-      <button className="add-group" onClick={openPopup}>
-        + Utwórz nową grupę
-      </button>
-
-      {isPopupOpen && (
-        <AddGroupPopup
-          closePopup={closePopup}
-          onGroupCreated={handleGroupCreated}
-        />
-      )}
 
       <div className="dashboard-container">
         <div className="sidebar">
+          <div className="action-buttons">
+            <button className="add-group" onClick={openGroupPopup}>
+              + Utwórz nową grupę
+            </button>
+            <button className="create-post" onClick={() => openPostPopup()}>
+              + Utwórz nowy post
+            </button>
+          </div>
+          
           <h2 className="group-title">Twoje grupy</h2>
           <div className="group-list">
             {[...groups]
@@ -75,6 +85,20 @@ export const Dashboard = () => {
           </div>
         </div>
       </div>
+
+      {isGroupPopupOpen && (
+        <AddGroupPopup
+          closePopup={closeGroupPopup}
+          onGroupCreated={handleGroupCreated}
+        />
+      )}
+
+      {isPostPopupOpen && (
+        <CreatePostPopup
+          onClose={closePostPopup}
+          defaultGroupId={selectedGroupId}
+        />
+      )}
     </div>
   );
 };
