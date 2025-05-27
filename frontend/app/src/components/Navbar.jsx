@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import "./navbar.css";
 
 export const Navbar = ({ onJoinGroup, onLeaveGroup }) => {
@@ -219,10 +219,10 @@ export const Navbar = ({ onJoinGroup, onLeaveGroup }) => {
   return (
     <div className="wrapper-navbar">
       <div className="navbar">
-        <div className="logo">
+        <Link to="/dashboard" className="logo" style={{ cursor: 'pointer' }}>
           <div className="logo-img" />
           <p>GroupApp</p>
-        </div>
+        </Link>
 
         <div className="search-container">
           <div className="search-input-wrapper">
