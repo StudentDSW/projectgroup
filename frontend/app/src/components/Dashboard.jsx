@@ -216,12 +216,11 @@ export const Dashboard = () => {
     const group = groups.find(g => g.id === post.group_id);
 
     return (
-      <div key={post.id} className="post-card" onClick={() => navigate(`/group/${group?.name}/${post.id}`)}>
+      <div key={post.id} className="post-card">
         <div className="post-header">
           <div>
             <h3 
               onClick={(e) => {
-                e.stopPropagation();
                 if (group) {
                   navigate(`/group/${group.name}`);
                 }
