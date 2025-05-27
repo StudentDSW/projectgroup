@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./login.css";
 import { Link, useNavigate } from "react-router-dom";
 import { AiOutlineCheck } from "react-icons/ai";
@@ -96,9 +96,44 @@ export const Registration = () => {
     navigate("/login");
   };
 
+  useEffect(() => {
+    let timeoutId;
+    if (isPopupVisible) {
+      timeoutId = setTimeout(() => {
+        setIsPopupVisible(false);
+        navigate("/login");
+      }, 2000); // Redirect after 2 seconds
+    }
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, [isPopupVisible, navigate]);
+
   return (
     <>
       <div className="body">
+        {isPopupVisible && (
+          <div className="create-account__popup" style={{
+            position: 'fixed',
+            top: '20px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 1000,
+            backgroundColor: '#4CAF50',
+            color: 'white',
+            padding: '15px 30px',
+            borderRadius: '5px',
+            boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '10px'
+          }}>
+            <h3 className="account__created" style={{ margin: 0 }}>Konto utworzone pomyślnie</h3>
+          </div>
+        )}
         <div className="container left">
           <div className="wrapper-left">
             <h2 className="title">Nasza Grupa</h2>
@@ -193,17 +228,6 @@ export const Registration = () => {
             </form>
           </div>
         </div>
-        {isPopupVisible && (
-          <div className="create-account__popup">
-            <h3 className="account__created">Konto utworzone pomyślnie</h3>
-            <button
-              className="create-account__popup-close"
-              onClick={handleClosePopup}
-            >
-              Ok
-            </button>
-          </div>
-        )}
       </div>
     </>
   );
