@@ -106,6 +106,12 @@ async def get_my_groups_posts(
         if post.image:
             image_base64 = base64.b64encode(post.image).decode("utf-8")
             user_dict["image"] = f"data:image/png;base64,{image_base64}"
+        # Add user information
+        user_dict["user"] = {
+            "id": post.user.id,
+            "username": post.user.username,
+            "avatar": f"data:image/png;base64,{base64.b64encode(post.user.avatar).decode('utf-8')}" if post.user.avatar else None
+        }
         posts_list.append(user_dict)
     return posts_list
 
