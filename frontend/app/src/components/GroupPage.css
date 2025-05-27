@@ -1,0 +1,540 @@
+.wrapper-dashboard {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+}
+
+.dashboard-container {
+  display: grid;
+  grid-template-columns: 300px 1fr 300px;
+  gap: 30px;
+  padding: 30px;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.sidebar {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  height: fit-content;
+}
+
+.right-sidebar {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  height: fit-content;
+}
+
+.group-content {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+}
+
+.group-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+}
+
+.breadcrumb a {
+  color: #666;
+  text-decoration: none;
+}
+
+.breadcrumb a:hover {
+  color: #333;
+}
+
+.separator {
+  color: #999;
+}
+
+.group-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.delete-group-button,
+.leave-group-button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.delete-group-button {
+  background-color: #ff4444;
+  color: white;
+}
+
+.delete-group-button:hover {
+  background-color: #cc0000;
+}
+
+.leave-group-button {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+.leave-group-button:hover {
+  background-color: #e0e0e0;
+}
+
+.posts-section {
+  margin-bottom: 30px;
+}
+
+.posts-section h2 {
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.add-post-button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  margin-bottom: 20px;
+  transition: background-color 0.2s;
+}
+
+.add-post-button:hover {
+  background-color: #45a049;
+}
+
+.posts-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.post-card {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.post-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 15px;
+}
+
+.post-header h3 {
+  margin: 0;
+  color: #333;
+}
+
+.post-header small {
+  color: #666;
+  display: block;
+  margin-top: 5px;
+}
+
+.delete-button {
+  background-color: #ff4444;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.delete-button:hover {
+  background-color: #cc0000;
+}
+
+.post-content {
+  margin: 15px 0;
+  line-height: 1.5;
+  color: #333;
+}
+
+.post-image {
+  max-width: 100%;
+  border-radius: 4px;
+  margin: 10px 0;
+}
+
+.post-actions {
+  display: flex;
+  gap: 15px;
+  margin: 15px 0;
+}
+
+.like-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #666;
+  padding: 5px 10px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.like-button:hover {
+  background-color: #f0f0f0;
+}
+
+.like-button.liked {
+  color: #4CAF50;
+}
+
+.comment-count {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #666;
+}
+
+.comments-section {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.comments-section h4 {
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.comment {
+  background: #f9f9f9;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 10px;
+}
+
+.comment strong {
+  color: #333;
+}
+
+.comment-time {
+  font-size: 12px;
+  color: #666;
+  margin-top: 5px;
+}
+
+.add-comment {
+  margin-top: 15px;
+}
+
+.comment-input {
+  width: 100%;
+  min-height: 60px;
+  padding: 10px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  resize: vertical;
+}
+
+.comment-button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.comment-button:hover {
+  background-color: #45a049;
+}
+
+.post-time {
+  font-size: 12px;
+  color: #666;
+  margin-top: 15px;
+}
+
+.members-sidebar {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  height: fit-content;
+}
+
+.members-section {
+  margin-top: 0;
+}
+
+.members-section h2 {
+  margin-bottom: 20px;
+  color: #333;
+  font-size: 1.5rem;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.members-category {
+  margin-bottom: 25px;
+}
+
+.members-category h3 {
+  color: #666;
+  font-size: 1.1rem;
+  margin-bottom: 12px;
+  font-weight: 500;
+}
+
+.members-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.member-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 12px;
+  background: #f9f9f9;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+}
+
+.member-item:hover {
+  background: #f0f0f0;
+}
+
+.member-name {
+  color: #333;
+  font-weight: 500;
+}
+
+.member-role {
+  color: #666;
+  font-size: 0.85rem;
+  background: #e0e0e0;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+.no-members {
+  color: #666;
+  font-style: italic;
+  padding: 10px;
+  background: #f9f9f9;
+  border-radius: 6px;
+  text-align: center;
+}
+
+.group-item.active {
+  background: #e3f2fd;
+  border-left: 4px solid #2196F3;
+}
+
+.group-page-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  font-size: 18px;
+  color: #666;
+}
+
+.group-page-error {
+  text-align: center;
+  padding: 40px;
+}
+
+.error-message {
+  color: #ff4444;
+  margin-bottom: 20px;
+  font-size: 18px;
+}
+
+.return-button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.return-button:hover {
+  background-color: #45a049;
+}
+
+.no-posts {
+  text-align: center;
+  color: #666;
+  padding: 20px;
+  font-style: italic;
+}
+
+.create-first-post {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 1rem;
+  transition: background-color 0.2s;
+}
+
+.create-first-post:hover {
+  background-color: #45a049;
+}
+
+.group-info {
+  margin-bottom: 30px;
+}
+
+.group-info h2 {
+  margin-bottom: 20px;
+  color: #333;
+  font-size: 1.5rem;
+}
+
+.info-section {
+  margin-bottom: 25px;
+}
+
+.info-section h3 {
+  color: #666;
+  font-size: 1.1rem;
+  margin-bottom: 10px;
+}
+
+.info-section p {
+  color: #333;
+  line-height: 1.5;
+}
+
+@media (max-width: 1200px) {
+  .dashboard-container {
+    grid-template-columns: 300px 1fr;
+  }
+
+  .right-sidebar {
+    grid-column: 1 / -1;
+    order: -1;
+    margin-bottom: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-container {
+    grid-template-columns: 1fr;
+    padding: 15px;
+  }
+
+  .sidebar {
+    order: -2;
+    margin-bottom: 20px;
+  }
+
+  .group-header {
+    flex-direction: column;
+    gap: 15px;
+    align-items: flex-start;
+  }
+
+  .group-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
+
+.group-settings {
+  position: relative;
+}
+
+.settings-button {
+  background: none;
+  border: none;
+  color: #666;
+  font-size: 1.2rem;
+  padding: 8px;
+  cursor: pointer;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.settings-button:hover {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+.settings-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  min-width: 180px;
+  z-index: 1000;
+  margin-top: 8px;
+  overflow: hidden;
+}
+
+.settings-menu-item {
+  display: block;
+  width: 100%;
+  padding: 12px 16px;
+  text-align: left;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: #333;
+  transition: background-color 0.2s;
+}
+
+.settings-menu-item:hover {
+  background-color: #f5f5f5;
+}
+
+.settings-menu-item.delete {
+  color: #ff4444;
+}
+
+.settings-menu-item.delete:hover {
+  background-color: #fff5f5;
+}
+
+.settings-menu-item.leave {
+  color: #666;
+}
+
+.settings-menu-item.leave:hover {
+  background-color: #f5f5f5;
+} 

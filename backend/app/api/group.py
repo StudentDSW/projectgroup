@@ -31,9 +31,26 @@ def get_group(db: Session, id: int = None, name: str = None):
     stmt = select(Group).where(*filters)
     return db.execute(stmt).scalar_one_or_none()
 
-def search_groups(db: Session, name: str):
+def search_groups(db: Session, name: str, user_id: int):
     stmt = select(Group).where(Group.name.ilike(f"%{name}%"))
-    return db.execute(stmt).scalars().all()
+    groups = db.execute(stmt).scalars().all()
+    
+    result = []
+    for group in groups:
+        group_dict = group.__dict__.copy()
+        # Check if user is a member
+        member = db.execute(
+            select(GroupMember)
+            .where(GroupMember.group_id == group.id)
+            .where(GroupMember.user_id == user_id)
+        ).scalar_one_or_none()
+        
+        group_dict["is_member"] = member is not None
+        if member:
+            group_dict["role"] = member.role
+        result.append(group_dict)
+    
+    return result
 
 def is_group_admin(db: Session, user_id: int, group_id: int) -> bool:
     stmt = select(GroupMember).where(
@@ -112,6 +129,11 @@ async def join_group(
     if not user:
         raise HTTPError(404, "User not found")
 
+    # Check if user is already a member
+    existing_member = is_user_in_group(db, user_id, group_id)
+    if existing_member:
+        return {"status": "Success", "result": "Already a member"}
+
     group_member = GroupMember(
         user_id = user.id,
         group_id = group.id,
@@ -178,20 +200,18 @@ async def get_groups(
     name: str,
     current_user: dict = Depends(auth.verify_token)
 ):
-    groups_result = search_groups(db,name)
+    groups_result = search_groups(db, name, current_user.get("id"))
 
     if not groups_result:
         raise HTTPError(404, "Group not found")
     
     groups_list = []
     for group in groups_result:
-        group_dict = group.__dict__.copy()
-
-        if group.avatar:
-            avatar_base64 = base64.b64encode(group.avatar).decode("utf-8")
-            group_dict["avatar"] = f"data:image/png;base64,{avatar_base64}"
+        if group.get("avatar"):
+            avatar_base64 = base64.b64encode(group["avatar"]).decode("utf-8")
+            group["avatar"] = f"data:image/png;base64,{avatar_base64}"
         
-        groups_list.append(group_dict)
+        groups_list.append(group)
 
     return groups_list
 
@@ -335,6 +355,20 @@ async def users_in_group(
     ]
 
     return members
+
+
+@router.get("/name/{group_name}")
+async def get_group_by_name(
+    db: db_dependency,
+    group_name: str,
+    current_user: dict = Depends(auth.verify_token)
+):
+    group = get_group(db=db, name=group_name)
+    if not group:
+        raise HTTPError(404, "Group not found")
+    group_dict = group.__dict__.copy()
+    group_dict["avatar"] = base64_encode(group.avatar)
+    return group_dict
 
 
 

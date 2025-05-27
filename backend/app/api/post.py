@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends, File, UploadFile
+from fastapi import APIRouter, HTTPException, Depends, File, UploadFile, Form
 from sqlalchemy.orm import Session
 from sqlalchemy import select, delete
 from typing import Optional
@@ -24,8 +24,8 @@ def get_group_member(db: Session, user_id: int, group_id: int):
 @router.post('/')
 async def create_post(
     db: db_dependency,
-    group_id: int,
-    content: str,
+    group_id: int = Form(...),
+    content: str = Form(...),
     image: Optional[UploadFile] = File(None),
     current_user: dict = Depends(verify_token)
 ):
@@ -59,7 +59,45 @@ async def get_my_posts(
     user_id = current_user['id']
     stmt = select(Post).where(Post.user_id == user_id).order_by(Post.created_at.desc())
     posts = db.scalars(stmt).all()
-    return posts
+    return [{
+        **post.__dict__,
+        'user': {
+            'id': post.user.id,
+            'username': post.user.username,
+            'avatar': post.user.avatar
+        }
+    } for post in posts]
+
+@router.get("/my-groups")
+async def get_my_groups_posts(
+    db: db_dependency,
+    current_user: dict = Depends(verify_token)
+):
+    user_id = current_user['id']
+    
+    # Get all groups the user is a member of
+    user_groups = db.scalars(
+        select(GroupMember.group_id)
+        .where(GroupMember.user_id == user_id)
+    ).all()
+    
+    if not user_groups:
+        return []
+    
+    # Get all posts from these groups
+    stmt = select(Post).where(
+        Post.group_id.in_(user_groups)
+    ).order_by(Post.created_at.desc())
+    
+    posts = db.scalars(stmt).all()
+    return [{
+        **post.__dict__,
+        'user': {
+            'id': post.user.id,
+            'username': post.user.username,
+            'avatar': post.user.avatar
+        }
+    } for post in posts]
 
 @router.get("/group/{group_id}")
 async def get_group_posts(
@@ -73,7 +111,14 @@ async def get_group_posts(
 
     stmt = select(Post).where(Post.group_id == group_id).order_by(Post.created_at.desc())
     posts = db.scalars(stmt).all()
-    return posts
+    return [{
+        **post.__dict__,
+        'user': {
+            'id': post.user.id,
+            'username': post.user.username,
+            'avatar': post.user.avatar
+        }
+    } for post in posts]
 
 @router.get("/admin/all")
 async def get_all_posts_admin(
@@ -85,7 +130,14 @@ async def get_all_posts_admin(
 
     stmt = select(Post).order_by(Post.created_at.desc())
     posts = db.scalars(stmt).all()
-    return posts
+    return [{
+        **post.__dict__,
+        'user': {
+            'id': post.user.id,
+            'username': post.user.username,
+            'avatar': post.user.avatar
+        }
+    } for post in posts]
 
 @router.put("/{post_id}")
 async def edit_post(
@@ -124,8 +176,22 @@ async def get_post_detail(
     reactions = db.scalars(select(Reaction).where(Reaction.post_id == post_id)).all()
     
     return {
-        "post": post,
-        "comments": comments,
+        "post": {
+            **post.__dict__,
+            'user': {
+                'id': post.user.id,
+                'username': post.user.username,
+                'avatar': post.user.avatar
+            }
+        },
+        "comments": [{
+            **comment.__dict__,
+            'user': {
+                'id': comment.user.id,
+                'username': comment.user.username,
+                'avatar': comment.user.avatar
+            }
+        } for comment in comments],
         "reactions": reactions
     }
 

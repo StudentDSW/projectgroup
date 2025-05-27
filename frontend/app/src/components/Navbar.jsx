@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./navbar.css";
@@ -18,17 +17,31 @@ export const Navbar = ({ onJoinGroup }) => {
   const [filteredGroups, setFilteredGroups] = useState([]);
   const [fetchError, setFetchError] = useState(null);
 
-  const handleSearch = (e) => {
+  const handleSearch = async (e) => {
     const text = e.target.value;
     setSearchText(text);
 
     if (text.trim() === "") {
       setFilteredGroups([]);
     } else {
-      const filtered = groups.filter((group) =>
-        group.name.toLowerCase().includes(text.toLowerCase())
-      );
-      setFilteredGroups(filtered);
+      try {
+        const token = localStorage.getItem("access_token");
+        const res = await fetch(`http://localhost:8000/group/search?name=${encodeURIComponent(text)}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!res.ok) {
+          throw new Error('Failed to fetch search results');
+        }
+
+        const searchResults = await res.json();
+        setFilteredGroups(searchResults);
+      } catch (err) {
+        console.error("Error searching groups:", err);
+        setFilteredGroups([]);
+      }
     }
   };
 
@@ -129,7 +142,25 @@ export const Navbar = ({ onJoinGroup }) => {
         return;
       }
 
-      if (typeof onJoinGroup === "function") {
+      const data = await res.json();
+      
+      if (data.result === "Already a member") {
+        // Update the UI to show the user is already a member
+        setGroups(prevGroups => 
+          prevGroups.map(g => 
+            g.id === group.id 
+              ? { ...g, is_member: true, role: 'user' }
+              : g
+          )
+        );
+        setFilteredGroups(prevGroups => 
+          prevGroups.map(g => 
+            g.id === group.id 
+              ? { ...g, is_member: true, role: 'user' }
+              : g
+          )
+        );
+      } else if (typeof onJoinGroup === "function") {
         onJoinGroup(group);
       }
 
@@ -193,18 +224,27 @@ export const Navbar = ({ onJoinGroup }) => {
                 <li
                   key={group.id}
                   className="autocomplete-item"
-                  onClick={() => handleJoinGroup(group)}
+                  onClick={() => !group.is_member && handleJoinGroup(group)}
                 >
-                  <span className="group-name">{group.name}</span>
-                  <button
-                    className="join-button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleJoinGroup(group);
-                    }}
-                  >
-                    Dołącz
-                  </button>
+                  <div className="group-info">
+                    <span className="group-name">{group.name}</span>
+                    {group.is_member && (
+                      <span className="member-badge">
+                        {group.role === 'admin' ? 'Admin' : 'Member'}
+                      </span>
+                    )}
+                  </div>
+                  {!group.is_member && (
+                    <button
+                      className="join-button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleJoinGroup(group);
+                      }}
+                    >
+                      Join
+                    </button>
+                  )}
                 </li>
               ))}
             </ul>
