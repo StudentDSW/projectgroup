@@ -4,3 +4,5 @@ backend/venv
 *.pyc
 *.pyo
 testdbapp.db
+venv
+
