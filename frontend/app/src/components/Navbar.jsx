@@ -306,14 +306,35 @@ export const Navbar = ({ onJoinGroup, onLeaveGroup }) => {
         <div className="navbar-right" ref={dropdownRef}>
           <div className="navbar-username">
             <p>{username}</p>
-            <div className="username-avatar" onClick={toggleDropdown}>
-              <img src={avatar} alt="avatar" className="avatar-image" />
-            </div>
+            <button 
+              className="profile-button" 
+              onClick={toggleDropdown}
+              aria-expanded={dropdownOpen}
+              aria-label="Menu profilu"
+            >
+              <img src={avatar} alt={`${username}'s avatar`} className="avatar-image" />
+            </button>
 
             {dropdownOpen && (
               <div className="dropdown-menu">
-                <button onClick={showProfile}>Profil</button>
-                <button onClick={handleLogout}>Wyloguj</button>
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    showProfile();
+                    setDropdownOpen(false);
+                  }}
+                >
+                  Profil
+                </button>
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleLogout();
+                    setDropdownOpen(false);
+                  }}
+                >
+                  Wyloguj
+                </button>
               </div>
             )}
           </div>
