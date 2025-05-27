@@ -1,0 +1,83 @@
+
+.profile-container {
+  max-width: 350px;
+  margin: 30px auto;
+  padding: 25px 30px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  text-align: center;
+  color: #333;
+}
+
+.profile-avatar {
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid #1877f2; 
+  box-shadow: 0 4px 12px rgba(24, 119, 242, 0.4);
+  margin-bottom: 20px;
+  transition: transform 0.3s ease;
+}
+
+.profile-avatar:hover {
+  transform: scale(1.05);
+  cursor: pointer;
+}
+
+.profile-label {
+  display: block;
+  width: 100%;
+  max-width: 300px; 
+  margin: 0 auto 30px auto;
+  background-color: #1877f2;
+  color: white;
+  padding: 12px 0;
+  font-weight: 700;
+  border-radius: 30px;
+  cursor: pointer;
+  user-select: none;
+  text-align: center;
+  font-size: 1.1rem;
+  transition: background-color 0.3s ease;
+}
+
+.profile-label:hover {
+  background-color: #145dbf;
+}
+
+.profile-file-input {
+  display: none;
+}
+
+.profile-username {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #050505;
+}
+
+.profile-email {
+  font-size: 1rem;
+  color: #606770;
+  letter-spacing: 0.03em;
+  margin-bottom: 15px;
+}
+
+@media (max-width: 400px) {
+  .profile-container {
+    max-width: 90%;
+    padding: 20px;
+  }
+
+  .profile-avatar {
+    width: 110px;
+    height: 110px;
+  }
+
+  .profile-username {
+    font-size: 1.3rem;
+  }
+}
