@@ -8,6 +8,7 @@ from app.dbmodels import User, Group, GroupMember, Post, Comment, Reaction
 from app.api.auth import verify_token
 from app.api.user import get_user, HTTPError
 from app.api.group import is_user_in_group
+import base64
 
 router = APIRouter(
     prefix='/posts',
@@ -59,14 +60,25 @@ async def get_my_posts(
     user_id = current_user['id']
     stmt = select(Post).where(Post.user_id == user_id).order_by(Post.created_at.desc())
     posts = db.scalars(stmt).all()
-    return [{
-        **post.__dict__,
-        'user': {
-            'id': post.user.id,
-            'username': post.user.username,
-            'avatar': post.user.avatar
-        }
-    } for post in posts]
+    # return [{
+    #     **post.__dict__,
+    #     'user': {
+    #         'id': post.user.id,
+    #         'username': post.user.username,
+    #         'avatar': f"data:image/png;base64,{base64.b64encode(post.user.avatar).decode("utf-8")}"
+    #     }
+    # } for post in posts]
+    posts_list = []
+    for post in posts:
+        user_dict = post.__dict__.copy()
+        if post.image:
+            image_base64 = base64.b64encode(post.image).decode("utf-8")
+            user_dict["image"] = f"data:image/png;base64,{image_base64}"
+        posts_list.append(user_dict)
+    return posts_list
+
+
+
 
 @router.get("/my-groups")
 async def get_my_groups_posts(
@@ -75,7 +87,6 @@ async def get_my_groups_posts(
 ):
     user_id = current_user['id']
     
-    # Get all groups the user is a member of
     user_groups = db.scalars(
         select(GroupMember.group_id)
         .where(GroupMember.user_id == user_id)
@@ -84,20 +95,24 @@ async def get_my_groups_posts(
     if not user_groups:
         return []
     
-    # Get all posts from these groups
     stmt = select(Post).where(
         Post.group_id.in_(user_groups)
     ).order_by(Post.created_at.desc())
     
-    posts = db.scalars(stmt).all()
-    return [{
-        **post.__dict__,
-        'user': {
-            'id': post.user.id,
-            'username': post.user.username,
-            'avatar': post.user.avatar
-        }
-    } for post in posts]
+    posts = db.execute(stmt).scalars().all()
+    posts_list = []
+    for post in posts:
+        user_dict = post.__dict__.copy()
+        if post.image:
+            image_base64 = base64.b64encode(post.image).decode("utf-8")
+            user_dict["image"] = f"data:image/png;base64,{image_base64}"
+        posts_list.append(user_dict)
+    return posts_list
+
+
+
+
+
 
 @router.get("/group/{group_id}")
 async def get_group_posts(
@@ -120,6 +135,11 @@ async def get_group_posts(
         }
     } for post in posts]
 
+
+
+
+
+
 @router.get("/admin/all")
 async def get_all_posts_admin(
     db: db_dependency,
@@ -139,6 +159,9 @@ async def get_all_posts_admin(
         }
     } for post in posts]
 
+
+
+
 @router.put("/{post_id}")
 async def edit_post(
     post_id: int,
@@ -157,6 +180,9 @@ async def edit_post(
     db.commit()
     db.refresh(post)
     return {"status": "Post updated", "post": post}
+
+
+
 
 @router.get("/{post_id}")
 async def get_post_detail(
