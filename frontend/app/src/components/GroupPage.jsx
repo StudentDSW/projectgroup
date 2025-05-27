@@ -400,7 +400,7 @@ const GroupPage = () => {
         <p className="post-content">{post.content}</p>
         {post.image && (
           <img 
-            src={`data:image/png;base64,${post.image}`} 
+            src={post.image}
             alt="Post" 
             className="post-image"
           />
