@@ -13,13 +13,14 @@ app.include_router(APIpost.router)
 Base.metadata.create_all(bind=engine)
 
 origins = [
-    "*"
+    "http://localhost:5173",  # Frontend development server
+    "http://127.0.0.1:5173"   # Alternative frontend URL
 ]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
-    allow_credentials=True,
+    allow_credentials=False,  # Changed to False since we're using token auth
     allow_methods=["*"],
     allow_headers=["*"],
 )

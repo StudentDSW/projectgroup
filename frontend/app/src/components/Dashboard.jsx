@@ -5,6 +5,8 @@ import CreatePostPopup from "./CreatePostPopup";
 import { useNavigate } from "react-router-dom";
 import "./dashboard.css";
 
+const API_URL = "http://localhost:8000";
+
 export const Dashboard = () => {
   const [isGroupPopupOpen, setIsGroupPopupOpen] = useState(false);
   const [isPostPopupOpen, setIsPostPopupOpen] = useState(false);
@@ -17,6 +19,7 @@ export const Dashboard = () => {
   const [comments, setComments] = useState({});
   const [newComment, setNewComment] = useState({});
   const [showComments, setShowComments] = useState({});
+  const [userRole, setUserRole] = useState(null);
 
   const fetchGroups = async () => {
     const token = localStorage.getItem("access_token");
@@ -228,6 +231,59 @@ export const Dashboard = () => {
     });
   };
 
+  const handleCommentReaction = async (commentId, reactionType) => {
+    const token = localStorage.getItem("access_token");
+    if (!token) return;
+
+    try {
+      const response = await fetch(`${API_URL}/posts/comments/${commentId}/reaction?reaction_type=${reactionType}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to update reaction');
+      }
+
+      // Refresh posts to get updated reaction counts
+      await fetchPosts();
+    } catch (error) {
+      console.error('Error updating comment reaction:', error);
+      alert(error.message);
+    }
+  };
+
+  const handleDeleteComment = async (commentId) => {
+    if (!window.confirm("Are you sure you want to delete this comment?")) return;
+
+    const token = localStorage.getItem("access_token");
+    if (!token) return;
+
+    try {
+      const res = await fetch(`http://localhost:8000/posts/comment/${commentId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        }
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.detail || "Failed to delete comment");
+      }
+      
+      await fetchPosts();
+    } catch (error) {
+      console.error("Error deleting comment:", error);
+      alert(error.message || "Failed to delete comment. Please try again.");
+    }
+  };
+
   const renderPost = (post) => {
     const currentUserId = JSON.parse(atob(localStorage.getItem("access_token").split('.')[1])).id;
     const hasLiked = post.reactions?.some(r => r.user_id === currentUserId && r.type === 'like');
@@ -255,7 +311,7 @@ export const Dashboard = () => {
             </h3>
             <small>{formatDate(post.created_at)}</small>
           </div>
-          {(post.user_id === currentUserId || userRole === "admin") && (
+          {post.user_id === currentUserId && (
             <button
               onClick={() => handleDeletePost(post.id)}
               className="delete-button"
@@ -296,15 +352,47 @@ export const Dashboard = () => {
         {showComments[post.id] && (
           <div className="comments-section">
             <div className="comments-list">
-              {post.comments?.map((comment) => (
-                <div key={comment.id} className="comment">
-                  <strong>{comment.user?.username || "Unknown User"}:</strong>
-                  <p>{comment.text}</p>
-                  <small className="comment-time">
-                    {formatDate(comment.created_at)}
-                  </small>
-                </div>
-              ))}
+              {post.comments?.map((comment) => {
+                const hasLikedComment = comment.reactions?.some(r => r.user_id === currentUserId && r.type === 'like');
+                const hasDislikedComment = comment.reactions?.some(r => r.user_id === currentUserId && r.type === 'dislike');
+                const commentLikeCount = comment.reactions?.filter(r => r.type === 'like').length || 0;
+                const commentDislikeCount = comment.reactions?.filter(r => r.type === 'dislike').length || 0;
+
+                return (
+                  <div key={comment.id} className="comment">
+                    <div className="comment-header">
+                      <strong>{comment.user?.username || "Unknown User"}:</strong>
+                      {comment.user_id === currentUserId && (
+                        <button
+                          onClick={() => handleDeleteComment(comment.id)}
+                          className="delete-comment-btn"
+                          title="Delete comment"
+                        >
+                          ×
+                        </button>
+                      )}
+                    </div>
+                    <p>{comment.text}</p>
+                    <div className="comment-actions">
+                      <button
+                        onClick={() => handleCommentReaction(comment.id, 'like')}
+                        className={`reaction-btn like-btn ${hasLikedComment ? "active" : ""}`}
+                      >
+                        👍 {commentLikeCount}
+                      </button>
+                      <button
+                        onClick={() => handleCommentReaction(comment.id, 'dislike')}
+                        className={`reaction-btn dislike-btn ${hasDislikedComment ? "active" : ""}`}
+                      >
+                        👎 {commentDislikeCount}
+                      </button>
+                      <small className="comment-time">
+                        {formatDate(comment.created_at)}
+                      </small>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
             <div className="add-comment">
               <textarea
