@@ -15,17 +15,23 @@ const PostFeed = ({
   const navigate = useNavigate();
   const token = localStorage.getItem("access_token");
   const currentUserId = token ? JSON.parse(atob(token.split('.')[1])).id : null;
+  const [showComments, setShowComments] = useState({});
 
   // Filter posts if groupId is provided
   const filteredPosts = groupId 
     ? posts.filter(post => post.group_id === groupId)
     : posts;
 
+  const toggleComments = (postId) => {
+    setShowComments(prev => ({ ...prev, [postId]: !prev[postId] }));
+  };
+
   const renderPost = (post) => {
     if (!post) return null;
 
     const hasLiked = post.reactions?.some(r => r.user_id === currentUserId && r.type === 'like');
     const likeCount = post.reactions?.filter(r => r.type === 'like').length || 0;
+    const commentCount = post.comments?.length || 0;
     const group = groups?.find(g => g.id === post.group_id);
 
     return (
@@ -73,12 +79,24 @@ const PostFeed = ({
           >
             👍 {likeCount}
           </button>
+          <button
+            onClick={() => toggleComments(post.id)}
+            className={`like-btn ${showComments[post.id] ? "liked" : ""}`}
+          >
+            💬 {commentCount}
+          </button>
         </div>
 
-        <CommentSection 
-          postId={post.id} 
-          onCommentAdded={onCommentAdded}
-        />
+        <div className="post-timestamp">
+          Posted on {new Date(post.created_at).toLocaleString()}
+        </div>
+
+        {showComments[post.id] && (
+          <CommentSection 
+            postId={post.id} 
+            onCommentAdded={onCommentAdded}
+          />
+        )}
       </div>
     );
   };
