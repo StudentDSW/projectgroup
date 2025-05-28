@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import CreatePostPopup from "./CreatePostPopup";
 import { AddGroupPopup } from "./AddGroupPopup";
 import { Navbar } from "./Navbar";
-import { FaCog } from "react-icons/fa";
+import { FaCog, FaUserCog } from "react-icons/fa";
 import "./GroupPage.css";
 
 const API_URL = "http://localhost:8000";
@@ -24,6 +24,9 @@ const GroupPage = () => {
   const navigate = useNavigate();
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);
   const [showComments, setShowComments] = useState({});
+  const [showMembershipPopup, setShowMembershipPopup] = useState(false);
+  const [selectedMember, setSelectedMember] = useState(null);
+  const [showRoleMenu, setShowRoleMenu] = useState(false);
 
   const fetchGroupData = async () => {
     try {
@@ -84,6 +87,7 @@ const GroupPage = () => {
       const members = await res.json();
       const currentUserId = JSON.parse(atob(token.split('.')[1])).id;
       const currentUser = members.find(member => member.id === currentUserId);
+      console.log('Current user role:', currentUser?.role_in_group);
       setUserRole(currentUser?.role_in_group || null);
     } catch (error) {
       console.error("Error fetching user role:", error);
@@ -335,6 +339,70 @@ const GroupPage = () => {
     }
   };
 
+  const handleRoleChange = async (memberId, newRole) => {
+    try {
+      console.log('Attempting to change role:', {
+        groupId: groupData.id,
+        memberId,
+        newRole,
+        currentUserRole: userRole
+      });
+
+      const res = await fetch(`${API_URL}/group/${groupData.id}/member/${memberId}/role?role=${newRole}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        console.error('Role change failed:', {
+          status: res.status,
+          statusText: res.statusText,
+          error: errorData
+        });
+        throw new Error(errorData.detail || 'Failed to update member role');
+      }
+
+      // Refresh all data after successful role change
+      await Promise.all([
+        fetchGroupMembers(),
+        fetchUserRole()
+      ]);
+      
+      setShowRoleMenu(false);
+      setSelectedMember(null);
+    } catch (error) {
+      console.error('Error updating member role:', error);
+      alert(error.message || 'Failed to update member role. Please try again.');
+    }
+  };
+
+  const handleRemoveMember = async (memberId) => {
+    if (!window.confirm("Are you sure you want to remove this member from the group?")) return;
+
+    try {
+      const res = await fetch(`${API_URL}/group/${groupData.id}/member/${memberId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to remove member');
+      }
+
+      // Refresh members list
+      await fetchGroupMembers();
+    } catch (error) {
+      console.error('Error removing member:', error);
+      alert('Failed to remove member. Please try again.');
+    }
+  };
+
   useEffect(() => {
     const loadData = async () => {
       if (!token) {
@@ -347,6 +415,13 @@ const GroupPage = () => {
       setError(null);
       
       try {
+        // Log current user info
+        const currentUserId = JSON.parse(atob(token.split('.')[1])).id;
+        console.log('Current user info:', {
+          userId: currentUserId,
+          token: token
+        });
+
         // First fetch group data
         await fetchGroupData();
         
@@ -400,6 +475,23 @@ const GroupPage = () => {
 
     fetchGroups();
   }, [token]);
+
+  // Add a new useEffect to refresh data periodically
+  useEffect(() => {
+    if (groupData?.id) {
+      const refreshInterval = setInterval(() => {
+        Promise.all([
+          fetchPosts(),
+          fetchUserRole(),
+          fetchGroupMembers()
+        ]).catch(error => {
+          console.error('Error refreshing data:', error);
+        });
+      }, 30000); // Refresh every 30 seconds
+
+      return () => clearInterval(refreshInterval);
+    }
+  }, [groupData?.id]);
 
   const openGroupPopup = () => setIsGroupPopupOpen(true);
   const closeGroupPopup = () => setIsGroupPopupOpen(false);
@@ -466,6 +558,11 @@ const GroupPage = () => {
     const dislikeCount = post.reactions?.filter(r => r.type === 'dislike').length || 0;
     const commentCount = post.comments?.length || 0;
 
+    // Check if current user is an admin of this group
+    const isGroupAdmin = groupMembers.some(member => 
+      member.id === currentUserId && member.role_in_group === "admin"
+    );
+
     return (
       <div key={post.id} className="post-card">
         <div className="post-header">
@@ -473,7 +570,7 @@ const GroupPage = () => {
             <h3>{post.user?.username || "Unknown User"}</h3>
             <small>{new Date(post.created_at).toLocaleString()}</small>
           </div>
-          {(post.user_id === currentUserId || userRole === "admin") && (
+          {(post.user_id === currentUserId || isGroupAdmin) && (
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -536,7 +633,7 @@ const GroupPage = () => {
                   <div key={comment.id} className="comment">
                     <div className="comment-header">
                       <strong>{comment.user?.username || "Unknown User"}:</strong>
-                      {comment.user_id === currentUserId && (
+                      {(comment.user_id === currentUserId || isGroupAdmin) && (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -742,15 +839,26 @@ const GroupPage = () => {
               {showSettingsMenu && (
                 <div className="settings-menu">
                   {userRole === "admin" && (
-                    <button 
-                      onClick={() => {
-                        setShowSettingsMenu(false);
-                        handleDeleteGroup();
-                      }}
-                      className="settings-menu-item delete"
-                    >
-                      Delete Group
-                    </button>
+                    <>
+                      <button 
+                        onClick={() => {
+                          setShowSettingsMenu(false);
+                          setShowMembershipPopup(true);
+                        }}
+                        className="settings-menu-item"
+                      >
+                        <FaUserCog /> Manage Members
+                      </button>
+                      <button 
+                        onClick={() => {
+                          setShowSettingsMenu(false);
+                          handleDeleteGroup();
+                        }}
+                        className="settings-menu-item delete"
+                      >
+                        Delete Group
+                      </button>
+                    </>
                   )}
                   <button 
                     onClick={() => {
@@ -801,6 +909,54 @@ const GroupPage = () => {
             handlePostCreated();
           }}
         />
+      )}
+
+      {showMembershipPopup && (
+        <div className="popup-overlay">
+          <div className="popup-content membership-popup">
+            <div className="popup-header">
+              <h2>Manage Group Members</h2>
+              <button
+                className="close-popup-button"
+                onClick={() => {
+                  setShowMembershipPopup(false);
+                  setSelectedMember(null);
+                  setShowRoleMenu(false);
+                }}
+              >
+                ×
+              </button>
+            </div>
+            <div className="membership-list">
+              {groupMembers.map((member) => (
+                <div key={member.id} className="membership-item">
+                  <div className="member-info">
+                    <span className="member-name">{member.username}</span>
+                    <span className="member-role">{member.role_in_group}</span>
+                  </div>
+                  {userRole === "admin" && member.role_in_group !== "admin" && (
+                    <div className="member-actions">
+                      <select
+                        className="role-select"
+                        value={member.role_in_group}
+                        onChange={(e) => handleRoleChange(member.id, e.target.value)}
+                      >
+                        <option value="user">Member</option>
+                        <option value="moderator">Moderator</option>
+                      </select>
+                      <button
+                        className="remove-button"
+                        onClick={() => handleRemoveMember(member.id)}
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
