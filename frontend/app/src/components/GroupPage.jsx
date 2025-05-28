@@ -21,6 +21,7 @@ const GroupPage = () => {
   const token = localStorage.getItem("access_token");
   const navigate = useNavigate();
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);
+  const [showComments, setShowComments] = useState({});
 
   const fetchGroupData = async () => {
     try {
@@ -215,12 +216,16 @@ const GroupPage = () => {
     }
   };
 
+  const toggleComments = (postId) => {
+    setShowComments(prev => ({ ...prev, [postId]: !prev[postId] }));
+  };
+
   const handleComment = async (postId) => {
     if (!newComment[postId]?.trim()) return;
 
     try {
       const formData = new FormData();
-      formData.append('text', newComment[postId]);
+      formData.append('text', newComment[postId].trim());
 
       const res = await fetch(`http://localhost:8000/posts/${postId}/comment`, {
         method: 'POST',
@@ -229,11 +234,35 @@ const GroupPage = () => {
         },
         body: formData
       });
-      if (!res.ok) throw new Error("Failed to add comment");
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.detail || "Failed to add comment");
+      }
+
+      const commentData = await res.json();
+      
+      // Update the posts state with the new comment
+      setPosts(prevPosts => 
+        prevPosts.map(post => {
+          if (post.id === postId) {
+            return {
+              ...post,
+              comments: [...(post.comments || []), commentData]
+            };
+          }
+          return post;
+        })
+      );
+
+      // Clear the comment input
       setNewComment(prev => ({ ...prev, [postId]: '' }));
-      fetchPosts();
+      
+      // Keep the comments section visible
+      setShowComments(prev => ({ ...prev, [postId]: true }));
     } catch (error) {
       console.error("Error adding comment:", error);
+      alert(error.message || "Failed to add comment. Please try again.");
     }
   };
 
@@ -413,39 +442,53 @@ const GroupPage = () => {
           >
             👍 {likeCount}
           </button>
-          <span className="comment-count">💬 {commentCount}</span>
+          <button
+            onClick={() => toggleComments(post.id)}
+            className={`comment-button ${showComments[post.id] ? 'active' : ''}`}
+          >
+            💬 {commentCount}
+          </button>
         </div>
 
-        <div className="comments-section">
-          <h4>Comments</h4>
-          {post.comments?.map(comment => (
-            <div key={comment.id} className="comment">
-              <strong>{comment.user?.username || "Unknown User"}:</strong> {comment.text}
-              <div className="comment-time">
-                {new Date(comment.created_at).toLocaleString()}
-              </div>
-            </div>
-          ))}
-          
-          <div className="add-comment">
-            <textarea
-              value={newComment[post.id] || ''}
-              onChange={(e) => setNewComment(prev => ({ ...prev, [post.id]: e.target.value }))}
-              placeholder="Write a comment..."
-              className="comment-input"
-            />
-            <button
-              onClick={() => handleComment(post.id)}
-              className="comment-button"
-            >
-              Comment
-            </button>
-          </div>
-        </div>
-
-        <div className="post-time">
+        <div className="post-timestamp">
           Posted on {new Date(post.created_at).toLocaleString()}
         </div>
+
+        {showComments[post.id] && (
+          <div className="comments-section" onClick={(e) => e.stopPropagation()}>
+            <h4>Comments</h4>
+            {post.comments?.map((comment) => (
+              <div key={comment.id} className="comment">
+                <strong>{comment.user?.username || "Unknown User"}</strong>
+                <p>{comment.text}</p>
+                <div className="comment-time">
+                  {new Date(comment.created_at).toLocaleString()}
+                </div>
+              </div>
+            ))}
+            <div className="add-comment">
+              <textarea
+                value={newComment[post.id] || ""}
+                onChange={(e) => setNewComment(prev => ({ ...prev, [post.id]: e.target.value }))}
+                placeholder="Write a comment..."
+                rows={2}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleComment(post.id);
+                  }
+                }}
+              />
+              <button
+                onClick={() => handleComment(post.id)}
+                className="submit-comment"
+                disabled={!newComment[post.id]?.trim()}
+              >
+                Comment
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     );
   };

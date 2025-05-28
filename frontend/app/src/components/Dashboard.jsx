@@ -61,6 +61,14 @@ export const Dashboard = () => {
       }
 
       const postsData = await postsResponse.json();
+      
+      // Initialize showComments state for each post
+      const initialShowComments = {};
+      postsData.forEach(post => {
+        initialShowComments[post.id] = false;
+      });
+      setShowComments(initialShowComments);
+      
       setPosts(postsData);
     } catch (error) {
       console.error("Fetch error:", error);
@@ -114,16 +122,17 @@ export const Dashboard = () => {
     if (!token) return;
 
     try {
-      const res = await fetch(`http://localhost:8000/posts/${postId}/reaction`, {
+      const res = await fetch(`http://localhost:8000/posts/${postId}/reaction?reaction_type=like`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ reaction_type: "like" }),
       });
 
-      if (!res.ok) throw new Error("Failed to like post");
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.detail || "Failed to like post");
+      }
       
       // Refresh posts to get updated like count
       const postsResponse = await fetch("http://localhost:8000/posts/my-groups", {
@@ -135,6 +144,7 @@ export const Dashboard = () => {
       }
     } catch (error) {
       console.error("Error liking post:", error);
+      alert(error.message || "Failed to like post. Please try again.");
     }
   };
 
@@ -166,29 +176,45 @@ export const Dashboard = () => {
     if (!commentText?.trim()) return;
 
     try {
+      const formData = new FormData();
+      formData.append('text', commentText.trim());
+
       const res = await fetch(`http://localhost:8000/posts/${postId}/comment`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ text: commentText }),
+        body: formData,
       });
 
-      if (!res.ok) throw new Error("Failed to add comment");
-
-      // Refresh posts to get updated comments
-      const postsResponse = await fetch("http://localhost:8000/posts/my-groups", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (postsResponse.ok) {
-        const postsData = await postsResponse.json();
-        setPosts(postsData);
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.detail || "Failed to add comment");
       }
 
+      const commentData = await res.json();
+      
+      // Update the posts state with the new comment
+      setPosts(prevPosts => 
+        prevPosts.map(post => {
+          if (post.id === postId) {
+            return {
+              ...post,
+              comments: [...(post.comments || []), commentData]
+            };
+          }
+          return post;
+        })
+      );
+
+      // Clear the comment input
       setNewComment({ ...newComment, [postId]: "" });
+      
+      // Keep the comments section visible
+      setShowComments(prev => ({ ...prev, [postId]: true }));
     } catch (error) {
       console.error("Error adding comment:", error);
+      alert(error.message || "Failed to add comment. Please try again.");
     }
   };
 
@@ -267,9 +293,9 @@ export const Dashboard = () => {
               e.stopPropagation();
               toggleComments(post.id);
             }}
-            className="comment-button"
+            className={`comment-button ${showComments[post.id] ? 'active' : ''}`}
           >
-            💬 {commentCount}
+            💬 {post.comments?.length || 0}
           </button>
         </div>
 
@@ -295,10 +321,17 @@ export const Dashboard = () => {
                 onChange={(e) => setNewComment({ ...newComment, [post.id]: e.target.value })}
                 placeholder="Write a comment..."
                 rows={2}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleComment(post.id);
+                  }
+                }}
               />
               <button
                 onClick={() => handleComment(post.id)}
                 className="submit-comment"
+                disabled={!newComment[post.id]?.trim()}
               >
                 Comment
               </button>

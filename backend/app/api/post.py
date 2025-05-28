@@ -77,48 +77,73 @@ async def get_my_posts(
         posts_list.append(user_dict)
     return posts_list
 
-
-
-
 @router.get("/my-groups")
 async def get_my_groups_posts(
     db: db_dependency,
     current_user: dict = Depends(verify_token)
 ):
-    user_id = current_user['id']
-    
-    user_groups = db.scalars(
-        select(GroupMember.group_id)
-        .where(GroupMember.user_id == user_id)
-    ).all()
-    
-    if not user_groups:
-        return []
-    
-    stmt = select(Post).where(
-        Post.group_id.in_(user_groups)
-    ).order_by(Post.created_at.desc())
-    
-    posts = db.execute(stmt).scalars().all()
-    posts_list = []
-    for post in posts:
-        user_dict = post.__dict__.copy()
-        if post.image:
-            image_base64 = base64.b64encode(post.image).decode("utf-8")
-            user_dict["image"] = f"data:image/png;base64,{image_base64}"
-        # Add user information
-        user_dict["user"] = {
-            "id": post.user.id,
-            "username": post.user.username,
-            "avatar": f"data:image/png;base64,{base64.b64encode(post.user.avatar).decode('utf-8')}" if post.user.avatar else None
-        }
-        posts_list.append(user_dict)
-    return posts_list
-
-
-
-
-
+    try:
+        user_id = current_user['id']
+        
+        user_groups = db.scalars(
+            select(GroupMember.group_id)
+            .where(GroupMember.user_id == user_id)
+        ).all()
+        
+        if not user_groups:
+            return []
+        
+        stmt = select(Post).where(
+            Post.group_id.in_(user_groups)
+        ).order_by(Post.created_at.desc())
+        
+        posts = db.execute(stmt).scalars().all()
+        posts_list = []
+        for post in posts:
+            post_dict = post.__dict__.copy()
+            
+            # Handle user data safely
+            if post.user:
+                post_dict['user'] = {
+                    'id': post.user.id,
+                    'username': post.user.username,
+                    'avatar': base64.b64encode(post.user.avatar).decode('utf-8') if post.user.avatar else None
+                }
+            else:
+                post_dict['user'] = {
+                    'id': None,
+                    'username': 'Unknown User',
+                    'avatar': None
+                }
+            
+            # Get reactions
+            reactions = db.scalars(select(Reaction).where(Reaction.post_id == post.id)).all()
+            post_dict['reactions'] = reactions
+            
+            # Get comments
+            comments = db.scalars(select(Comment).where(Comment.post_id == post.id)).all()
+            post_dict['comments'] = [{
+                **comment.__dict__,
+                'user': {
+                    'id': comment.user.id,
+                    'username': comment.user.username,
+                    'avatar': base64.b64encode(comment.user.avatar).decode('utf-8') if comment.user.avatar else None
+                } if comment.user else None
+            } for comment in comments]
+            
+            # Handle image data
+            if post.image:
+                try:
+                    post_dict["image"] = f"data:image/png;base64,{base64.b64encode(post.image).decode('utf-8')}"
+                except:
+                    post_dict["image"] = None
+            
+            posts_list.append(post_dict)
+            
+        return posts_list
+    except Exception as e:
+        print(f"Error in get_my_groups_posts: {str(e)}")
+        raise HTTPError(500, f"Internal server error: {str(e)}")
 
 @router.get("/group/{group_id}")
 async def get_group_posts(
@@ -180,11 +205,6 @@ async def get_group_posts(
         print(f"Error in get_group_posts: {str(e)}")
         raise HTTPError(500, f"Internal server error: {str(e)}")
 
-
-
-
-
-
 @router.get("/admin/all")
 async def get_all_posts_admin(
     db: db_dependency,
@@ -204,9 +224,6 @@ async def get_all_posts_admin(
         }
     } for post in posts]
 
-
-
-
 @router.put("/{post_id}")
 async def edit_post(
     post_id: int,
@@ -225,9 +242,6 @@ async def edit_post(
     db.commit()
     db.refresh(post)
     return {"status": "Post updated", "post": post}
-
-
-
 
 @router.post('/{post_id}/comment')
 async def comment_on_post(
@@ -322,7 +336,6 @@ async def react_to_comment(
     db.add(reaction)
     db.commit()
     return {"status": "Reaction added"}
-
 
 @router.delete("/comment/{comment_id}")
 async def delete_comment(

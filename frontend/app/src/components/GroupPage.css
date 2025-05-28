@@ -182,98 +182,143 @@
 
 .post-actions {
   display: flex;
-  gap: 15px;
-  margin: 15px 0;
+  gap: 1rem;
+  margin-top: 1rem;
+  align-items: center;
 }
 
-.like-button {
+.like-button,
+.comment-button {
   background: none;
   border: none;
   cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 0.5rem;
+  font-size: 0.9rem;
   color: #666;
-  padding: 5px 10px;
-  border-radius: 4px;
-  transition: background-color 0.2s;
 }
 
-.like-button:hover {
+.like-button:hover,
+.comment-button:hover {
   background-color: #f0f0f0;
 }
 
 .like-button.liked {
-  color: #4CAF50;
+  color: #1a73e8;
 }
 
-.comment-count {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  color: #666;
+.comment-button.active {
+  color: #1a73e8;
+  background-color: #e8f0fe;
 }
 
 .comments-section {
-  margin-top: 20px;
-  padding-top: 20px;
-  border-top: 1px solid #e0e0e0;
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  animation: slideDown 0.3s ease;
 }
 
-.comments-section h4 {
-  margin-bottom: 15px;
-  color: #333;
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .comment {
-  background: #f9f9f9;
-  padding: 10px;
-  border-radius: 4px;
-  margin-bottom: 10px;
+  padding: 0.75rem;
+  border-bottom: 1px solid #eee;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.comment:last-child {
+  border-bottom: none;
 }
 
 .comment strong {
+  color: #1a73e8;
+  margin-right: 0.5rem;
+}
+
+.comment p {
+  margin: 0.25rem 0;
   color: #333;
 }
 
 .comment-time {
-  font-size: 12px;
+  font-size: 0.8rem;
   color: #666;
-  margin-top: 5px;
+  margin-top: 0.25rem;
 }
 
 .add-comment {
-  margin-top: 15px;
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
-.comment-input {
+.add-comment textarea {
   width: 100%;
-  min-height: 60px;
-  padding: 10px;
-  border: 1px solid #e0e0e0;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
   border-radius: 4px;
-  margin-bottom: 10px;
   resize: vertical;
+  min-height: 60px;
+  font-family: inherit;
+  font-size: 0.9rem;
 }
 
-.comment-button {
-  background-color: #4CAF50;
+.add-comment textarea:focus {
+  outline: none;
+  border-color: #1a73e8;
+  box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.1);
+}
+
+.submit-comment {
+  align-self: flex-end;
+  padding: 0.5rem 1rem;
+  background-color: #1a73e8;
   color: white;
   border: none;
-  padding: 8px 16px;
   border-radius: 4px;
   cursor: pointer;
-  font-weight: 500;
+  font-size: 0.9rem;
+  transition: background-color 0.2s ease;
 }
 
-.comment-button:hover {
-  background-color: #45a049;
+.submit-comment:hover {
+  background-color: #1557b0;
 }
 
-.post-time {
-  font-size: 12px;
+.submit-comment:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.post-timestamp {
+  font-size: 0.8rem;
   color: #666;
-  margin-top: 15px;
+  margin-top: 0.5rem;
 }
 
 .members-sidebar {
