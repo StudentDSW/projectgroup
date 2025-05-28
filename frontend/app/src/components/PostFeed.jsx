@@ -26,11 +26,40 @@ const PostFeed = ({
     setShowComments(prev => ({ ...prev, [postId]: !prev[postId] }));
   };
 
+  const handleReaction = async (postId, reactionType) => {
+    try {
+      const formData = new FormData();
+      formData.append('reaction_type', reactionType);
+
+      const response = await fetch(`http://localhost:8000/posts/${postId}/reaction`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update reaction');
+      }
+
+      // Call the parent component's callback to refresh posts
+      if (onLike) {
+        onLike(postId);
+      }
+    } catch (error) {
+      console.error('Error updating reaction:', error);
+      alert('Failed to update reaction. Please try again.');
+    }
+  };
+
   const renderPost = (post) => {
     if (!post) return null;
 
     const hasLiked = post.reactions?.some(r => r.user_id === currentUserId && r.type === 'like');
+    const hasDisliked = post.reactions?.some(r => r.user_id === currentUserId && r.type === 'dislike');
     const likeCount = post.reactions?.filter(r => r.type === 'like').length || 0;
+    const dislikeCount = post.reactions?.filter(r => r.type === 'dislike').length || 0;
     const commentCount = post.comments?.length || 0;
     const group = groups?.find(g => g.id === post.group_id);
 
@@ -74,14 +103,20 @@ const PostFeed = ({
 
         <div className="post-footer">
           <button
-            onClick={() => onLike(post.id)}
-            className={`like-btn ${hasLiked ? "liked" : ""}`}
+            onClick={() => handleReaction(post.id, 'like')}
+            className={`reaction-btn like-btn ${hasLiked ? "active" : ""}`}
           >
             👍 {likeCount}
           </button>
           <button
+            onClick={() => handleReaction(post.id, 'dislike')}
+            className={`reaction-btn dislike-btn ${hasDisliked ? "active" : ""}`}
+          >
+            👎 {dislikeCount}
+          </button>
+          <button
             onClick={() => toggleComments(post.id)}
-            className={`like-btn ${showComments[post.id] ? "liked" : ""}`}
+            className={`reaction-btn comment-btn ${showComments[post.id] ? "active" : ""}`}
           >
             💬 {commentCount}
           </button>

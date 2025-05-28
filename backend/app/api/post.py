@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends, File, UploadFile, Form
 from sqlalchemy.orm import Session
-from sqlalchemy import select, delete
+from sqlalchemy import select, delete, and_
 from typing import Optional
 from datetime import datetime, timezone
 from app.db import db_dependency 
@@ -301,6 +301,40 @@ async def react_to_post(
     if not member:
         raise HTTPError(403, "You have to belong to the group to react")
 
+    # Check if user already has a reaction of this type
+    existing_reaction = db.scalars(
+        select(Reaction).where(
+            and_(
+                Reaction.post_id == post_id,
+                Reaction.user_id == user_id,
+                Reaction.type == reaction_type
+            )
+        )
+    ).first()
+
+    if existing_reaction:
+        # If reaction exists, remove it (toggle off)
+        db.delete(existing_reaction)
+        db.commit()
+        return {"status": "Reaction removed"}
+
+    # Check if user has an opposite reaction
+    opposite_type = "dislike" if reaction_type == "like" else "like"
+    opposite_reaction = db.scalars(
+        select(Reaction).where(
+            and_(
+                Reaction.post_id == post_id,
+                Reaction.user_id == user_id,
+                Reaction.type == opposite_type
+            )
+        )
+    ).first()
+
+    if opposite_reaction:
+        # Remove the opposite reaction
+        db.delete(opposite_reaction)
+
+    # Add the new reaction
     reaction = Reaction(
         post_id=post_id,
         user_id=user_id,

@@ -117,34 +117,28 @@ export const Dashboard = () => {
     navigate(`/group/${group.name}`);
   };
 
-  const handleLike = async (postId) => {
+  const handleReaction = async (postId, reactionType) => {
     const token = localStorage.getItem("access_token");
     if (!token) return;
 
     try {
-      const res = await fetch(`http://localhost:8000/posts/${postId}/reaction?reaction_type=like`, {
+      const res = await fetch(`http://localhost:8000/posts/${postId}/reaction?reaction_type=${reactionType}`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
-        },
+        }
       });
 
       if (!res.ok) {
         const errorData = await res.json();
-        throw new Error(errorData.detail || "Failed to like post");
+        throw new Error(errorData.detail || "Failed to update reaction");
       }
       
-      // Refresh posts to get updated like count
-      const postsResponse = await fetch("http://localhost:8000/posts/my-groups", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (postsResponse.ok) {
-        const postsData = await postsResponse.json();
-        setPosts(postsData);
-      }
+      // Refresh posts to get updated reaction counts
+      await fetchPosts();
     } catch (error) {
-      console.error("Error liking post:", error);
-      alert(error.message || "Failed to like post. Please try again.");
+      console.error("Error updating reaction:", error);
+      alert(error.message || "Failed to update reaction. Please try again.");
     }
   };
 
@@ -237,7 +231,9 @@ export const Dashboard = () => {
   const renderPost = (post) => {
     const currentUserId = JSON.parse(atob(localStorage.getItem("access_token").split('.')[1])).id;
     const hasLiked = post.reactions?.some(r => r.user_id === currentUserId && r.type === 'like');
+    const hasDisliked = post.reactions?.some(r => r.user_id === currentUserId && r.type === 'dislike');
     const likeCount = post.reactions?.filter(r => r.type === 'like').length || 0;
+    const dislikeCount = post.reactions?.filter(r => r.type === 'dislike').length || 0;
     const commentCount = post.comments?.length || 0;
     const group = groups.find(g => g.id === post.group_id);
 
@@ -248,73 +244,68 @@ export const Dashboard = () => {
             <h3 
               onClick={(e) => {
                 if (group) {
-                  navigate(`/group/${group.name}`);
+                  e.stopPropagation();
+                  handleGroupClick(group);
                 }
               }}
-              className="group-name-link"
+              style={{ cursor: group ? 'pointer' : 'default' }}
             >
-              {group ? group.name : "Unknown Group"}
+              {post.user?.username || "Unknown User"}
+              {group && <span className="group-name"> in {group.name}</span>}
             </h3>
-            <small>Posted by {post.user?.username || "Unknown User"}</small>
+            <small>{formatDate(post.created_at)}</small>
           </div>
-          {post.user_id === currentUserId && (
+          {(post.user_id === currentUserId || userRole === "admin") && (
             <button
-              onClick={(e) => {
-                e.stopPropagation();
-                handleDeletePost(post.id);
-              }}
+              onClick={() => handleDeletePost(post.id)}
               className="delete-button"
             >
               Delete
             </button>
           )}
         </div>
-        <p className="post-content">{post.content}</p>
-        {post.image && (
-          <img 
-            src={post.image}
-            alt="Post" 
-            className="post-image"
-          />
-        )}
-        
+
+        <div className="post-content">
+          <p>{post.content}</p>
+          {post.image && (
+            <img src={post.image} alt="Post" className="post-image" />
+          )}
+        </div>
+
         <div className="post-actions">
           <button
-            onClick={(e) => {
-              e.stopPropagation();
-              handleLike(post.id);
-            }}
-            className={`like-button ${hasLiked ? 'liked' : ''}`}
+            onClick={() => handleReaction(post.id, 'like')}
+            className={`reaction-btn like-btn ${hasLiked ? "active" : ""}`}
           >
             👍 {likeCount}
           </button>
           <button
-            onClick={(e) => {
-              e.stopPropagation();
-              toggleComments(post.id);
-            }}
-            className={`comment-button ${showComments[post.id] ? 'active' : ''}`}
+            onClick={() => handleReaction(post.id, 'dislike')}
+            className={`reaction-btn dislike-btn ${hasDisliked ? "active" : ""}`}
           >
-            💬 {post.comments?.length || 0}
+            👎 {dislikeCount}
+          </button>
+          <button
+            onClick={() => toggleComments(post.id)}
+            className={`reaction-btn comment-btn ${showComments[post.id] ? "active" : ""}`}
+          >
+            💬 {commentCount}
           </button>
         </div>
 
-        <div className="post-timestamp">
-          Posted on {formatDate(post.created_at)}
-        </div>
-
         {showComments[post.id] && (
-          <div className="comments-section" onClick={(e) => e.stopPropagation()}>
-            <h4>Comments</h4>
-            {post.comments?.map((comment) => (
-              <div key={comment.id} className="comment">
-                <strong>{comment.user?.username || "Unknown User"}</strong>
-                <p>{comment.text}</p>
-                <div className="comment-time">
-                  {formatDate(comment.created_at)}
+          <div className="comments-section">
+            <div className="comments-list">
+              {post.comments?.map((comment) => (
+                <div key={comment.id} className="comment">
+                  <strong>{comment.user?.username || "Unknown User"}:</strong>
+                  <p>{comment.text}</p>
+                  <small className="comment-time">
+                    {formatDate(comment.created_at)}
+                  </small>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
             <div className="add-comment">
               <textarea
                 value={newComment[post.id] || ""}

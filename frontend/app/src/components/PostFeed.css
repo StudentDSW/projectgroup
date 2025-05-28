@@ -86,7 +86,7 @@
   align-items: center;
 }
 
-.like-btn {
+.reaction-btn {
   background: none;
   border: none;
   cursor: pointer;
@@ -100,12 +100,23 @@
   color: #666;
 }
 
-.like-btn:hover {
+.reaction-btn:hover {
   background-color: #f0f0f0;
 }
 
-.like-btn.liked {
+.reaction-btn.active {
   color: #1a73e8;
+  background-color: #e8f0fe;
+}
+
+.like-btn.active {
+  color: #4CAF50;
+  background-color: #e8f5e9;
+}
+
+.dislike-btn.active {
+  color: #f44336;
+  background-color: #ffebee;
 }
 
 /* Comment Section Styles */

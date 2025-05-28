@@ -197,22 +197,24 @@ const GroupPage = () => {
     }
   };
 
-  const handleLike = async (postId) => {
+  const handleReaction = async (postId, reactionType) => {
     try {
-      const formData = new FormData();
-      formData.append('reaction_type', 'like');
-
-      const res = await fetch(`http://localhost:8000/posts/${postId}/reaction`, {
+      const res = await fetch(`http://localhost:8000/posts/${postId}/reaction?reaction_type=${reactionType}`, {
         method: 'POST',
         headers: { 
           'Authorization': `Bearer ${token}`
-        },
-        body: formData
+        }
       });
-      if (!res.ok) throw new Error("Failed to like post");
-      fetchPosts();
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.detail || "Failed to update reaction");
+      }
+      
+      await fetchPosts();
     } catch (error) {
-      console.error("Error liking post:", error);
+      console.error("Error updating reaction:", error);
+      alert(error.message || "Failed to update reaction. Please try again.");
     }
   };
 
@@ -407,17 +409,19 @@ const GroupPage = () => {
   const renderPost = (post) => {
     const currentUserId = JSON.parse(atob(token.split('.')[1])).id;
     const hasLiked = post.reactions?.some(r => r.user_id === currentUserId && r.type === 'like');
+    const hasDisliked = post.reactions?.some(r => r.user_id === currentUserId && r.type === 'dislike');
     const likeCount = post.reactions?.filter(r => r.type === 'like').length || 0;
+    const dislikeCount = post.reactions?.filter(r => r.type === 'dislike').length || 0;
     const commentCount = post.comments?.length || 0;
 
     return (
       <div key={post.id} className="post-card">
         <div className="post-header">
           <div>
-            <h3>{post.title || "Post"}</h3>
-            <small>Posted by {post.user?.username || "Unknown User"}</small>
+            <h3>{post.user?.username || "Unknown User"}</h3>
+            <small>{new Date(post.created_at).toLocaleString()}</small>
           </div>
-          {post.user_id === currentUserId && (
+          {(post.user_id === currentUserId || userRole === "admin") && (
             <button
               onClick={() => handleDeletePost(post.id)}
               className="delete-button"
@@ -426,50 +430,52 @@ const GroupPage = () => {
             </button>
           )}
         </div>
-        <p className="post-content">{post.content}</p>
-        {post.image && (
-          <img 
-            src={post.image}
-            alt="Post" 
-            className="post-image"
-          />
-        )}
-        
+
+        <div className="post-content">
+          <p>{post.content}</p>
+          {post.image && (
+            <img src={post.image} alt="Post" className="post-image" />
+          )}
+        </div>
+
         <div className="post-actions">
           <button
-            onClick={() => handleLike(post.id)}
-            className={`like-button ${hasLiked ? 'liked' : ''}`}
+            onClick={() => handleReaction(post.id, 'like')}
+            className={`reaction-btn like-btn ${hasLiked ? "active" : ""}`}
           >
             👍 {likeCount}
           </button>
           <button
+            onClick={() => handleReaction(post.id, 'dislike')}
+            className={`reaction-btn dislike-btn ${hasDisliked ? "active" : ""}`}
+          >
+            👎 {dislikeCount}
+          </button>
+          <button
             onClick={() => toggleComments(post.id)}
-            className={`comment-button ${showComments[post.id] ? 'active' : ''}`}
+            className={`reaction-btn comment-btn ${showComments[post.id] ? "active" : ""}`}
           >
             💬 {commentCount}
           </button>
         </div>
 
-        <div className="post-timestamp">
-          Posted on {new Date(post.created_at).toLocaleString()}
-        </div>
-
         {showComments[post.id] && (
-          <div className="comments-section" onClick={(e) => e.stopPropagation()}>
-            <h4>Comments</h4>
-            {post.comments?.map((comment) => (
-              <div key={comment.id} className="comment">
-                <strong>{comment.user?.username || "Unknown User"}</strong>
-                <p>{comment.text}</p>
-                <div className="comment-time">
-                  {new Date(comment.created_at).toLocaleString()}
+          <div className="comments-section">
+            <div className="comments-list">
+              {post.comments?.map((comment) => (
+                <div key={comment.id} className="comment">
+                  <strong>{comment.user?.username || "Unknown User"}:</strong>
+                  <p>{comment.text}</p>
+                  <small className="comment-time">
+                    {new Date(comment.created_at).toLocaleString()}
+                  </small>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
             <div className="add-comment">
               <textarea
                 value={newComment[post.id] || ""}
-                onChange={(e) => setNewComment(prev => ({ ...prev, [post.id]: e.target.value }))}
+                onChange={(e) => setNewComment({ ...newComment, [post.id]: e.target.value })}
                 placeholder="Write a comment..."
                 rows={2}
                 onKeyDown={(e) => {
