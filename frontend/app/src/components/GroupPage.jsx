@@ -6,6 +6,8 @@ import { Navbar } from "./Navbar";
 import { FaCog } from "react-icons/fa";
 import "./GroupPage.css";
 
+const API_URL = "http://localhost:8000";
+
 const GroupPage = () => {
   const { groupName } = useParams();
   const [groupData, setGroupData] = useState(null);
@@ -21,6 +23,7 @@ const GroupPage = () => {
   const token = localStorage.getItem("access_token");
   const navigate = useNavigate();
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);
+  const [showComments, setShowComments] = useState({});
 
   const fetchGroupData = async () => {
     try {
@@ -30,13 +33,13 @@ const GroupPage = () => {
       }
 
       // Try to fetch by name first
-      let res = await fetch(`http://localhost:8000/group/name/${groupName}`, {
+      let res = await fetch(`${API_URL}/group/name/${groupName}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       
       // If not found by name, try to fetch by ID
       if (!res.ok && !isNaN(parseInt(groupName))) {
-        res = await fetch(`http://localhost:8000/group/${groupName}`, {
+        res = await fetch(`${API_URL}/group/${groupName}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
       }
@@ -66,7 +69,7 @@ const GroupPage = () => {
     try {
       if (!groupData?.id) return;
 
-      const res = await fetch(`http://localhost:8000/group/members/${groupData.id}`, {
+      const res = await fetch(`${API_URL}/group/members/${groupData.id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       
@@ -96,7 +99,7 @@ const GroupPage = () => {
       }
 
       console.log("Fetching posts for group:", groupData.id);
-      const res = await fetch(`http://localhost:8000/posts/group/${groupData.id}`, {
+      const res = await fetch(`${API_URL}/posts/group/${groupData.id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       
@@ -125,7 +128,7 @@ const GroupPage = () => {
       }
 
       console.log("Fetching members for group:", groupData.id);
-      const response = await fetch(`http://localhost:8000/group/members/${groupData.id}`, {
+      const response = await fetch(`${API_URL}/group/members/${groupData.id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       
@@ -146,7 +149,7 @@ const GroupPage = () => {
     if (!window.confirm("Are you sure you want to leave this group?")) return;
     
     try {
-      const res = await fetch(`http://localhost:8000/group/leave/${groupData.id}`, {
+      const res = await fetch(`${API_URL}/group/leave/${groupData.id}`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -168,7 +171,7 @@ const GroupPage = () => {
     if (!window.confirm("Are you sure you want to delete this group? This action cannot be undone.")) return;
     
     try {
-      const res = await fetch(`http://localhost:8000/group/${groupData.id}`, {
+      const res = await fetch(`${API_URL}/group/${groupData.id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -184,7 +187,7 @@ const GroupPage = () => {
     if (!window.confirm("Are you sure you want to delete this post?")) return;
     
     try {
-      const res = await fetch(`http://localhost:8000/posts/post/${postId}`, {
+      const res = await fetch(`${API_URL}/posts/post/${postId}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -196,23 +199,29 @@ const GroupPage = () => {
     }
   };
 
-  const handleLike = async (postId) => {
+  const handleReaction = async (postId, reactionType) => {
     try {
-      const formData = new FormData();
-      formData.append('reaction_type', 'like');
-
-      const res = await fetch(`http://localhost:8000/posts/${postId}/reaction`, {
+      const res = await fetch(`${API_URL}/posts/${postId}/reaction?reaction_type=${reactionType}`, {
         method: 'POST',
         headers: { 
           'Authorization': `Bearer ${token}`
-        },
-        body: formData
+        }
       });
-      if (!res.ok) throw new Error("Failed to like post");
-      fetchPosts();
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.detail || "Failed to update reaction");
+      }
+      
+      await fetchPosts();
     } catch (error) {
-      console.error("Error liking post:", error);
+      console.error("Error updating reaction:", error);
+      alert(error.message || "Failed to update reaction. Please try again.");
     }
+  };
+
+  const toggleComments = (postId) => {
+    setShowComments(prev => ({ ...prev, [postId]: !prev[postId] }));
   };
 
   const handleComment = async (postId) => {
@@ -220,20 +229,44 @@ const GroupPage = () => {
 
     try {
       const formData = new FormData();
-      formData.append('text', newComment[postId]);
+      formData.append('text', newComment[postId].trim());
 
-      const res = await fetch(`http://localhost:8000/posts/${postId}/comment`, {
+      const res = await fetch(`${API_URL}/posts/${postId}/comment`, {
         method: 'POST',
         headers: { 
           'Authorization': `Bearer ${token}`
         },
         body: formData
       });
-      if (!res.ok) throw new Error("Failed to add comment");
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.detail || "Failed to add comment");
+      }
+
+      const commentData = await res.json();
+      
+      // Update the posts state with the new comment
+      setPosts(prevPosts => 
+        prevPosts.map(post => {
+          if (post.id === postId) {
+            return {
+              ...post,
+              comments: [...(post.comments || []), commentData]
+            };
+          }
+          return post;
+        })
+      );
+
+      // Clear the comment input
       setNewComment(prev => ({ ...prev, [postId]: '' }));
-      fetchPosts();
+      
+      // Keep the comments section visible
+      setShowComments(prev => ({ ...prev, [postId]: true }));
     } catch (error) {
       console.error("Error adding comment:", error);
+      alert(error.message || "Failed to add comment. Please try again.");
     }
   };
 
@@ -250,6 +283,56 @@ const GroupPage = () => {
   const handleMemberUpdated = () => {
     fetchGroupMembers();
     fetchUserRole();
+  };
+
+  const handleCommentReaction = async (commentId, reactionType) => {
+    const token = localStorage.getItem("access_token");
+    if (!token) return;
+
+    try {
+      const response = await fetch(`${API_URL}/posts/comments/${commentId}/reaction?reaction_type=${reactionType}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to update reaction');
+      }
+
+      // Refresh posts to get updated reaction counts
+      await fetchPosts();
+    } catch (error) {
+      console.error('Error updating comment reaction:', error);
+      alert(error.message);
+    }
+  };
+
+  const handleDeleteComment = async (commentId) => {
+    if (!window.confirm("Are you sure you want to delete this comment?")) return;
+    
+    try {
+      const res = await fetch(`${API_URL}/posts/comment/${commentId}`, {
+        method: 'DELETE',
+        headers: { 
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.detail || "Failed to delete comment");
+      }
+      
+      await fetchPosts();
+    } catch (error) {
+      console.error("Error deleting comment:", error);
+      alert(error.message || "Failed to delete comment. Please try again.");
+    }
   };
 
   useEffect(() => {
@@ -300,7 +383,7 @@ const GroupPage = () => {
   useEffect(() => {
     const fetchGroups = async () => {
       try {
-        const response = await fetch("http://localhost:8000/group/mygroups", {
+        const response = await fetch(`${API_URL}/group/mygroups`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -378,17 +461,19 @@ const GroupPage = () => {
   const renderPost = (post) => {
     const currentUserId = JSON.parse(atob(token.split('.')[1])).id;
     const hasLiked = post.reactions?.some(r => r.user_id === currentUserId && r.type === 'like');
+    const hasDisliked = post.reactions?.some(r => r.user_id === currentUserId && r.type === 'dislike');
     const likeCount = post.reactions?.filter(r => r.type === 'like').length || 0;
+    const dislikeCount = post.reactions?.filter(r => r.type === 'dislike').length || 0;
     const commentCount = post.comments?.length || 0;
 
     return (
       <div key={post.id} className="post-card">
         <div className="post-header">
           <div>
-            <h3>{post.title || "Post"}</h3>
-            <small>Posted by {post.user?.username || "Unknown User"}</small>
+            <h3>{post.user?.username || "Unknown User"}</h3>
+            <small>{new Date(post.created_at).toLocaleString()}</small>
           </div>
-          {post.user_id === currentUserId && (
+          {(post.user_id === currentUserId || userRole === "admin") && (
             <button
               onClick={() => handleDeletePost(post.id)}
               className="delete-button"
@@ -397,55 +482,103 @@ const GroupPage = () => {
             </button>
           )}
         </div>
-        <p className="post-content">{post.content}</p>
-        {post.image && (
-          <img 
-            src={`data:image/png;base64,${post.image}`} 
-            alt="Post" 
-            className="post-image"
-          />
-        )}
-        
+
+        <div className="post-content">
+          <p>{post.content}</p>
+          {post.image && (
+            <img src={post.image} alt="Post" className="post-image" />
+          )}
+        </div>
+
         <div className="post-actions">
           <button
-            onClick={() => handleLike(post.id)}
-            className={`like-button ${hasLiked ? 'liked' : ''}`}
+            onClick={() => handleReaction(post.id, 'like')}
+            className={`reaction-btn like-btn ${hasLiked ? "active" : ""}`}
           >
             👍 {likeCount}
           </button>
-          <span className="comment-count">💬 {commentCount}</span>
+          <button
+            onClick={() => handleReaction(post.id, 'dislike')}
+            className={`reaction-btn dislike-btn ${hasDisliked ? "active" : ""}`}
+          >
+            👎 {dislikeCount}
+          </button>
+          <button
+            onClick={() => toggleComments(post.id)}
+            className={`reaction-btn comment-btn ${showComments[post.id] ? "active" : ""}`}
+          >
+            💬 {commentCount}
+          </button>
         </div>
 
-        <div className="comments-section">
-          <h4>Comments</h4>
-          {post.comments?.map(comment => (
-            <div key={comment.id} className="comment">
-              <strong>{comment.user?.username || "Unknown User"}:</strong> {comment.text}
-              <div className="comment-time">
-                {new Date(comment.created_at).toLocaleString()}
-              </div>
+        {showComments[post.id] && (
+          <div className="comments-section">
+            <div className="comments-list">
+              {post.comments?.map((comment) => {
+                const hasLikedComment = comment.reactions?.some(r => r.user_id === currentUserId && r.type === 'like');
+                const hasDislikedComment = comment.reactions?.some(r => r.user_id === currentUserId && r.type === 'dislike');
+                const commentLikeCount = comment.reactions?.filter(r => r.type === 'like').length || 0;
+                const commentDislikeCount = comment.reactions?.filter(r => r.type === 'dislike').length || 0;
+
+                return (
+                  <div key={comment.id} className="comment">
+                    <div className="comment-header">
+                      <strong>{comment.user?.username || "Unknown User"}:</strong>
+                      {comment.user_id === currentUserId && (
+                        <button
+                          onClick={() => handleDeleteComment(comment.id)}
+                          className="delete-comment-btn"
+                          title="Delete comment"
+                        >
+                          ×
+                        </button>
+                      )}
+                    </div>
+                    <p>{comment.text}</p>
+                    <div className="comment-actions">
+                      <button
+                        onClick={() => handleCommentReaction(comment.id, 'like')}
+                        className={`reaction-btn like-btn ${hasLikedComment ? "active" : ""}`}
+                      >
+                        👍 {commentLikeCount}
+                      </button>
+                      <button
+                        onClick={() => handleCommentReaction(comment.id, 'dislike')}
+                        className={`reaction-btn dislike-btn ${hasDislikedComment ? "active" : ""}`}
+                      >
+                        👎 {commentDislikeCount}
+                      </button>
+                      <small className="comment-time">
+                        {new Date(comment.created_at).toLocaleString()}
+                      </small>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-          ))}
-          
-          <div className="add-comment">
-            <textarea
-              value={newComment[post.id] || ''}
-              onChange={(e) => setNewComment(prev => ({ ...prev, [post.id]: e.target.value }))}
-              placeholder="Write a comment..."
-              className="comment-input"
-            />
-            <button
-              onClick={() => handleComment(post.id)}
-              className="comment-button"
-            >
-              Comment
-            </button>
+            <div className="add-comment">
+              <textarea
+                value={newComment[post.id] || ""}
+                onChange={(e) => setNewComment({ ...newComment, [post.id]: e.target.value })}
+                placeholder="Write a comment..."
+                rows={2}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleComment(post.id);
+                  }
+                }}
+              />
+              <button
+                onClick={() => handleComment(post.id)}
+                className="submit-comment"
+                disabled={!newComment[post.id]?.trim()}
+              >
+                Comment
+              </button>
+            </div>
           </div>
-        </div>
-
-        <div className="post-time">
-          Posted on {new Date(post.created_at).toLocaleString()}
-        </div>
+        )}
       </div>
     );
   };

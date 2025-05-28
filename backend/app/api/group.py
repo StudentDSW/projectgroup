@@ -212,8 +212,8 @@ async def get_groups(
             group["avatar"] = f"data:image/png;base64,{avatar_base64}"
         
         groups_list.append(group)
-
     return groups_list
+
 
 @router.get("/{group_id}")
 async def get_group_by_id(

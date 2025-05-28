@@ -1,12 +1,13 @@
 import { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import "./navbar.css";
 
-export const Navbar = ({ onJoinGroup }) => {
+export const Navbar = ({ onJoinGroup, onLeaveGroup }) => {
   const navigate = useNavigate();
   const [searchText, setSearchText] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [username, setUsername] = useState(
     localStorage.getItem("username") || ""
@@ -15,33 +16,43 @@ export const Navbar = ({ onJoinGroup }) => {
 
   const [groups, setGroups] = useState([]);
   const [filteredGroups, setFilteredGroups] = useState([]);
-  const [fetchError, setFetchError] = useState(null);
+  const [searchError, setSearchError] = useState(null);
 
   const handleSearch = async (e) => {
     const text = e.target.value;
     setSearchText(text);
+    setSearchError(null);
 
     if (text.trim() === "") {
       setFilteredGroups([]);
-    } else {
-      try {
-        const token = localStorage.getItem("access_token");
-        const res = await fetch(`http://localhost:8000/group/search?name=${encodeURIComponent(text)}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+      return;
+    }
 
-        if (!res.ok) {
-          throw new Error('Failed to fetch search results');
-        }
-
-        const searchResults = await res.json();
-        setFilteredGroups(searchResults);
-      } catch (err) {
-        console.error("Error searching groups:", err);
-        setFilteredGroups([]);
+    setIsLoading(true);
+    try {
+      const token = localStorage.getItem("access_token");
+      if (!token) {
+        setSearchError("Zaloguj się, aby wyszukiwać grupy");
+        return;
       }
+
+      const res = await fetch(`http://localhost:8000/group/search?name=${encodeURIComponent(text)}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) {
+        throw new Error('Nie udało się wyszukać grup');
+      }
+
+      const searchResults = await res.json();
+      setFilteredGroups(searchResults);
+    } catch (err) {
+      console.error("Błąd wyszukiwania grup:", err);
+      setSearchError("Wystąpił błąd podczas wyszukiwania");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -62,57 +73,30 @@ export const Navbar = ({ onJoinGroup }) => {
 
   useEffect(() => {
     const fetchProfile = async () => {
+      const token = localStorage.getItem("access_token");
+      if (!token) return;
+
       try {
         const res = await fetch("http://localhost:8000/user/me", {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-          },
-        });
-
-        if (!res.ok) throw new Error("Błąd pobierania użytkownika");
-
-        const data = await res.json();
-
-        setUsername(data.username);
-        setAvatar(data.avatar || "/default-avatar.jpg");
-
-        localStorage.setItem("user_id", data.id);
-        localStorage.setItem("username", data.username);
-        localStorage.setItem(`avatar_${data.id}`, data.avatar || "");
-      } catch (err) {
-        console.error("Błąd ładowania profilu w navbarze:", err);
-      }
-    };
-
-    fetchProfile();
-  }, []);
-
-  useEffect(() => {
-    const fetchGroups = async () => {
-      const token = localStorage.getItem("access_token");
-      if (!token) {
-        alert("Brak tokena, proszę się zalogować.");
-        return;
-      }
-      try {
-        const res = await fetch("http://localhost:8000/group/all", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
 
-        if (!res.ok) throw new Error(`Błąd pobierania grup: ${res.status}`);
+        if (!res.ok) throw new Error("Błąd pobierania profilu");
 
         const data = await res.json();
-        setGroups(data);
-        setFetchError(null);
+        setUsername(data.username);
+        setAvatar(data.avatar || "/default-avatar.jpg");
+        localStorage.setItem("user_id", data.id);
+        localStorage.setItem("username", data.username);
+        localStorage.setItem(`avatar_${data.id}`, data.avatar || "");
       } catch (err) {
-        console.error("Błąd pobierania grup:", err);
-        setFetchError(err.message);
+        console.error("Błąd ładowania profilu:", err);
       }
     };
 
-    fetchGroups();
+    fetchProfile();
   }, []);
 
   const handleJoinGroup = async (group) => {
@@ -120,11 +104,19 @@ export const Navbar = ({ onJoinGroup }) => {
     const userId = localStorage.getItem("user_id");
 
     if (!token || !userId) {
-      alert("Brak danych użytkownika. Zaloguj się ponownie.");
+      setSearchError("Zaloguj się, aby dołączyć do grupy");
       return;
     }
 
     try {
+      setFilteredGroups(prevGroups => 
+        prevGroups.map(g => 
+          g.id === group.id 
+            ? { ...g, is_member: true, role: 'user' }
+            : g
+        )
+      );
+
       const res = await fetch(
         `http://localhost:8000/group/join/${group.id}/${userId}`,
         {
@@ -136,16 +128,19 @@ export const Navbar = ({ onJoinGroup }) => {
       );
 
       if (!res.ok) {
-        const errText = await res.text();
-        console.error("Błąd dołączania:", errText);
-        alert("Nie udało się dołączyć do grupy.");
-        return;
+        setFilteredGroups(prevGroups => 
+          prevGroups.map(g => 
+            g.id === group.id 
+              ? { ...g, is_member: false, role: null }
+              : g
+          )
+        );
+        throw new Error("Nie udało się dołączyć do grupy");
       }
 
       const data = await res.json();
       
       if (data.result === "Already a member") {
-        // Update the UI to show the user is already a member
         setGroups(prevGroups => 
           prevGroups.map(g => 
             g.id === group.id 
@@ -153,6 +148,44 @@ export const Navbar = ({ onJoinGroup }) => {
               : g
           )
         );
+      }
+      
+      if (typeof onJoinGroup === "function") {
+        onJoinGroup(group);
+      }
+    } catch (err) {
+      console.error("Błąd dołączania do grupy:", err);
+      setSearchError("Nie udało się dołączyć do grupy");
+    }
+  };
+
+  const handleLeaveGroup = async (group) => {
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+      setSearchError("Zaloguj się, aby opuścić grupę");
+      return;
+    }
+
+    try {
+      setFilteredGroups(prevGroups => 
+        prevGroups.map(g => 
+          g.id === group.id 
+            ? { ...g, is_member: false, role: null }
+            : g
+        )
+      );
+
+      const res = await fetch(
+        `http://localhost:8000/group/leave/${group.id}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!res.ok) {
         setFilteredGroups(prevGroups => 
           prevGroups.map(g => 
             g.id === group.id 
@@ -160,16 +193,15 @@ export const Navbar = ({ onJoinGroup }) => {
               : g
           )
         );
-      } else if (typeof onJoinGroup === "function") {
-        onJoinGroup(group);
+        throw new Error("Nie udało się opuścić grupy");
       }
 
-      setSearchText("");
-      setFilteredGroups([]);
-      console.log(`Dołączono do grupy: ${group.name}`);
+      if (typeof onLeaveGroup === "function") {
+        onLeaveGroup(group);
+      }
     } catch (err) {
-      console.error("Błąd sieci:", err);
-      alert("Wystąpił błąd sieci podczas dołączania do grupy.");
+      console.error("Błąd opuszczania grupy:", err);
+      setSearchError("Nie udało się opuścić grupy");
     }
   };
 
@@ -187,16 +219,16 @@ export const Navbar = ({ onJoinGroup }) => {
   return (
     <div className="wrapper-navbar">
       <div className="navbar">
-        <div className="logo">
+        <Link to="/dashboard" className="logo" style={{ cursor: 'pointer' }}>
           <div className="logo-img" />
-          <p>nazwa apki</p>
-        </div>
+          <p>GroupApp</p>
+        </Link>
 
-        <div className="search-container" style={{ position: "relative" }}>
+        <div className="search-container">
           <div className="search-input-wrapper">
             <input
               type="text"
-              placeholder="Wyszukaj grupę.."
+              placeholder="Wyszukaj grupę..."
               value={searchText}
               onChange={handleSearch}
               className="search-input"
@@ -218,48 +250,55 @@ export const Navbar = ({ onJoinGroup }) => {
             </div>
           </div>
 
-          {searchText && filteredGroups.length > 0 && (
-            <ul className="autocomplete-dropdown">
-              {filteredGroups.map((group) => (
-                <li
-                  key={group.id}
-                  className="autocomplete-item"
-                  onClick={() => !group.is_member && handleJoinGroup(group)}
-                >
-                  <div className="group-info">
-                    <span className="group-name">{group.name}</span>
-                    {group.is_member && (
-                      <span className="member-badge">
-                        {group.role === 'admin' ? 'Admin' : 'Member'}
-                      </span>
-                    )}
-                  </div>
-                  {!group.is_member && (
-                    <button
-                      className="join-button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleJoinGroup(group);
-                      }}
+          {searchText && (
+            <div className="search-results">
+              {isLoading ? (
+                <div className="search-loading">Wyszukiwanie...</div>
+              ) : searchError ? (
+                <div className="search-error">{searchError}</div>
+              ) : filteredGroups.length > 0 ? (
+                <ul className="group-list">
+                  {filteredGroups.map((group) => (
+                    <li
+                      key={group.id}
+                      className="group-item"
+                      onClick={() => !group.is_member && handleJoinGroup(group)}
                     >
-                      Join
-                    </button>
-                  )}
-                </li>
-              ))}
-            </ul>
-          )}
-
-          {searchText && filteredGroups.length === 0 && (
-            <div className="autocomplete-dropdown no-results">Brak wyników</div>
-          )}
-
-          {fetchError && (
-            <div
-              className="autocomplete-dropdown no-results"
-              style={{ color: "red" }}
-            >
-              {fetchError}
+                      <div className="group-info">
+                        <span className="group-name">{group.name}</span>
+                        {group.is_member && (
+                          <span className="member-badge">
+                            {group.role === 'admin' ? 'Admin' : 'Member'}
+                          </span>
+                        )}
+                      </div>
+                      {group.is_member ? (
+                        <button
+                          className="leave-button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleLeaveGroup(group);
+                          }}
+                        >
+                          Leave
+                        </button>
+                      ) : (
+                        <button
+                          className="join-button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleJoinGroup(group);
+                          }}
+                        >
+                          Join
+                        </button>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="no-results">Brak znalezionych grup</div>
+              )}
             </div>
           )}
         </div>
@@ -267,14 +306,35 @@ export const Navbar = ({ onJoinGroup }) => {
         <div className="navbar-right" ref={dropdownRef}>
           <div className="navbar-username">
             <p>{username}</p>
-            <div className="username-avatar" onClick={toggleDropdown}>
-              <img src={avatar} alt="avatar" className="username-avatar" />
-            </div>
+            <button 
+              className="profile-button" 
+              onClick={toggleDropdown}
+              aria-expanded={dropdownOpen}
+              aria-label="Menu profilu"
+            >
+              <img src={avatar} alt={`${username}'s avatar`} className="avatar-image" />
+            </button>
 
             {dropdownOpen && (
               <div className="dropdown-menu">
-                <button onClick={showProfile}>Pokaż profil</button>
-                <button onClick={handleLogout}>Wyloguj się</button>
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    showProfile();
+                    setDropdownOpen(false);
+                  }}
+                >
+                  Profil
+                </button>
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleLogout();
+                    setDropdownOpen(false);
+                  }}
+                >
+                  Wyloguj
+                </button>
               </div>
             )}
           </div>

@@ -6,7 +6,6 @@ import { Dashboard } from "./components/Dashboard";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { Profile } from "./components/Profile"
 import GroupPage from "./components/GroupPage";
-import PostDetail from "./components/PostDetail";
 
 import './App.css'
 
@@ -31,14 +30,6 @@ function App() {
           element={
             <ProtectedRoute>
               <GroupPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/group/:groupName/:postId"
-          element={
-            <ProtectedRoute>
-              <PostDetail />
             </ProtectedRoute>
           }
         />
