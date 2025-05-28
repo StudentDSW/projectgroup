@@ -475,7 +475,10 @@ const GroupPage = () => {
           </div>
           {(post.user_id === currentUserId || userRole === "admin") && (
             <button
-              onClick={() => handleDeletePost(post.id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDeletePost(post.id);
+              }}
               className="delete-button"
             >
               Delete
@@ -492,19 +495,28 @@ const GroupPage = () => {
 
         <div className="post-actions">
           <button
-            onClick={() => handleReaction(post.id, 'like')}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleReaction(post.id, 'like');
+            }}
             className={`reaction-btn like-btn ${hasLiked ? "active" : ""}`}
           >
             👍 {likeCount}
           </button>
           <button
-            onClick={() => handleReaction(post.id, 'dislike')}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleReaction(post.id, 'dislike');
+            }}
             className={`reaction-btn dislike-btn ${hasDisliked ? "active" : ""}`}
           >
             👎 {dislikeCount}
           </button>
           <button
-            onClick={() => toggleComments(post.id)}
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleComments(post.id);
+            }}
             className={`reaction-btn comment-btn ${showComments[post.id] ? "active" : ""}`}
           >
             💬 {commentCount}
@@ -526,7 +538,10 @@ const GroupPage = () => {
                       <strong>{comment.user?.username || "Unknown User"}:</strong>
                       {comment.user_id === currentUserId && (
                         <button
-                          onClick={() => handleDeleteComment(comment.id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteComment(comment.id);
+                          }}
                           className="delete-comment-btn"
                           title="Delete comment"
                         >
@@ -537,13 +552,19 @@ const GroupPage = () => {
                     <p>{comment.text}</p>
                     <div className="comment-actions">
                       <button
-                        onClick={() => handleCommentReaction(comment.id, 'like')}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleCommentReaction(comment.id, 'like');
+                        }}
                         className={`reaction-btn like-btn ${hasLikedComment ? "active" : ""}`}
                       >
                         👍 {commentLikeCount}
                       </button>
                       <button
-                        onClick={() => handleCommentReaction(comment.id, 'dislike')}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleCommentReaction(comment.id, 'dislike');
+                        }}
                         className={`reaction-btn dislike-btn ${hasDislikedComment ? "active" : ""}`}
                       >
                         👎 {commentDislikeCount}
@@ -570,7 +591,10 @@ const GroupPage = () => {
                 }}
               />
               <button
-                onClick={() => handleComment(post.id)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleComment(post.id);
+                }}
                 className="submit-comment"
                 disabled={!newComment[post.id]?.trim()}
               >
@@ -579,64 +603,6 @@ const GroupPage = () => {
             </div>
           </div>
         )}
-      </div>
-    );
-  };
-
-  const renderMembersSection = () => {
-    console.log("Rendering members section with:", groupMembers);
-    // Sort members by role
-    const owner = groupMembers.find(member => member.role_in_group === "admin");
-    const moderators = groupMembers.filter(member => member.role_in_group === "moderator");
-    const members = groupMembers.filter(member => member.role_in_group === "user");
-
-    return (
-      <div className="members-section">
-        <h2>Group Members</h2>
-        
-        <div className="members-category">
-          <h3>Owner</h3>
-          {owner ? (
-            <div className="member-item">
-              <span className="member-name">{owner.username}</span>
-              <span className="member-role">Admin</span>
-            </div>
-          ) : (
-            <p className="no-members">No owner assigned</p>
-          )}
-        </div>
-
-        <div className="members-category">
-          <h3>Moderators</h3>
-          {moderators.length > 0 ? (
-            <div className="members-list">
-              {moderators.map((mod) => (
-                <div key={mod.id} className="member-item">
-                  <span className="member-name">{mod.username}</span>
-                  <span className="member-role">Moderator</span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="no-members">No moderators assigned</p>
-          )}
-        </div>
-
-        <div className="members-category">
-          <h3>Members</h3>
-          {members.length > 0 ? (
-            <div className="members-list">
-              {members.map((member) => (
-                <div key={member.id} className="member-item">
-                  <span className="member-name">{member.username}</span>
-                  <span className="member-role">Member</span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="no-members">No members yet</p>
-          )}
-        </div>
       </div>
     );
   };
@@ -704,6 +670,58 @@ const GroupPage = () => {
               </div>
             )}
           </div>
+
+          <div className="members-section">
+            <h2>Group Members</h2>
+            
+            <div className="members-category">
+              <h3>Owner</h3>
+              {groupMembers.find(member => member.role_in_group === "admin") ? (
+                <div className="member-item">
+                  <span className="member-name">{groupMembers.find(member => member.role_in_group === "admin").username}</span>
+                  <span className="member-role">Admin</span>
+                </div>
+              ) : (
+                <p className="no-members">No owner assigned</p>
+              )}
+            </div>
+
+            <div className="members-category">
+              <h3>Moderators</h3>
+              {groupMembers.filter(member => member.role_in_group === "moderator").length > 0 ? (
+                <div className="members-list">
+                  {groupMembers
+                    .filter(member => member.role_in_group === "moderator")
+                    .map((mod) => (
+                      <div key={mod.id} className="member-item">
+                        <span className="member-name">{mod.username}</span>
+                        <span className="member-role">Moderator</span>
+                      </div>
+                    ))}
+                </div>
+              ) : (
+                <p className="no-members">No moderators assigned</p>
+              )}
+            </div>
+
+            <div className="members-category">
+              <h3>Members</h3>
+              {groupMembers.filter(member => member.role_in_group === "user").length > 0 ? (
+                <div className="members-list">
+                  {groupMembers
+                    .filter(member => member.role_in_group === "user")
+                    .map((member) => (
+                      <div key={member.id} className="member-item">
+                        <span className="member-name">{member.username}</span>
+                        <span className="member-role">Member</span>
+                      </div>
+                    ))}
+                </div>
+              ) : (
+                <p className="no-members">No members yet</p>
+              )}
+            </div>
+          </div>
         </div>
 
         <div className="group-content">
@@ -748,6 +766,11 @@ const GroupPage = () => {
             </div>
           </div>
 
+          <div className="group-description">
+            <h3>About</h3>
+            <p>{groupData.description || "No description available."}</p>
+          </div>
+
           <div className="posts-section">
             <h2>{groupData.name} Posts ({posts.length})</h2>
             {posts.length === 0 ? (
@@ -760,10 +783,6 @@ const GroupPage = () => {
               </div>
             )}
           </div>
-        </div>
-
-        <div className="right-sidebar">
-          {renderMembersSection()}
         </div>
       </div>
 
