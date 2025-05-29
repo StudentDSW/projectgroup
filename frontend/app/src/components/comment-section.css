@@ -1,136 +1,137 @@
 .comments-section {
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-  padding: 1rem;
-  margin-top: 1rem;
-  max-width: 600px;
+	background: #fff;
+	border-radius: 8px;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+	padding: 1rem;
+	margin-top: 1rem;
+	max-width: 600px;
 }
 .comments-section h4 {
-  margin-bottom: 0.5rem;
-  font-size: 1.1rem;
-  color: #333;
+	margin-bottom: 0.5rem;
+	font-size: 1.1rem;
+	color: #333;
 }
 .comments-list {
-  margin-bottom: 1rem;
+	margin-bottom: 1rem;
 }
 .comment {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-  background: #f7f7f7;
-  border-radius: 6px;
-  padding: 0.5rem 0.75rem;
-  margin-bottom: 0.5rem;
-  position: relative;
+	display: flex;
+	flex-direction: column;
+	gap: 0.2rem;
+	background: #f7f7f7;
+	border-radius: 6px;
+	padding: 0.5rem 0.75rem;
+	margin-bottom: 0.5rem;
+	position: relative;
 }
 .comment-header {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
 }
 .avatar-image {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 1px solid #e0e0e0;
+	width: 32px;
+	height: 32px;
+	border-radius: 50%;
+	object-fit: cover;
+	border: 1px solid #e0e0e0;
 }
 .comment-author {
-  font-weight: 600;
-  color: #2d2d2d;
+	font-weight: 600;
+	color: #2d2d2d;
 }
 .comment-time {
-  font-size: 0.85em;
-  color: #888;
-  margin-left: auto;
+	font-size: 0.85em;
+	color: #888;
+	margin-left: auto;
 }
 .comment-text {
-  margin: 0.2rem 0 0.3rem 2.2rem;
-  color: #222;
-  font-size: 1em;
-  line-height: 1.4;
+	margin: 0.2rem 0 0.3rem 2.2rem;
+	color: #222;
+	font-size: 1em;
+	line-height: 1.4;
 }
 .comment-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-left: 2.2rem;
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	margin-left: 2.2rem;
 }
 .comment-action-btn {
-  background: none;
-  border: none;
-  color: #888;
-  cursor: pointer;
-  font-size: 1.1em;
-  padding: 0 0.3em;
-  transition: color 0.2s;
-  display: flex;
-  align-items: center;
-  gap: 0.2rem;
+	width: 70px;
+	background: none;
+	border: none;
+	color: #888;
+	cursor: pointer;
+	font-size: 1.1em;
+	padding: 0 0.3em;
+	transition: color 0.2s;
+	display: flex;
+	align-items: center;
+	gap: 0.2rem;
 }
 .comment-action-btn.active,
 .comment-action-btn:hover {
-  color: #1976d2;
+	color: #1976d2;
 }
 .comment-action-btn.delete {
-  color: #e53935;
+	color: #e53935;
 }
 .comment-action-btn.like.active {
-  color: #4caf50;
+	color: #4caf50;
 }
 .comment-action-btn.dislike.active {
-  color: #f44336;
+	color: #f44336;
 }
 .add-comment {
-  display: flex;
-  gap: 0.5rem;
-  align-items: flex-start;
-  margin-top: 0.5rem;
+	display: flex;
+	gap: 0.5rem;
+	align-items: flex-start;
+	margin-top: 0.5rem;
 }
 .add-comment textarea {
-  flex: 1;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  padding: 0.5rem;
-  font-size: 1em;
-  resize: vertical;
-  min-height: 36px;
-  max-height: 120px;
-  transition: border-color 0.2s;
+	flex: 1;
+	border-radius: 6px;
+	border: 1px solid #ccc;
+	padding: 0.5rem;
+	font-size: 1em;
+	resize: vertical;
+	min-height: 36px;
+	max-height: 120px;
+	transition: border-color 0.2s;
 }
 .add-comment textarea:focus {
-  outline: none;
-  border-color: #1976d2;
+	outline: none;
+	border-color: #1976d2;
 }
 .submit-comment {
-  background: #1976d2;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  padding: 0.5rem 1rem;
-  font-size: 1em;
-  cursor: pointer;
-  transition: background 0.2s;
+	background: #1976d2;
+	color: #fff;
+	border: none;
+	border-radius: 6px;
+	padding: 0.5rem 1rem;
+	font-size: 1em;
+	cursor: pointer;
+	transition: background 0.2s;
 }
 .submit-comment:hover:not(:disabled) {
-  background: #1565c0;
+	background: #1565c0;
 }
 .submit-comment:disabled {
-  background: #b0b0b0;
-  cursor: not-allowed;
+	background: #b0b0b0;
+	cursor: not-allowed;
 }
 .delete-comment-btn {
-  background: none;
-  border: none;
-  color: #e53935;
-  cursor: pointer;
-  font-size: 1.2em;
-  padding: 0 0.3em;
-  margin-left: auto;
-  opacity: 0.7;
-  transition: opacity 0.2s;
+	background: none;
+	border: none;
+	color: #e53935;
+	cursor: pointer;
+	font-size: 1.2em;
+	padding: 0 0.3em;
+	margin-left: auto;
+	opacity: 0.7;
+	transition: opacity 0.2s;
 }
 .delete-comment-btn:hover {
-  opacity: 1;
-} 
+	opacity: 1;
+}

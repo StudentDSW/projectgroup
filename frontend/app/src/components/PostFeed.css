@@ -1,231 +1,232 @@
 .posts-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
 }
 
 .post {
-  background: white;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+	background: white;
+	border: 1px solid #e0e0e0;
+	border-radius: 8px;
+	padding: 20px;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .post-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 15px;
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	margin-bottom: 15px;
 }
 
 .post-author {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+	display: flex;
+	align-items: center;
+	gap: 10px;
 }
 
 .author-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  object-fit: cover;
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+	object-fit: cover;
 }
 
 .post-info {
-  display: flex;
-  flex-direction: column;
+	display: flex;
+	flex-direction: column;
 }
 
 .author-name {
-  font-weight: 500;
-  color: #333;
+	font-weight: 500;
+	color: #333;
 }
 
 .group-name {
-  color: #666;
-  font-size: 0.9rem;
-  cursor: pointer;
+	color: #666;
+	font-size: 0.9rem;
+	cursor: pointer;
 }
 
 .group-name:hover {
-  color: #1a73e8;
-  text-decoration: underline;
+	color: #1a73e8;
+	text-decoration: underline;
 }
 
 .delete-post-btn {
-  background-color: #ff4444;
-  color: white;
-  border: none;
-  padding: 5px 10px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
+	width: 10em;
+	background-color: #ff4444;
+	color: white;
+	border: none;
+	padding: 5px 10px;
+	border-radius: 4px;
+	cursor: pointer;
+	font-size: 14px;
 }
 
 .delete-post-btn:hover {
-  background-color: #cc0000;
+	background-color: #cc0000;
 }
 
 .post-content {
-  margin: 15px 0;
-  line-height: 1.5;
-  color: #333;
+	margin: 15px 0;
+	line-height: 1.5;
+	color: #333;
 }
 
 .post-image {
-  max-width: 100%;
-  max-height: 30vh;
-  object-fit: contain;
-  border-radius: 8px;
-  margin-top: 10px;
+	max-width: 100%;
+	max-height: 30vh;
+	object-fit: contain;
+	border-radius: 8px;
+	margin-top: 10px;
 }
 
 .post-footer {
-  display: flex;
-  gap: 1rem;
-  margin-top: 1rem;
-  align-items: center;
+	display: flex;
+	gap: 1rem;
+	margin-top: 1rem;
+	align-items: center;
 }
 
 .reaction-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0.5rem;
-  border-radius: 4px;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.9rem;
-  color: #666;
+	background: none;
+	border: none;
+	cursor: pointer;
+	padding: 0.5rem;
+	border-radius: 4px;
+	transition: all 0.2s ease;
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	font-size: 0.9rem;
+	color: #666;
 }
 
 .reaction-btn:hover {
-  background-color: #f0f0f0;
+	background-color: #f0f0f0;
 }
 
 .reaction-btn.active {
-  color: #1a73e8;
-  background-color: #e8f0fe;
+	color: #1a73e8;
+	background-color: #e8f0fe;
 }
 
 .like-btn.active {
-  color: #4CAF50;
-  background-color: #e8f5e9;
+	color: #4caf50;
+	background-color: #e8f5e9;
 }
 
 .dislike-btn.active {
-  color: #f44336;
-  background-color: #ffebee;
+	color: #f44336;
+	background-color: #ffebee;
 }
 
 /* Comment Section Styles */
 .comments-section {
-  margin-top: 1rem;
-  padding: 1rem;
-  background-color: #f8f9fa;
-  border-radius: 8px;
+	margin-top: 1rem;
+	padding: 1rem;
+	background-color: #f8f9fa;
+	border-radius: 8px;
 }
 
 .comments-section h4 {
-  margin: 0 0 1rem 0;
-  color: #333;
+	margin: 0 0 1rem 0;
+	color: #333;
 }
 
 .comments-list {
-  margin-bottom: 1rem;
+	margin-bottom: 1rem;
 }
 
 .comment {
-  padding: 0.75rem;
-  margin-bottom: 0.75rem;
-  background-color: white;
-  border-radius: 6px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+	padding: 0.75rem;
+	margin-bottom: 0.75rem;
+	background-color: white;
+	border-radius: 6px;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .comment-header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 0.5rem;
+	display: flex;
+	align-items: center;
+	margin-bottom: 0.5rem;
 }
 
 .comment-avatar {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  margin-right: 0.5rem;
+	width: 24px;
+	height: 24px;
+	border-radius: 50%;
+	margin-right: 0.5rem;
 }
 
 .comment-author {
-  font-weight: 600;
-  color: #333;
-  margin-right: 0.5rem;
+	font-weight: 600;
+	color: #333;
+	margin-right: 0.5rem;
 }
 
 .comment-time {
-  font-size: 0.8rem;
-  color: #666;
+	font-size: 0.8rem;
+	color: #666;
 }
 
 .comment-text {
-  margin: 0;
-  color: #444;
-  line-height: 1.4;
+	margin: 0;
+	color: #444;
+	line-height: 1.4;
 }
 
 .add-comment {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
 }
 
 .add-comment textarea {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  resize: vertical;
-  font-family: inherit;
+	width: 100%;
+	padding: 0.75rem;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	resize: vertical;
+	font-family: inherit;
 }
 
 .add-comment textarea:focus {
-  outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+	outline: none;
+	border-color: #007bff;
+	box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
 }
 
 .submit-comment {
-  align-self: flex-end;
-  padding: 0.5rem 1rem;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s;
+	align-self: flex-end;
+	padding: 0.5rem 1rem;
+	background-color: #007bff;
+	color: white;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	transition: background-color 0.2s;
 }
 
 .submit-comment:hover {
-  background-color: #0056b3;
+	background-color: #0056b3;
 }
 
 .submit-comment:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
+	background-color: #ccc;
+	cursor: not-allowed;
 }
 
 .post-timestamp {
-  font-size: 0.8rem;
-  color: #666;
-  margin-top: 0.5rem;
+	font-size: 0.8rem;
+	color: #666;
+	margin-top: 0.5rem;
 }
 
 .no-posts {
-  text-align: center;
-  color: #666;
-  padding: 20px;
-  font-style: italic;
-} 
+	text-align: center;
+	color: #666;
+	padding: 20px;
+	font-style: italic;
+}
