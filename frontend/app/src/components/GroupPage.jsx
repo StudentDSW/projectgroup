@@ -207,6 +207,25 @@ const GroupPage = () => {
     fetchGroups();
   }, [token]);
 
+  // Add event listener for avatar changes
+  useEffect(() => {
+    const handleAvatarChange = (event) => {
+      // Update the avatar in posts where the current user is the author
+      setPosts(prevPosts => 
+        prevPosts.map(post => 
+          post.user_id === currentUserId
+            ? { ...post, user: { ...post.user, avatar: event.detail.avatar } }
+            : post
+        )
+      );
+    };
+
+    window.addEventListener('avatarChanged', handleAvatarChange);
+    return () => {
+      window.removeEventListener('avatarChanged', handleAvatarChange);
+    };
+  }, [currentUserId]);
+
   /*** HANDLERS ***/
   const handleGroupClick = async (group) => {
     setPosts([]);

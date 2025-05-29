@@ -85,40 +85,17 @@ export const Profile = () => {
     }
   }, [token, navigate]);
 
-  const handleFileChange = async (e) => {
-    const file = e.target.files[0];
-    if (!file || !userId) return;
+  // Add event listener for avatar changes
+  useEffect(() => {
+    const handleAvatarChange = (event) => {
+      setAvatar(event.detail.avatar);
+    };
 
-    const formData = new FormData();
-    formData.append("avatar", file);
-
-    try {
-      const res = await fetch(`${API_URL}/user/${userId}`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
-      });
-
-      if (!res.ok) throw new Error("Failed to save avatar");
-
-      // Get the updated user data to get the new avatar
-      const userRes = await fetch(`${API_URL}/user/me`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!userRes.ok) throw new Error("Failed to fetch updated user data");
-      
-      const userData = await userRes.json();
-      setAvatar(getAvatarUrl(userData.avatar));
-    } catch (err) {
-      console.error("Error saving avatar:", err);
-      alert("Failed to update avatar. Please try again.");
-    }
-  };
+    window.addEventListener('avatarChanged', handleAvatarChange);
+    return () => {
+      window.removeEventListener('avatarChanged', handleAvatarChange);
+    };
+  }, []);
 
   const handleGroupClick = (group) => {
     navigate(`/group/${group.name}`);
@@ -172,16 +149,6 @@ export const Profile = () => {
                 e.target.onerror = null;
                 e.target.src = "/default-avatar.jpg";
               }}
-            />
-            <label className="profile-label" htmlFor="avatar-upload">
-              Change Avatar
-            </label>
-            <input
-              id="avatar-upload"
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-              className="profile-file-input"
             />
             <div className="profile-username">{username}</div>
             <div className="profile-email">{email}</div>

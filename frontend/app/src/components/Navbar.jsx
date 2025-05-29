@@ -1,9 +1,12 @@
 import { useState, useRef, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import "./navbar.css";
+
+const API_URL = "http://localhost:8000";
 
 export const Navbar = ({ onJoinGroup, onLeaveGroup }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchText, setSearchText] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -14,10 +17,78 @@ export const Navbar = ({ onJoinGroup, onLeaveGroup }) => {
     localStorage.getItem("username") || ""
   );
   const [avatar, setAvatar] = useState("/default-avatar.jpg");
+  const [userId, setUserId] = useState(null);
 
   const [groups, setGroups] = useState([]);
   const [filteredGroups, setFilteredGroups] = useState([]);
   const [searchError, setSearchError] = useState(null);
+
+  const isAccountPage = location.pathname === "/account";
+
+  const getAvatarUrl = (avatarData) => {
+    if (!avatarData) return "/default-avatar.jpg";
+    if (avatarData.startsWith("data:image")) {
+      return avatarData;
+    }
+    if (avatarData.startsWith("http")) {
+      return avatarData;
+    }
+    if (avatarData.match(/^[A-Za-z0-9+/=]+$/)) {
+      return `data:image/png;base64,${avatarData}`;
+    }
+    return "/default-avatar.jpg";
+  };
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file || !userId) return;
+
+    const formData = new FormData();
+    formData.append("avatar", file);
+
+    try {
+      const token = localStorage.getItem("access_token");
+      const res = await fetch(`${API_URL}/user/${userId}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      if (!res.ok) throw new Error("Failed to save avatar");
+
+      // Get the updated user data to get the new avatar
+      const userRes = await fetch(`${API_URL}/user/me`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!userRes.ok) throw new Error("Failed to fetch updated user data");
+      
+      const userData = await userRes.json();
+      const newAvatarUrl = getAvatarUrl(userData.avatar);
+      
+      // Update avatar in state
+      setAvatar(newAvatarUrl);
+      
+      // Update avatar in localStorage
+      localStorage.setItem(`avatar_${userId}`, userData.avatar || "");
+      
+      // Dispatch a custom event to notify other components about the avatar change
+      const avatarChangeEvent = new CustomEvent('avatarChanged', {
+        detail: { avatar: newAvatarUrl }
+      });
+      window.dispatchEvent(avatarChangeEvent);
+
+      // Close the dropdown after successful update
+      setDropdownOpen(false);
+    } catch (err) {
+      console.error("Error saving avatar:", err);
+      alert("Failed to update avatar. Please try again.");
+    }
+  };
 
   const handleSearch = async (e) => {
     const text = e.target.value;
@@ -81,7 +152,7 @@ export const Navbar = ({ onJoinGroup, onLeaveGroup }) => {
       if (!token) return;
 
       try {
-        const res = await fetch("http://localhost:8000/user/me", {
+        const res = await fetch(`${API_URL}/user/me`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -91,7 +162,8 @@ export const Navbar = ({ onJoinGroup, onLeaveGroup }) => {
 
         const data = await res.json();
         setUsername(data.username);
-        setAvatar(data.avatar || "/default-avatar.jpg");
+        setAvatar(getAvatarUrl(data.avatar));
+        setUserId(data.id);
         localStorage.setItem("user_id", data.id);
         localStorage.setItem("username", data.username);
         localStorage.setItem(`avatar_${data.id}`, data.avatar || "");
@@ -308,26 +380,43 @@ export const Navbar = ({ onJoinGroup, onLeaveGroup }) => {
         <div className="navbar-right" ref={dropdownRef}>
           <div className="navbar-username">
             <p>{username}</p>
-            <button 
-              className="profile-button" 
-              onClick={toggleDropdown}
-              aria-expanded={dropdownOpen}
-              aria-label="Menu profilu"
-            >
-              <img src={avatar} alt={`${username}'s avatar`} className="avatar-image" />
-            </button>
+            <div className="profile-button-container">
+              <button 
+                className="profile-button" 
+                onClick={toggleDropdown}
+                aria-expanded={dropdownOpen}
+                aria-label="Menu profilu"
+              >
+                <img src={avatar} alt={`${username}'s avatar`} className="avatar-image" />
+              </button>
+            </div>
 
             {dropdownOpen && (
               <div className="dropdown-menu">
-                <button 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    showProfile();
-                    setDropdownOpen(false);
-                  }}
-                >
-                  Profil
-                </button>
+                {!isAccountPage ? (
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate("/account");
+                      setDropdownOpen(false);
+                    }}
+                  >
+                    Profile
+                  </button>
+                ) : (
+                  <div className="avatar-upload-container">
+                    <input
+                      id="avatar-upload"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      className="profile-file-input"
+                    />
+                    <label htmlFor="avatar-upload" className="avatar-upload-label">
+                      Change Avatar
+                    </label>
+                  </div>
+                )}
                 <button 
                   onClick={(e) => {
                     e.stopPropagation();
