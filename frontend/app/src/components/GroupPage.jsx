@@ -432,6 +432,72 @@ const GroupPage = () => {
     }
   };
 
+  const getAvatarUrl = (avatar) => {
+    if (!avatar) return "/default-avatar.jpg";
+    if (avatar.startsWith("data:image")) {
+      // If it's already a data URL, return it directly
+      return avatar;
+    }
+    if (avatar.startsWith("http")) {
+      return avatar;
+    }
+    // If it's a base64 string without the data:image prefix, add it
+    if (avatar.match(/^[A-Za-z0-9+/=]+$/)) {
+      return `data:image/png;base64,${avatar}`;
+    }
+    return "/default-avatar.jpg";
+  };
+
+  const renderMember = (member, showActions = false) => {
+    const isCurrentUser = member.id === currentUserId;
+    const isAdmin = userRole === "admin";
+    const canChangeRole = isAdmin && member.id !== currentUserId;
+    const canRemove = isAdmin && member.id !== currentUserId;
+
+    return (
+      <div key={member.id} className="membership-item">
+        <div className="member-info">
+          <img
+            src={getAvatarUrl(member.avatar)}
+            alt={`${member.username}'s avatar`}
+            className="member-avatar"
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = "/default-avatar.jpg";
+            }}
+          />
+          <div className="member-details">
+            <span className="member-name">{member.username}</span>
+            <span className={`member-role ${member.role_in_group}`}>{member.role_in_group}</span>
+          </div>
+        </div>
+        {showActions && (
+          <div className="member-actions">
+            {canChangeRole && (
+              <select
+                value={member.role_in_group}
+                onChange={(e) => handleRoleChange(member.id, e.target.value)}
+                className="role-select"
+              >
+                <option value="user">Member</option>
+                <option value="moderator">Moderator</option>
+                <option value="admin">Admin</option>
+              </select>
+            )}
+            {canRemove && (
+              <button
+                onClick={() => handleRemoveMember(member.id)}
+                className="remove-member-btn"
+              >
+                Remove
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   /*** MEMOIZED RENDER FUNCTIONS ***/
   const renderPost = useMemo(
     () => (post) => {
@@ -457,7 +523,7 @@ const GroupPage = () => {
             <div>
               <div className="post-user-info">
                 <img
-                  src={post.user?.avatar || "/default-avatar.jpg"}
+                  src={getAvatarUrl(post.user?.avatar)}
                   alt={`${post.user?.username || "User"}'s avatar`}
                   className="avatar-image"
                   onError={(e) => {
@@ -685,12 +751,7 @@ const GroupPage = () => {
             <div className="members-category">
               <h3>Owner</h3>
               {groupMembers.find((m) => m.role_in_group === "admin") ? (
-                <div className="member-item">
-                  <span className="member-name">
-                    {groupMembers.find((m) => m.role_in_group === "admin").username}
-                  </span>
-                  <span className="member-role">Admin</span>
-                </div>
+                renderMember(groupMembers.find((m) => m.role_in_group === "admin"), false)
               ) : (
                 <p className="no-members">No owner assigned</p>
               )}
@@ -702,12 +763,7 @@ const GroupPage = () => {
                 <div className="members-list">
                   {groupMembers
                     .filter((m) => m.role_in_group === "moderator")
-                    .map((mod) => (
-                      <div key={mod.id} className="member-item">
-                        <span className="member-name">{mod.username}</span>
-                        <span className="member-role">Moderator</span>
-                      </div>
-                    ))}
+                    .map((mod) => renderMember(mod, false))}
                 </div>
               ) : (
                 <p className="no-members">No moderators assigned</p>
@@ -720,12 +776,7 @@ const GroupPage = () => {
                 <div className="members-list">
                   {groupMembers
                     .filter((m) => m.role_in_group === "user")
-                    .map((member) => (
-                      <div key={member.id} className="member-item">
-                        <span className="member-name">{member.username}</span>
-                        <span className="member-role">Member</span>
-                      </div>
-                    ))}
+                    .map(member => renderMember(member, false))}
                 </div>
               ) : (
                 <p className="no-members">No members yet</p>
@@ -828,32 +879,7 @@ const GroupPage = () => {
               </button>
             </div>
             <div className="membership-list">
-              {groupMembers.map((member) => (
-                <div key={member.id} className="membership-item">
-                  <div className="member-info">
-                    <span className="member-name">{member.username}</span>
-                    <span className="member-role">{member.role_in_group}</span>
-                  </div>
-                  {userRole === "admin" && member.role_in_group !== "admin" && (
-                    <div className="member-actions">
-                      <select
-                        className="role-select"
-                        value={member.role_in_group}
-                        onChange={(e) => handleRoleChange(member.id, e.target.value)}
-                      >
-                        <option value="user">Member</option>
-                        <option value="moderator">Moderator</option>
-                      </select>
-                      <button
-                        className="remove-button"
-                        onClick={() => handleRemoveMember(member.id)}
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ))}
+              {groupMembers.map(member => renderMember(member, true))}
             </div>
           </div>
         </div>
@@ -861,5 +887,4 @@ const GroupPage = () => {
     </div>
   );
 };
-
 export { GroupPage };

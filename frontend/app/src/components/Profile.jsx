@@ -1,6 +1,7 @@
-
 import { useState, useEffect } from "react";
 import "./profile.css";
+
+const API_URL = "http://localhost:8000";
 
 export const Profile = () => {
   const [userId, setUserId] = useState(null);
@@ -11,57 +12,54 @@ export const Profile = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await fetch("http://localhost:8000/user/me", {
+        const res = await fetch(`${API_URL}/user/me`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("access_token")}`,
           },
         });
 
-        if (!res.ok) throw new Error("Nie udało się pobrać danych użytkownika");
+        if (!res.ok) throw new Error("Failed to fetch user data");
 
         const data = await res.json();
         setUserId(data.id);
         setUsername(data.username);
         setEmail(data.email);
-        setAvatar(data.avatar || null);
+        setAvatar(data.avatar ? `${API_URL}/user/avatar/${data.id}` : null);
 
         localStorage.setItem("user_id", data.id);
         localStorage.setItem("username", data.username);
-        localStorage.setItem(`avatar_${data.id}`, data.avatar || "");
       } catch (err) {
-        console.error("Błąd pobierania profilu:", err);
+        console.error("Error fetching profile:", err);
       }
     };
 
     fetchProfile();
   }, []);
 
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (!file || !userId) return;
 
     const formData = new FormData();
     formData.append("avatar", file);
 
-    fetch(`http://localhost:8000/user/${userId}`, {
-      method: "PUT",
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-      },
-      body: formData,
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Nie udało się zapisać avatara");
+    try {
+      const res = await fetch(`${API_URL}/user/${userId}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+        },
+        body: formData,
+      });
 
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          const base64 = reader.result;
-          setAvatar(base64);
-          localStorage.setItem(`avatar_${userId}`, base64);
-        };
-        reader.readAsDataURL(file);
-      })
-      .catch((err) => console.error("Błąd zapisu avatara:", err));
+      if (!res.ok) throw new Error("Failed to save avatar");
+
+      // Update avatar URL after successful upload
+      setAvatar(`${API_URL}/user/avatar/${userId}?t=${Date.now()}`);
+    } catch (err) {
+      console.error("Error saving avatar:", err);
+      alert("Failed to update avatar. Please try again.");
+    }
   };
 
   return (
@@ -72,7 +70,7 @@ export const Profile = () => {
         className="profile-avatar"
       />
       <label className="profile-label" htmlFor="avatar-upload">
-        Zmień avatar
+        Change Avatar
       </label>
       <input
         id="avatar-upload"

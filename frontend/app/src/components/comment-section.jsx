@@ -42,6 +42,20 @@ const CommentSection = ({
     }
   };
 
+  const getAvatarUrl = (avatar) => {
+    if (!avatar) return "/default-avatar.jpg";
+    if (avatar.startsWith("data:image")) {
+      return avatar;
+    }
+    if (avatar.startsWith("http")) {
+      return avatar;
+    }
+    if (avatar.match(/^[A-Za-z0-9+/=]+$/)) {
+      return `data:image/png;base64,${avatar}`;
+    }
+    return "/default-avatar.jpg";
+  };
+
   return (
     <div className="comments-section">
       <div className="comments-list">
@@ -59,7 +73,7 @@ const CommentSection = ({
             <div key={comment.id} className="comment">
               <div className="comment-header">
                 <img
-                  src={comment.user?.avatar || "/default-avatar.jpg"}
+                  src={getAvatarUrl(comment.user?.avatar)}
                   alt={`${comment.user?.username || "User"}'s avatar`}
                   className="avatar-image"
                   onError={(e) => {

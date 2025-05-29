@@ -117,8 +117,18 @@ const PostFeed = ({
 
   const getAvatarUrl = (avatar) => {
     if (!avatar) return "/default-avatar.jpg";
-    if (avatar.startsWith("data:image")) return avatar;
-    return `data:image/png;base64,${avatar}`;
+    if (avatar.startsWith("data:image")) {
+      // If it's already a data URL, return it directly
+      return avatar;
+    }
+    if (avatar.startsWith("http")) {
+      return avatar;
+    }
+    // If it's a base64 string without the data:image prefix, add it
+    if (avatar.match(/^[A-Za-z0-9+/=]+$/)) {
+      return `data:image/png;base64,${avatar}`;
+    }
+    return "/default-avatar.jpg";
   };
 
   const renderPost = (post, index) => {
