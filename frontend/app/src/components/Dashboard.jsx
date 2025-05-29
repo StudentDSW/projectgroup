@@ -1,11 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Navbar } from "./Navbar";
 import { AddGroupPopup } from "./AddGroupPopup";
 import CreatePostPopup from "./CreatePostPopup";
+import PostFeed from "./PostFeed";
 import { useNavigate } from "react-router-dom";
 import "./dashboard.css";
+import CommentSection from './comment-section';
 
 const API_URL = "http://localhost:8000";
+const POSTS_PER_PAGE = 10;
 
 export const Dashboard = () => {
   const [isGroupPopupOpen, setIsGroupPopupOpen] = useState(false);
@@ -20,6 +23,22 @@ export const Dashboard = () => {
   const [newComment, setNewComment] = useState({});
   const [showComments, setShowComments] = useState({});
   const [userRole, setUserRole] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+
+  const token = localStorage.getItem("access_token");
+  
+  // Get current user ID from token
+  const currentUserId = useMemo(() => {
+    try {
+      if (!token) return null;
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload?.id || null;
+    } catch (err) {
+      console.error("Error decoding token:", err);
+      return null;
+    }
+  }, [token]);
 
   const fetchGroups = async () => {
     const token = localStorage.getItem("access_token");
@@ -48,12 +67,12 @@ export const Dashboard = () => {
     }
   };
 
-  const fetchPosts = async () => {
+  const fetchPosts = async (page = 1) => {
     const token = localStorage.getItem("access_token");
     if (!token) return;
 
     try {
-      const postsResponse = await fetch("http://localhost:8000/posts/my-groups", {
+      const postsResponse = await fetch(`${API_URL}/posts/my-groups?page=${page}&per_page=${POSTS_PER_PAGE}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -63,30 +82,56 @@ export const Dashboard = () => {
         throw new Error("Failed to fetch posts");
       }
 
-      const postsData = await postsResponse.json();
+      const responseData = await postsResponse.json();
+      const postsData = responseData.posts;
       
-      // Initialize showComments state for each post
-      const initialShowComments = {};
-      postsData.forEach(post => {
-        initialShowComments[post.id] = false;
+      // Update posts state while preserving showComments state
+      setPosts(prevPosts => {
+        if (page === 1) {
+          return postsData;
+        }
+        // For pagination, merge new posts with existing ones
+        const existingIds = new Set(prevPosts.map(post => post.id));
+        const newPosts = postsData.filter(post => !existingIds.has(post.id));
+        return [...prevPosts, ...newPosts];
       });
-      setShowComments(initialShowComments);
+
+      // Check if we have more posts to load
+      setHasMore(page < responseData.total_pages);
       
-      setPosts(postsData);
+      // Preserve showComments state for existing posts
+      setShowComments(prev => {
+        const newState = { ...prev };
+        postsData.forEach(post => {
+          if (!newState.hasOwnProperty(post.id)) {
+            newState[post.id] = false;
+          }
+        });
+        return newState;
+      });
     } catch (error) {
       console.error("Fetch error:", error);
       setError("Failed to load posts. Please try again.");
     }
   };
 
+  const fetchMorePosts = async () => {
+    if (!hasMore || isLoading) return;
+    
+    const nextPage = currentPage + 1;
+    setCurrentPage(nextPage);
+    await fetchPosts(nextPage);
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       setError(null);
+      setPosts([]); // Reset posts when loading new data
 
       try {
         await fetchGroups();
-        await fetchPosts();
+        await fetchPosts(1);
       } catch (error) {
         console.error("Fetch error:", error);
         setError("Failed to load data. Please try again.");
@@ -97,6 +142,14 @@ export const Dashboard = () => {
 
     fetchData();
   }, [navigate]);
+
+  // Add a cleanup effect
+  useEffect(() => {
+    return () => {
+      setPosts([]);
+      setGroups([]);
+    };
+  }, []);
 
   const openGroupPopup = () => setIsGroupPopupOpen(true);
   const closeGroupPopup = () => setIsGroupPopupOpen(false);
@@ -117,28 +170,74 @@ export const Dashboard = () => {
   };
 
   const handleGroupClick = (group) => {
+    setPosts([]); // Reset posts before navigation
     navigate(`/group/${group.name}`);
   };
 
-  const handleReaction = async (postId, reactionType) => {
+  const handleReaction = async (postId, reactionType, responseData) => {
     const token = localStorage.getItem("access_token");
     if (!token) return;
 
     try {
-      const res = await fetch(`http://localhost:8000/posts/${postId}/reaction?reaction_type=${reactionType}`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        }
-      });
+      // If responseData is not provided, fetch it
+      if (!responseData) {
+        const res = await fetch(`http://localhost:8000/posts/${postId}/reaction?reaction_type=${reactionType}`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          }
+        });
 
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.detail || "Failed to update reaction");
+        if (!res.ok) {
+          const errorData = await res.json();
+          throw new Error(errorData.detail || "Failed to update reaction");
+        }
+
+        responseData = await res.json();
       }
-      
-      // Refresh posts to get updated reaction counts
-      await fetchPosts();
+
+      // Get current user ID from token
+      const currentUserId = JSON.parse(atob(token.split('.')[1])).id;
+
+      // Update the posts state immediately based on the response
+      setPosts(prevPosts => 
+        prevPosts.map(post => {
+          if (post.id === postId) {
+            const updatedReactions = [...(post.reactions || [])];
+            const existingReactionIndex = updatedReactions.findIndex(
+              r => r.user_id === currentUserId
+            );
+
+            if (responseData.status === "removed") {
+              // Remove the reaction if it was toggled off
+              if (existingReactionIndex !== -1) {
+                updatedReactions.splice(existingReactionIndex, 1);
+              }
+            } else {
+              // Add or update the reaction
+              if (existingReactionIndex !== -1) {
+                updatedReactions[existingReactionIndex] = {
+                  ...updatedReactions[existingReactionIndex],
+                  type: reactionType
+                };
+              } else {
+                updatedReactions.push({
+                  id: Date.now(), // Temporary ID
+                  post_id: postId,
+                  user_id: currentUserId,
+                  type: reactionType
+                });
+              }
+            }
+
+            return {
+              ...post,
+              reactions: updatedReactions
+            };
+          }
+          return post;
+        })
+      );
     } catch (error) {
       console.error("Error updating reaction:", error);
       alert(error.message || "Failed to update reaction. Please try again.");
@@ -165,18 +264,17 @@ export const Dashboard = () => {
     }
   };
 
-  const handleComment = async (postId) => {
+  const handleComment = async (postId, commentText) => {
     const token = localStorage.getItem("access_token");
     if (!token) return;
 
-    const commentText = newComment[postId];
     if (!commentText?.trim()) return;
 
     try {
       const formData = new FormData();
       formData.append('text', commentText.trim());
 
-      const res = await fetch(`http://localhost:8000/posts/${postId}/comment`, {
+      const res = await fetch(`${API_URL}/posts/${postId}/comment`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -189,24 +287,22 @@ export const Dashboard = () => {
         throw new Error(errorData.detail || "Failed to add comment");
       }
 
-      const commentData = await res.json();
+      // Get the response data which includes the new comment
+      const responseData = await res.json();
       
-      // Update the posts state with the new comment
+      // Update posts state immediately with the new comment
       setPosts(prevPosts => 
         prevPosts.map(post => {
           if (post.id === postId) {
             return {
               ...post,
-              comments: [...(post.comments || []), commentData]
+              comments: [...(post.comments || []), responseData]
             };
           }
           return post;
         })
       );
 
-      // Clear the comment input
-      setNewComment({ ...newComment, [postId]: "" });
-      
       // Keep the comments section visible
       setShowComments(prev => ({ ...prev, [postId]: true }));
     } catch (error) {
@@ -236,189 +332,70 @@ export const Dashboard = () => {
     if (!token) return;
 
     try {
-      const response = await fetch(`${API_URL}/posts/comments/${commentId}/reaction?reaction_type=${reactionType}`, {
-        method: 'POST',
+      const res = await fetch(`${API_URL}/posts/comments/${commentId}/reaction?reaction_type=${reactionType}`, {
+        method: "POST",
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Failed to update reaction');
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.detail || "Failed to update reaction");
       }
 
-      // Refresh posts to get updated reaction counts
-      await fetchPosts();
+      // Refresh posts to get updated reactions
+      await fetchPosts(currentPage);
     } catch (error) {
-      console.error('Error updating comment reaction:', error);
-      alert(error.message);
+      console.error("Error updating comment reaction:", error);
+      alert(error.message || "Failed to update reaction. Please try again.");
     }
   };
 
-  const handleDeleteComment = async (commentId) => {
-    if (!window.confirm("Are you sure you want to delete this comment?")) return;
-
+  const handleDeleteComment = async (postId, commentId) => {
     const token = localStorage.getItem("access_token");
     if (!token) return;
 
+    if (!window.confirm("Are you sure you want to delete this comment?")) return;
+
     try {
-      const res = await fetch(`http://localhost:8000/posts/comment/${commentId}`, {
+      const res = await fetch(`${API_URL}/posts/${postId}/comment/${commentId}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
-        }
+        },
       });
 
       if (!res.ok) {
         const errorData = await res.json();
         throw new Error(errorData.detail || "Failed to delete comment");
       }
-      
-      await fetchPosts();
+
+      // Refresh posts to get updated comments
+      await fetchPosts(currentPage);
     } catch (error) {
       console.error("Error deleting comment:", error);
       alert(error.message || "Failed to delete comment. Please try again.");
     }
   };
 
-  const renderPost = (post) => {
-    const currentUserId = JSON.parse(atob(localStorage.getItem("access_token").split('.')[1])).id;
-    const hasLiked = post.reactions?.some(r => r.user_id === currentUserId && r.type === 'like');
-    const hasDisliked = post.reactions?.some(r => r.user_id === currentUserId && r.type === 'dislike');
-    const likeCount = post.reactions?.filter(r => r.type === 'like').length || 0;
-    const dislikeCount = post.reactions?.filter(r => r.type === 'dislike').length || 0;
-    const commentCount = post.comments?.length || 0;
-    const group = groups.find(g => g.id === post.group_id);
+  const handleGroupUpdated = () => {
+    // Reset states
+    setPosts([]);
+    setGroups([]);
+    setError(null);
+    setIsLoading(true);
 
-    return (
-      <div key={post.id} className="post-card">
-        <div className="post-header">
-          <div>
-            <h3 
-              onClick={(e) => {
-                if (group) {
-                  e.stopPropagation();
-                  handleGroupClick(group);
-                }
-              }}
-              style={{ cursor: group ? 'pointer' : 'default' }}
-            >
-              {post.user?.username || "Unknown User"}
-              {group && <span className="group-name"> in {group.name}</span>}
-            </h3>
-            <small>{formatDate(post.created_at)}</small>
-          </div>
-          {post.user_id === currentUserId && (
-            <button
-              onClick={() => handleDeletePost(post.id)}
-              className="delete-button"
-            >
-              Delete
-            </button>
-          )}
-        </div>
-
-        <div className="post-content">
-          <p>{post.content}</p>
-          {post.image && (
-            <img src={post.image} alt="Post" className="post-image" />
-          )}
-        </div>
-
-        <div className="post-actions">
-          <button
-            onClick={() => handleReaction(post.id, 'like')}
-            className={`reaction-btn like-btn ${hasLiked ? "active" : ""}`}
-          >
-            👍 {likeCount}
-          </button>
-          <button
-            onClick={() => handleReaction(post.id, 'dislike')}
-            className={`reaction-btn dislike-btn ${hasDisliked ? "active" : ""}`}
-          >
-            👎 {dislikeCount}
-          </button>
-          <button
-            onClick={() => toggleComments(post.id)}
-            className={`reaction-btn comment-btn ${showComments[post.id] ? "active" : ""}`}
-          >
-            💬 {commentCount}
-          </button>
-        </div>
-
-        {showComments[post.id] && (
-          <div className="comments-section">
-            <div className="comments-list">
-              {post.comments?.map((comment) => {
-                const hasLikedComment = comment.reactions?.some(r => r.user_id === currentUserId && r.type === 'like');
-                const hasDislikedComment = comment.reactions?.some(r => r.user_id === currentUserId && r.type === 'dislike');
-                const commentLikeCount = comment.reactions?.filter(r => r.type === 'like').length || 0;
-                const commentDislikeCount = comment.reactions?.filter(r => r.type === 'dislike').length || 0;
-
-                return (
-                  <div key={comment.id} className="comment">
-                    <div className="comment-header">
-                      <strong>{comment.user?.username || "Unknown User"}:</strong>
-                      {comment.user_id === currentUserId && (
-                        <button
-                          onClick={() => handleDeleteComment(comment.id)}
-                          className="delete-comment-btn"
-                          title="Delete comment"
-                        >
-                          ×
-                        </button>
-                      )}
-                    </div>
-                    <p>{comment.text}</p>
-                    <div className="comment-actions">
-                      <button
-                        onClick={() => handleCommentReaction(comment.id, 'like')}
-                        className={`reaction-btn like-btn ${hasLikedComment ? "active" : ""}`}
-                      >
-                        👍 {commentLikeCount}
-                      </button>
-                      <button
-                        onClick={() => handleCommentReaction(comment.id, 'dislike')}
-                        className={`reaction-btn dislike-btn ${hasDislikedComment ? "active" : ""}`}
-                      >
-                        👎 {commentDislikeCount}
-                      </button>
-                      <small className="comment-time">
-                        {formatDate(comment.created_at)}
-                      </small>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-            <div className="add-comment">
-              <textarea
-                value={newComment[post.id] || ""}
-                onChange={(e) => setNewComment({ ...newComment, [post.id]: e.target.value })}
-                placeholder="Write a comment..."
-                rows={2}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    handleComment(post.id);
-                  }
-                }}
-              />
-              <button
-                onClick={() => handleComment(post.id)}
-                className="submit-comment"
-                disabled={!newComment[post.id]?.trim()}
-              >
-                Comment
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-    );
+    // Fetch fresh data
+    Promise.all([
+      fetchGroups(),
+      fetchPosts(1)
+    ]).catch(error => {
+      console.error("Error updating data:", error);
+      setError("Error updating data");
+    }).finally(() => {
+      setIsLoading(false);
+    });
   };
 
   const handleGroupJoined = (newGroup) => {
@@ -463,13 +440,25 @@ export const Dashboard = () => {
 
   return (
     <div className="wrapper-dashboard">
-      <Navbar onJoinGroup={handleGroupJoined} />
+      <Navbar
+        onJoinGroup={(newGroup) => {
+          setGroups((prev) => {
+            if (prev.some((g) => g.id === newGroup.id)) return prev;
+            return [...prev, newGroup];
+          });
+          fetchPosts(1);
+        }}
+        onLeaveGroup={(leftGroup) => {
+          setGroups((prev) => prev.filter(g => g.id !== leftGroup.id));
+          fetchPosts(1);
+        }}
+      />
       <div className="dashboard-container">
         <div className="sidebar">
           <div className="action-buttons">
             <button 
               className="add-group" 
-              onClick={openGroupPopup}
+              onClick={() => setIsGroupPopupOpen(true)}
               title="Create a new group"
             >
               <span className="icon">+</span>
@@ -477,7 +466,7 @@ export const Dashboard = () => {
             </button>
             <button 
               className="create-post" 
-              onClick={() => openPostPopup()}
+              onClick={() => setIsPostPopupOpen(true)}
               title="Create a new post"
             >
               <span className="icon">+</span>
@@ -519,9 +508,18 @@ export const Dashboard = () => {
                 <p>No posts yet. Join a group to see posts here.</p>
               </div>
             ) : (
-              <div className="posts-grid">
-                {posts.map(renderPost)}
-              </div>
+              <PostFeed
+                posts={posts}
+                groups={groups}
+                onLike={handleReaction}
+                onDelete={handleDeletePost}
+                userRole={userRole}
+                onCommentAdded={handleComment}
+                onCommentReaction={handleCommentReaction}
+                onDeleteComment={handleDeleteComment}
+                fetchMorePosts={fetchMorePosts}
+                currentUserId={currentUserId}
+              />
             )}
           </div>
         </div>
@@ -529,7 +527,7 @@ export const Dashboard = () => {
 
       {isGroupPopupOpen && (
         <AddGroupPopup
-          closePopup={closeGroupPopup}
+          closePopup={() => setIsGroupPopupOpen(false)}
           onGroupCreated={handleGroupCreated}
         />
       )}
@@ -537,8 +535,8 @@ export const Dashboard = () => {
       {isPostPopupOpen && (
         <CreatePostPopup
           onClose={() => {
-            closePostPopup();
-            handlePostCreated();
+            setIsPostPopupOpen(false);
+            fetchPosts(1);
           }}
           defaultGroupId={selectedGroupId}
         />

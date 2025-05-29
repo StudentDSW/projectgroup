@@ -5,6 +5,7 @@ import { AddGroupPopup } from "./AddGroupPopup";
 import { Navbar } from "./Navbar";
 import { FaCog, FaUserCog } from "react-icons/fa";
 import "./GroupPage.css";
+import CommentSection from './comment-section';
 
 const API_URL = "http://localhost:8000";
 
@@ -295,16 +296,12 @@ const GroupPage = () => {
     setShowComments((prev) => ({ ...prev, [postId]: !prev[postId] }));
   };
 
-  const handleCommentChange = (postId, value) => {
-    setNewComment(prev => ({ ...prev, [postId]: value }));
-  };
-
-  const handleComment = async (postId) => {
-    const text = newComment[postId]?.trim();
-    if (!text || !isLoggedIn) return;
+  const handleComment = async (postId, commentText) => {
+    if (!commentText?.trim() || !isLoggedIn) return;
+    
     try {
       const formData = new FormData();
-      formData.append('text', text);
+      formData.append('text', commentText.trim());
 
       const res = await fetch(`${API_URL}/posts/${postId}/comment`, {
         method: 'POST',
@@ -319,21 +316,11 @@ const GroupPage = () => {
         throw new Error(errorData.detail || "Failed to add comment");
       }
 
-      const commentData = await res.json();
+      // Refresh posts to get the updated comment
+      await fetchPosts(currentPage);
       
-      // Update the posts state to include the new comment
-      setPosts(prevPosts => prevPosts.map(post => {
-        if (post.id === postId) {
-          return {
-            ...post,
-            comments: [...(post.comments || []), commentData]
-          };
-        }
-        return post;
-      }));
-
-      // Clear the comment input
-      setNewComment(prev => ({ ...prev, [postId]: "" }));
+      // Keep the comments section visible
+      setShowComments(prev => ({ ...prev, [postId]: true }));
     } catch (err) {
       console.error("Error adding comment:", err);
       alert(err.message || "Failed to add comment. Please try again.");
@@ -468,7 +455,18 @@ const GroupPage = () => {
         <div key={post.id} className="post-card">
           <div className="post-header">
             <div>
-              <h3>{post.user?.username || "Unknown User"}</h3>
+              <div className="post-user-info">
+                <img
+                  src={post.user?.avatar || "/default-avatar.jpg"}
+                  alt={`${post.user?.username || "User"}'s avatar`}
+                  className="avatar-image"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = "/default-avatar.jpg";
+                  }}
+                />
+                <h3>{post.user?.username || "Unknown User"}</h3>
+              </div>
               <small>{new Date(post.created_at).toLocaleString()}</small>
             </div>
             {canDeletePost && (
@@ -522,49 +520,22 @@ const GroupPage = () => {
             </button>
           </div>
 
-          <div className="comments-section">
-            {showComments[post.id] && (
-              <div className="comments-list">
-                {post.comments?.map((comment) => (
-                  <div key={comment.id} className="comment">
-                    <div className="comment-header">
-                      <span className="comment-author">
-                        {comment.user?.username || "Unknown User"}
-                      </span>
-                      <span className="comment-time">
-                        {new Date(comment.created_at).toLocaleString()}
-                      </span>
-                    </div>
-                    <p className="comment-text">{comment.text}</p>
-                  </div>
-                ))}
-                <div className="add-comment">
-                  <textarea
-                    value={newComment[post.id] || ""}
-                    onChange={(e) => handleCommentChange(post.id, e.target.value)}
-                    placeholder="Write a comment..."
-                    rows={2}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        handleComment(post.id);
-                      }
-                    }}
-                  />
-                  <button
-                    onClick={() => handleComment(post.id)}
-                    disabled={!newComment[post.id]?.trim()}
-                  >
-                    Comment
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
+          {showComments[post.id] && (
+            <CommentSection
+              postId={post.id}
+              comments={post.comments || []}
+              currentUserId={currentUserId}
+              userRole={userRole}
+              onComment={handleComment}
+              onDeleteComment={handleDeleteComment}
+              onCommentReaction={handleCommentReaction}
+              isLoggedIn={isLoggedIn}
+            />
+          )}
         </div>
       );
     },
-    [currentUserId, userRole, showComments, newComment, handleComment, handleReaction, handleDeletePost]
+    [currentUserId, userRole, showComments, groupData, isLoggedIn]
   );
 
   const renderSettingsMenu = useMemo(() => {

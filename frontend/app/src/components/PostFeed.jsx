@@ -1,7 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import CommentSection from "./CommentSection";
+import CommentSection from "./comment-section";
+import LoadingSpinner from "./LoadingSpinner";
 import "./PostFeed.css";
+
+const POSTS_PER_PAGE = 10;
 
 const PostFeed = ({ 
   posts, 
@@ -10,17 +13,78 @@ const PostFeed = ({
   onDelete, 
   userRole, 
   groupId = null,
-  onCommentAdded 
+  onCommentAdded,
+  onCommentReaction,
+  onDeleteComment,
+  fetchMorePosts
 }) => {
   const navigate = useNavigate();
   const token = localStorage.getItem("access_token");
   const currentUserId = token ? JSON.parse(atob(token.split('.')[1])).id : null;
   const [showComments, setShowComments] = useState({});
+  const [visiblePosts, setVisiblePosts] = useState([]);
+  const [page, setPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const observer = useRef();
 
-  // Filter posts if groupId is provided
-  const filteredPosts = groupId 
-    ? posts.filter(post => post.group_id === groupId)
-    : posts;
+  // Memoize filtered posts
+  const filteredPosts = useMemo(() => {
+    return groupId 
+      ? posts.filter(post => post.group_id === groupId)
+      : posts;
+  }, [posts, groupId]);
+
+  const lastPostElementRef = useCallback(node => {
+    if (isLoading) return;
+    if (observer.current) observer.current.disconnect();
+    observer.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && hasMore) {
+        setPage(prevPage => prevPage + 1);
+      }
+    });
+    if (node) observer.current.observe(node);
+  }, [isLoading, hasMore]);
+
+  useEffect(() => {
+    const loadPosts = async () => {
+      if (isLoading) return;
+      
+      setIsLoading(true);
+      try {
+        // Create a Set to track unique post IDs
+        const uniquePostIds = new Set();
+        const newPosts = filteredPosts.filter(post => {
+          if (uniquePostIds.has(post.id)) {
+            return false;
+          }
+          uniquePostIds.add(post.id);
+          return true;
+        });
+
+        const startIndex = 0;
+        const endIndex = page * POSTS_PER_PAGE;
+        const paginatedPosts = newPosts.slice(startIndex, endIndex);
+        
+        if (paginatedPosts.length < POSTS_PER_PAGE) {
+          setHasMore(false);
+        }
+        
+        setVisiblePosts(paginatedPosts);
+        
+        // If we have a fetchMorePosts function and we're running out of posts
+        if (fetchMorePosts && paginatedPosts.length >= (page * POSTS_PER_PAGE) - 5) {
+          await fetchMorePosts();
+        }
+      } catch (error) {
+        console.error('Error loading posts:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadPosts();
+  }, [page, filteredPosts, fetchMorePosts]);
 
   const toggleComments = (postId) => {
     setShowComments(prev => ({ ...prev, [postId]: !prev[postId] }));
@@ -28,24 +92,22 @@ const PostFeed = ({
 
   const handleReaction = async (postId, reactionType) => {
     try {
-      const formData = new FormData();
-      formData.append('reaction_type', reactionType);
-
-      const response = await fetch(`http://localhost:8000/posts/${postId}/reaction`, {
+      const response = await fetch(`http://localhost:8000/posts/${postId}/reaction?reaction_type=${reactionType}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
-        },
-        body: formData
+        }
       });
 
       if (!response.ok) {
         throw new Error('Failed to update reaction');
       }
 
-      // Call the parent component's callback to refresh posts
+      const responseData = await response.json();
+      
+      // Call the parent component's callback with both postId and reactionType
       if (onLike) {
-        onLike(postId);
+        onLike(postId, reactionType, responseData);
       }
     } catch (error) {
       console.error('Error updating reaction:', error);
@@ -53,7 +115,13 @@ const PostFeed = ({
     }
   };
 
-  const renderPost = (post) => {
+  const getAvatarUrl = (avatar) => {
+    if (!avatar) return "/default-avatar.jpg";
+    if (avatar.startsWith("data:image")) return avatar;
+    return `data:image/png;base64,${avatar}`;
+  };
+
+  const renderPost = (post, index) => {
     if (!post) return null;
 
     const hasLiked = post.reactions?.some(r => r.user_id === currentUserId && r.type === 'like');
@@ -63,14 +131,22 @@ const PostFeed = ({
     const commentCount = post.comments?.length || 0;
     const group = groups?.find(g => g.id === post.group_id);
 
+    // Add ref to the last post element
+    const isLastPost = index === visiblePosts.length - 1;
+    const postRef = isLastPost ? lastPostElementRef : null;
+
     return (
-      <div key={post.id} className="post">
+      <div key={post.id} className="post" ref={postRef}>
         <div className="post-header">
           <div className="post-author">
             <img
-              src={post.user?.avatar || "/default-avatar.png"}
-              alt={post.user?.username || "User"}
-              className="author-avatar"
+              src={getAvatarUrl(post.user?.avatar)}
+              alt={`${post.user?.username || "User"}'s avatar`}
+              className="avatar-image"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = "/default-avatar.jpg";
+              }}
             />
             <div className="post-info">
               <span className="author-name">{post.user?.username || "Unknown User"}</span>
@@ -128,8 +204,14 @@ const PostFeed = ({
 
         {showComments[post.id] && (
           <CommentSection 
-            postId={post.id} 
-            onCommentAdded={onCommentAdded}
+            postId={post.id}
+            comments={post.comments || []}
+            currentUserId={currentUserId}
+            userRole={userRole}
+            onComment={onCommentAdded}
+            onDeleteComment={onDeleteComment}
+            onCommentReaction={onCommentReaction}
+            isLoggedIn={!!token}
           />
         )}
       </div>
@@ -149,12 +231,15 @@ const PostFeed = ({
 
   return (
     <div className="posts-grid">
-      {filteredPosts.length === 0 ? (
+      {visiblePosts.length === 0 ? (
         <div className="no-posts">
           <p>{groupId ? "No posts in this group yet." : "No posts yet. Join a group to see posts here."}</p>
         </div>
       ) : (
-        filteredPosts.map(renderPost)
+        <>
+          {visiblePosts.map((post, index) => renderPost(post, index))}
+          {isLoading && <LoadingSpinner loading={true} />}
+        </>
       )}
     </div>
   );

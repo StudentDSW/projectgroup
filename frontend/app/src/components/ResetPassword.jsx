@@ -52,8 +52,9 @@ export const ResetPassword = () => {
             <div className="reset-password__box">
                 <h2>Przypomnienie hasła</h2>
                 <div className="form-box">
-                    <label htmlFor="">Adres email, na który utworzono konto</label>
+                    <label htmlFor="reset-email">Adres email, na który utworzono konto</label>
                     <input 
+                        id="reset-email"
                         type="email" 
                         name="email"
                         placeholder="jan.kowalski@gmail.com"

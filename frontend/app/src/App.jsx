@@ -5,7 +5,7 @@ import { ResetPassword } from "./components/ResetPassword"
 import { Dashboard } from "./components/Dashboard";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { Profile } from "./components/Profile"
-import GroupPage from "./components/GroupPage";
+import { GroupPage } from "./components/GroupPage";
 
 import './App.css'
 

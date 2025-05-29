@@ -114,8 +114,10 @@ const CreatePostPopup = ({ defaultGroupId, onClose }) => {
         {error && <div className="error-message">{error}</div>}
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label>Content</label>
+            <label htmlFor="post-content">Content</label>
             <textarea
+              id="post-content"
+              name="post-content"
               value={content}
               onChange={(e) => setContent(e.target.value)}
               required
@@ -125,8 +127,10 @@ const CreatePostPopup = ({ defaultGroupId, onClose }) => {
           </div>
 
           <div className="form-group">
-            <label>Image (optional)</label>
+            <label htmlFor="post-image">Image (optional)</label>
             <input
+              id="post-image"
+              name="post-image"
               type="file"
               accept="image/*"
               onChange={handleImageChange}
@@ -151,8 +155,10 @@ const CreatePostPopup = ({ defaultGroupId, onClose }) => {
           </div>
 
           <div className="form-group">
-            <label>Group</label>
+            <label htmlFor="post-group">Group</label>
             <select
+              id="post-group"
+              name="post-group"
               value={groupId || ""}
               onChange={(e) => setGroupId(e.target.value)}
               required

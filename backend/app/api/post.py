@@ -1,6 +1,6 @@
-from fastapi import APIRouter, HTTPException, Depends, File, UploadFile, Form
+from fastapi import APIRouter, HTTPException, Depends, File, UploadFile, Form, Query
 from sqlalchemy.orm import Session
-from sqlalchemy import select, delete, and_
+from sqlalchemy import select, delete, and_, desc, func
 from typing import Optional
 from datetime import datetime, timezone
 from app.db import db_dependency 
@@ -80,22 +80,39 @@ async def get_my_posts(
 @router.get("/my-groups")
 async def get_my_groups_posts(
     db: db_dependency,
-    current_user: dict = Depends(verify_token)
+    current_user: dict = Depends(verify_token),
+    page: int = Query(1, ge=1),
+    per_page: int = Query(10, ge=1, le=50)
 ):
     try:
         user_id = current_user['id']
         
+        # Get user's groups
         user_groups = db.scalars(
             select(GroupMember.group_id)
             .where(GroupMember.user_id == user_id)
         ).all()
         
         if not user_groups:
-            return []
+            return {
+                "posts": [],
+                "total": 0,
+                "page": page,
+                "per_page": per_page,
+                "total_pages": 0
+            }
         
+        # Calculate offset
+        offset = (page - 1) * per_page
+        
+        # Get total count for pagination
+        count_query = select(func.count()).select_from(Post).where(Post.group_id.in_(user_groups))
+        total_count = db.scalar(count_query)
+        
+        # Get paginated posts
         stmt = select(Post).where(
             Post.group_id.in_(user_groups)
-        ).order_by(Post.created_at.desc())
+        ).order_by(desc(Post.created_at)).offset(offset).limit(per_page)
         
         posts = db.execute(stmt).scalars().all()
         posts_list = []
@@ -140,7 +157,13 @@ async def get_my_groups_posts(
             
             posts_list.append(post_dict)
             
-        return posts_list
+        return {
+            "posts": posts_list,
+            "total": total_count,
+            "page": page,
+            "per_page": per_page,
+            "total_pages": (total_count + per_page - 1) // per_page
+        }
     except Exception as e:
         print(f"Error in get_my_groups_posts: {str(e)}")
         raise HTTPError(500, f"Internal server error: {str(e)}")
@@ -149,19 +172,34 @@ async def get_my_groups_posts(
 async def get_group_posts(
     group_id: int,
     db: db_dependency,
-    current_user: dict = Depends(verify_token)
+    current_user: dict = Depends(verify_token),
+    page: int = Query(1, ge=1),
+    per_page: int = Query(10, ge=1, le=50)
 ):
     try:
         member = get_group_member(db, current_user['id'], group_id)
         if not member:
             raise HTTPError(403, "Not a member of this group")
 
-        stmt = select(Post).where(Post.group_id == group_id).order_by(Post.created_at.desc())
-        posts = db.scalars(stmt).all()
+        # Calculate offset
+        offset = (page - 1) * per_page
+
+        # Get total count for pagination
+        total_count = db.scalar(
+            select(func.count()).select_from(Post).where(Post.group_id == group_id)
+        )
+
+        # Get paginated posts
+        stmt = select(Post).where(
+            Post.group_id == group_id
+        ).order_by(desc(Post.created_at)).offset(offset).limit(per_page)
         
+        posts = db.scalars(stmt).all()
         posts_list = []
+        
         for post in posts:
             post_dict = post.__dict__.copy()
+            
             # Handle user data safely
             if post.user:
                 post_dict['user'] = {
@@ -200,7 +238,13 @@ async def get_group_posts(
             
             posts_list.append(post_dict)
             
-        return posts_list
+        return {
+            "posts": posts_list,
+            "total": total_count,
+            "page": page,
+            "per_page": per_page,
+            "total_pages": (total_count + per_page - 1) // per_page
+        }
     except Exception as e:
         print(f"Error in get_group_posts: {str(e)}")
         raise HTTPError(500, f"Internal server error: {str(e)}")
@@ -451,7 +495,12 @@ async def delete_post_with_comments_reactions(
 
     user_id = current_user["id"]
     
-    if post.user_id != user_id:
+    # Get the group member to check admin status
+    member = get_group_member(db, user_id, post.group_id)
+    is_admin = member and member.role == "admin"
+    
+    # Allow deletion if user is post owner or admin
+    if post.user_id != user_id and not is_admin:
         raise HTTPError(403, "You don't have permission to delete this post")
 
     db.delete(post)

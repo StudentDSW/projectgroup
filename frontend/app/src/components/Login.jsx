@@ -95,6 +95,7 @@ export const Login = () => {
             <div className="form-box">
               <label htmlFor="username">Nazwa użytkownika</label>
               <input
+                id="username"
                 type="text"
                 name="username"
                 placeholder="Twój login"
@@ -107,6 +108,7 @@ export const Login = () => {
             <div className="form-box">
               <label htmlFor="password">Hasło</label>
               <input
+                id="password"
                 type="password"
                 name="password"
                 placeholder="Hasło"

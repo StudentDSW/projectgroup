@@ -7,6 +7,7 @@ export const Navbar = ({ onJoinGroup, onLeaveGroup }) => {
   const [searchText, setSearchText] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const searchRef = useRef(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const [username, setUsername] = useState(
@@ -64,6 +65,9 @@ export const Navbar = ({ onJoinGroup, onLeaveGroup }) => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setDropdownOpen(false);
+      }
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setFilteredGroups([]);
       }
     };
 
@@ -224,7 +228,7 @@ export const Navbar = ({ onJoinGroup, onLeaveGroup }) => {
           <p>GroupApp</p>
         </Link>
 
-        <div className="search-container">
+        <div className="search-container" ref={searchRef}>
           <div className="search-input-wrapper">
             <input
               type="text"
@@ -250,13 +254,13 @@ export const Navbar = ({ onJoinGroup, onLeaveGroup }) => {
             </div>
           </div>
 
-          {searchText && (
+          {searchText && filteredGroups.length > 0 && (
             <div className="search-results">
               {isLoading ? (
                 <div className="search-loading">Wyszukiwanie...</div>
               ) : searchError ? (
                 <div className="search-error">{searchError}</div>
-              ) : filteredGroups.length > 0 ? (
+              ) : (
                 <ul className="group-list">
                   {filteredGroups.map((group) => (
                     <li
@@ -296,8 +300,6 @@ export const Navbar = ({ onJoinGroup, onLeaveGroup }) => {
                     </li>
                   ))}
                 </ul>
-              ) : (
-                <div className="no-results">Brak znalezionych grup</div>
               )}
             </div>
           )}

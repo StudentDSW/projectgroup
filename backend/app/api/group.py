@@ -347,7 +347,7 @@ async def users_in_group(
             "id": membership.user.id,
             "username": membership.user.username,
             "email": membership.user.email,
-            "avatar": membership.user.avatar,
+            "avatar": base64_encode(membership.user.avatar) if membership.user.avatar else None,
             "registration_date": membership.user.registration_date,
             "role_in_group": membership.role,
         }
@@ -369,6 +369,74 @@ async def get_group_by_name(
     group_dict = group.__dict__.copy()
     group_dict["avatar"] = base64_encode(group.avatar)
     return group_dict
+
+
+@router.put("/{group_id}/member/{user_id}/role")
+async def update_member_role(
+    db: db_dependency,
+    group_id: int,
+    user_id: int,
+    role: str,
+    current_user: dict = Depends(auth.verify_token)
+):
+    # Check if the current user is an admin of the group
+    if not is_group_admin(db, current_user.get("id"), group_id):
+        raise HTTPError(403, "Only group admins can change member roles")
+    
+    # Get the group member
+    member = db.execute(
+        select(GroupMember)
+        .where(GroupMember.group_id == group_id)
+        .where(GroupMember.user_id == user_id)
+    ).scalar_one_or_none()
+    
+    if not member:
+        raise HTTPError(404, "Member not found in group")
+    
+    # Update the role
+    member.role = role
+    db.commit()
+    db.refresh(member)
+    
+    return {"status": "Success", "result": f"Updated role to {role}"}
+
+
+@router.delete("/{group_id}/member/{user_id}")
+async def remove_member(
+    db: db_dependency,
+    group_id: int,
+    user_id: int,
+    current_user: dict = Depends(auth.verify_token)
+):
+    # Check if the current user is an admin of the group
+    if not is_group_admin(db, current_user.get("id"), group_id):
+        raise HTTPError(403, "Only group admins can remove members")
+    
+    # Get the group member
+    member = db.execute(
+        select(GroupMember)
+        .where(GroupMember.group_id == group_id)
+        .where(GroupMember.user_id == user_id)
+    ).scalar_one_or_none()
+    
+    if not member:
+        raise HTTPError(404, "Member not found in group")
+    
+    # Don't allow removing the last admin
+    if member.role == "admin":
+        admin_count = db.execute(
+            select(GroupMember)
+            .where(GroupMember.group_id == group_id)
+            .where(GroupMember.role == "admin")
+        ).count()
+        if admin_count <= 1:
+            raise HTTPError(400, "Cannot remove the last admin of the group")
+    
+    # Remove the member
+    db.delete(member)
+    db.commit()
+    
+    return {"status": "Success", "result": "Member removed from group"}
 
 
 

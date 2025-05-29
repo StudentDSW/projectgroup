@@ -160,6 +160,7 @@ export const Registration = () => {
               <div className="form-box">
                 <label htmlFor="username">Nazwa użytkownika</label>
                 <input
+                  id="username"
                   type="text"
                   name="username"
                   placeholder="Nazwa użytkownika"
@@ -174,6 +175,7 @@ export const Registration = () => {
               <div className="form-box">
                 <label htmlFor="email">Email</label>
                 <input
+                  id="email"
                   type="email"
                   name="email"
                   placeholder="Twój adres email"
@@ -186,6 +188,7 @@ export const Registration = () => {
               <div className="form-box">
                 <label htmlFor="password">Hasło</label>
                 <input
+                  id="password"
                   type="password"
                   name="password"
                   placeholder="Hasło"
@@ -200,6 +203,7 @@ export const Registration = () => {
               <div className="form-box">
                 <label htmlFor="confirmPassword">Potwierdź hasło</label>
                 <input
+                  id="confirmPassword"
                   type="password"
                   name="confirmPassword"
                   placeholder="Potwierdź hasło"
