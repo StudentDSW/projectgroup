@@ -1,6 +1,5 @@
-
 .profile-container {
-  max-width: 350px;
+  max-width: 800px;
   margin: 30px auto;
   padding: 25px 30px;
   background: #fff;
@@ -66,10 +65,104 @@
   margin-bottom: 15px;
 }
 
-@media (max-width: 400px) {
+/* Sidebar styles */
+.sidebar {
+  width: 280px;
+  background: #fff;
+  border-right: 1px solid #e4e6eb;
+  padding: 20px;
+  height: calc(100vh - 60px);
+  overflow-y: auto;
+}
+
+.groups-section {
+  margin-top: 20px;
+}
+
+.group-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #050505;
+  margin-bottom: 15px;
+}
+
+.group-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.group-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.group-item:hover {
+  background-color: #f0f2f5;
+}
+
+.group-name {
+  font-weight: 500;
+  color: #050505;
+}
+
+.group-arrow {
+  color: #65676b;
+  font-size: 1.2rem;
+}
+
+.no-groups {
+  color: #65676b;
+  text-align: center;
+  padding: 20px;
+}
+
+/* Dashboard container */
+.dashboard-container {
+  display: flex;
+  height: calc(100vh - 60px);
+}
+
+.group-content {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.group-header {
+  margin-bottom: 20px;
+}
+
+.breadcrumb {
+  color: #65676b;
+  font-size: 0.9rem;
+}
+
+.breadcrumb span {
+  color: #050505;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .dashboard-container {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid #e4e6eb;
+  }
+
   .profile-container {
-    max-width: 90%;
-    padding: 20px;
+    max-width: 100%;
+    margin: 20px 0;
   }
 
   .profile-avatar {
