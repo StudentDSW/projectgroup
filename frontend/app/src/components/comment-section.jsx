@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import './comment-section.css';
 
@@ -8,7 +9,6 @@ const CommentSection = ({
   userRole,
   onComment,
   onDeleteComment,
-  onCommentReaction,
   isLoggedIn 
 }) => {
   const [newComment, setNewComment] = useState('');
@@ -19,7 +19,7 @@ const CommentSection = ({
     
     try {
       await onComment(postId, text);
-      setNewComment(''); // Clear the input after successful comment
+      setNewComment('');
     } catch (err) {
       console.error('Error adding comment:', err);
     }
@@ -34,22 +34,10 @@ const CommentSection = ({
     }
   };
 
-  const handleCommentReaction = async (commentId, type) => {
-    try {
-      await onCommentReaction(commentId, type);
-    } catch (err) {
-      console.error('Error adding reaction:', err);
-    }
-  };
-
   const getAvatarUrl = (avatar) => {
     if (!avatar) return "/default-avatar.jpg";
-    if (avatar.startsWith("data:image")) {
-      return avatar;
-    }
-    if (avatar.startsWith("http")) {
-      return avatar;
-    }
+    if (avatar.startsWith("data:image")) return avatar;
+    if (avatar.startsWith("http")) return avatar;
     if (avatar.match(/^[A-Za-z0-9+/=]+$/)) {
       return `data:image/png;base64,${avatar}`;
     }
@@ -59,58 +47,33 @@ const CommentSection = ({
   return (
     <div className="comments-section">
       <div className="comments-list">
-        {comments.map((comment) => {
-          const hasLikedComment = comment.reactions?.some(
-            r => r.user_id === currentUserId && r.type === 'like'
-          );
-          const hasDislikedComment = comment.reactions?.some(
-            r => r.user_id === currentUserId && r.type === 'dislike'
-          );
-          const commentLikeCount = comment.reactions?.filter(r => r.type === 'like').length || 0;
-          const commentDislikeCount = comment.reactions?.filter(r => r.type === 'dislike').length || 0;
-
-          return (
-            <div key={comment.id} className="comment">
-              <div className="comment-header">
-                <img
-                  src={getAvatarUrl(comment.user?.avatar)}
-                  alt={`${comment.user?.username || "User"}'s avatar`}
-                  className="avatar-image"
-                  onError={(e) => {
-                    e.target.onerror = null;
-                    e.target.src = "/default-avatar.jpg";
-                  }}
-                />
-                <span className="comment-author">{comment.user?.username || "Unknown User"}</span>
-                <span className="comment-time">{new Date(comment.created_at).toLocaleString()}</span>
-                {(comment.user_id === currentUserId || userRole === 'admin') && (
-                  <button
-                    onClick={() => handleDeleteComment(comment.id)}
-                    className="delete-comment-btn"
-                    title="Delete comment"
-                  >
-                    ×
-                  </button>
-                )}
-              </div>
-              <p className="comment-text">{comment.text}</p>
-              <div className="comment-actions">
+        {comments.map((comment) => (
+          <div key={comment.id} className="comment">
+            <div className="comment-header">
+              <img
+                src={getAvatarUrl(comment.user?.avatar)}
+                alt={`${comment.user?.username || "User"}'s avatar`}
+                className="avatar-image"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = "/default-avatar.jpg";
+                }}
+              />
+              <span className="comment-author">{comment.user?.username || "Unknown User"}</span>
+              <span className="comment-time">{new Date(comment.created_at).toLocaleString()}</span>
+              {(comment.user_id === currentUserId || userRole === 'admin') && (
                 <button
-                  onClick={() => handleCommentReaction(comment.id, 'like')}
-                  className={`comment-action-btn like ${hasLikedComment ? "active" : ""}`}
+                  onClick={() => handleDeleteComment(comment.id)}
+                  className="delete-comment-btn"
+                  title="Delete comment"
                 >
-                  👍 {commentLikeCount}
+                  ×
                 </button>
-                <button
-                  onClick={() => handleCommentReaction(comment.id, 'dislike')}
-                  className={`comment-action-btn dislike ${hasDislikedComment ? "active" : ""}`}
-                >
-                  👎 {commentDislikeCount}
-                </button>
-              </div>
+              )}
             </div>
-          );
-        })}
+            <p className="comment-text">{comment.text}</p>
+          </div>
+        ))}
       </div>
       <div className="add-comment">
         <textarea
@@ -138,4 +101,4 @@ const CommentSection = ({
   );
 };
 
-export default CommentSection; 
+export default CommentSection;
