@@ -7,6 +7,7 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 import { Profile } from "./components/Profile"
 import { GroupPage } from "./components/GroupPage";
 import GoToTop from './components/GoToTop';
+import ErrorBoundary from "./components/ErrorBoundary";
 
 import './App.css'
 
@@ -29,9 +30,11 @@ function App() {
         <Route
           path="/group/:groupName"
           element={
-            <ProtectedRoute>
-              <GroupPage />
-            </ProtectedRoute>
+            <ErrorBoundary>
+              <ProtectedRoute>
+                <GroupPage />
+              </ProtectedRoute>
+            </ErrorBoundary>
           }
         />
         <Route path="/account" element={<Profile />} />

@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import CreatePostPopup from "./CreatePostPopup";
 import { AddGroupPopup } from "./AddGroupPopup";
 import { Navbar } from "./Navbar";
-import { FaCog, FaUserCog } from "react-icons/fa";
+import { FaCog, FaUserCog, FaTrash } from "react-icons/fa";
 import "./GroupPage.css";
 import CommentSection from './comment-section';
 
@@ -367,18 +367,47 @@ const GroupPage = () => {
   };
 
   const handleDeleteComment = async (postId, commentId) => {
+    if (!window.confirm("Are you sure you want to delete this comment?")) return;
+    
     try {
-      const res = await fetch(`${API_URL}/posts/${postId}/comment/${commentId}`, {
+      // Find the post and comment to check permissions
+      const post = posts.find(p => p.id === postId);
+      if (!post) {
+        throw new Error("Post not found");
+      }
+
+      const comment = post.comments?.find(c => c.id === commentId);
+      if (!comment) {
+        throw new Error("Comment not found");
+      }
+
+      // Check if user is comment owner or admin
+      const isCommentOwner = comment.user_id === currentUserId;
+      const isAdmin = userRole === "admin";
+      
+      if (!isCommentOwner && !isAdmin) {
+        throw new Error("You don't have permission to delete this comment");
+      }
+
+      const res = await fetch(`${API_URL}/posts/comment/${commentId}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!res.ok) throw new Error("Failed to delete comment");
+      
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.detail || "Failed to delete comment");
+      }
       
       // Fetch only the updated post
       const updatedPostRes = await fetch(`${API_URL}/posts/group/${groupData.id}?post_id=${postId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!updatedPostRes.ok) throw new Error("Failed to fetch updated post");
+      
+      if (!updatedPostRes.ok) {
+        throw new Error("Failed to fetch updated post");
+      }
+      
       const { posts: [updatedPost] } = await updatedPostRes.json();
       
       // Update only the specific post in the state
@@ -387,7 +416,7 @@ const GroupPage = () => {
       ));
     } catch (err) {
       console.error("Error deleting comment:", err);
-      alert("Failed to delete comment. Please try again.");
+      alert(err.message || "Failed to delete comment. Please try again.");
     }
   };
 
@@ -552,8 +581,9 @@ const GroupPage = () => {
               <button
                 onClick={() => handleRemoveMember(member.id)}
                 className="remove-member-btn"
+                title="Remove member"
               >
-                Remove
+                <FaTrash />
               </button>
             )}
           </div>
@@ -608,7 +638,7 @@ const GroupPage = () => {
                 className="delete-button"
                 title={isAdmin ? "Delete post (Admin)" : "Delete your post"}
               >
-                Delete
+                <FaTrash />
               </button>
             )}
           </div>
@@ -886,7 +916,13 @@ const GroupPage = () => {
               </div>
             ) : (
               <>
-                <div className="posts-grid">{posts.map(renderPost)}</div>
+                <div className="posts-grid">
+                  {posts.map((post, index) => (
+                    <div key={`${post.id}-${index}`} className="post-card">
+                      {renderPost(post)}
+                    </div>
+                  ))}
+                </div>
                 {hasMore && (
                   <div className="load-more-container">
                     <button

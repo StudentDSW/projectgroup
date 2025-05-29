@@ -117,7 +117,7 @@ const CreatePostPopup = ({ defaultGroupId, onClose }) => {
             <label htmlFor="post-content">Content</label>
             <textarea
               id="post-content"
-              name="post-content"
+              name="content"
               value={content}
               onChange={(e) => setContent(e.target.value)}
               required
@@ -130,7 +130,7 @@ const CreatePostPopup = ({ defaultGroupId, onClose }) => {
             <label htmlFor="post-image">Image (optional)</label>
             <input
               id="post-image"
-              name="post-image"
+              name="image"
               type="file"
               accept="image/*"
               onChange={handleImageChange}

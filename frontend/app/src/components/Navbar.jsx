@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import "./navbar.css";
+import { FaMoon, FaSun } from 'react-icons/fa';
 
 const API_URL = "http://localhost:8000";
 
@@ -24,6 +25,21 @@ export const Navbar = ({ onJoinGroup, onLeaveGroup }) => {
   const [searchError, setSearchError] = useState(null);
 
   const isAccountPage = location.pathname === "/account";
+
+  const [darkMode, setDarkMode] = useState(() => {
+    return localStorage.getItem('darkMode') === 'true';
+  });
+
+  useEffect(() => {
+    if (darkMode) {
+      document.body.classList.add('dark-mode');
+    } else {
+      document.body.classList.remove('dark-mode');
+    }
+    localStorage.setItem('darkMode', darkMode);
+  }, [darkMode]);
+
+  const toggleDarkMode = () => setDarkMode((prev) => !prev);
 
   const getAvatarUrl = (avatarData) => {
     if (!avatarData) return "/default-avatar.jpg";
@@ -378,6 +394,14 @@ export const Navbar = ({ onJoinGroup, onLeaveGroup }) => {
         </div>
 
         <div className="navbar-right" ref={dropdownRef}>
+          <button
+            className="dark-mode-toggle"
+            onClick={toggleDarkMode}
+            aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+            title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            {darkMode ? <FaSun /> : <FaMoon />}
+          </button>
           <div className="navbar-username">
             <p>{username}</p>
             <div className="profile-button-container">

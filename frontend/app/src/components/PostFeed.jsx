@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import CommentSection from "./comment-section";
 import LoadingSpinner from "./LoadingSpinner";
 import "./PostFeed.css";
+import { FaTrash } from 'react-icons/fa';
 
 const POSTS_PER_PAGE = 10;
 
@@ -147,8 +148,9 @@ const PostFeed = ({
             <button
               onClick={() => onDelete(post.id)}
               className="delete-post-btn"
+              title="Delete post"
             >
-              Delete
+              <FaTrash />
             </button>
           )}
         </div>

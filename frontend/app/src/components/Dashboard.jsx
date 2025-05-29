@@ -357,18 +357,38 @@ export const Dashboard = () => {
   const handleDeleteComment = useCallback(
     async (postId, commentId) => {
       if (!token) return;
+      if (!window.confirm("Are you sure you want to delete this comment?")) return;
       try {
+        // Find the post and comment to check permissions
+        const post = posts.find((p) => p.id === postId);
+        if (!post) {
+          throw new Error("Post not found");
+        }
+
+        const comment = post.comments?.find((c) => c.id === commentId);
+        if (!comment) {
+          throw new Error("Comment not found");
+        }
+
+        // Check if user is comment owner or admin
+        const currentUserId = token ? JSON.parse(atob(token.split('.')[1])).id : null;
+        const isCommentOwner = comment.user_id === currentUserId;
+        const isAdmin = post.userRole === "admin" || (typeof userRole !== 'undefined' && userRole === "admin");
+        if (!isCommentOwner && !isAdmin) {
+          throw new Error("You don't have permission to delete this comment");
+        }
+
         const res = await fetch(
-          `${API_URL}/posts/${postId}/comment/${commentId}`,
+          `${API_URL}/posts/comment/${commentId}`,
           {
             method: "DELETE",
             headers: { Authorization: `Bearer ${token}` },
           }
         );
-        if (!res.ok) throw new Error("Failed to delete comment");
-
-        const post = posts.find((p) => p.id === postId);
-        if (!post) return;
+        if (!res.ok) {
+          const errorData = await res.json();
+          throw new Error(errorData.detail || "Failed to delete comment");
+        }
 
         const updatedPostRes = await fetch(
           `${API_URL}/posts/group/${post.group_id}?post_id=${postId}`,
@@ -382,6 +402,7 @@ export const Dashboard = () => {
         );
       } catch (err) {
         console.error("Error deleting comment:", err);
+        alert(err.message || "Failed to delete comment. Please try again.");
       }
     },
     [token, posts]

@@ -701,3 +701,181 @@
 .delete-comment-btn:hover {
 	opacity: 1;
 }
+
+body.dark-mode .wrapper-dashboard {
+	background-color: #181a1b;
+}
+body.dark-mode .dashboard-container,
+body.dark-mode .dashboard-content {
+	background: none;
+	color: #f1f1f1;
+}
+body.dark-mode .sidebar {
+	background: #23272a;
+	color: #f1f1f1;
+	border-right: 1px solid #222;
+}
+body.dark-mode .action-buttons button {
+	background: #23272a;
+	color: #ffd700;
+	border: 1px solid #333;
+}
+body.dark-mode .action-buttons button:hover {
+	background: #333;
+	color: #fff;
+}
+body.dark-mode .group-list,
+body.dark-mode .group-item {
+	background: #23272a;
+	color: #ffd700;
+}
+body.dark-mode .group-item:hover {
+	background: #2c2f34;
+}
+body.dark-mode .posts-section {
+	background: none;
+	color: #f1f1f1;
+}
+body.dark-mode .post,
+body.dark-mode .post-card {
+	background: #23272a;
+	color: #f1f1f1;
+	border: 1px solid #333;
+}
+body.dark-mode .post-header,
+body.dark-mode .post-content,
+body.dark-mode .post-actions {
+	background: none;
+	color: #f1f1f1;
+}
+body.dark-mode .reaction-btn,
+body.dark-mode .comment-btn {
+	background: #23272a;
+	color: #ffd700;
+	border: 1px solid #333;
+}
+body.dark-mode .reaction-btn.active,
+body.dark-mode .comment-btn.active {
+	background: #333;
+	color: #ffd700;
+}
+body.dark-mode .load-more-button {
+	background: #23272a;
+	color: #ffd700;
+	border: 1px solid #333;
+}
+body.dark-mode .load-more-button:hover {
+	background: #333;
+	color: #fff;
+}
+body.dark-mode .no-posts,
+body.dark-mode .dashboard-loading,
+body.dark-mode .dashboard-error {
+	color: #ffd700;
+}
+body.dark-mode .members-section {
+	background: #1a1f2e;
+	border-color: #4a5568;
+}
+body.dark-mode .members-section h3 {
+	color: #ffffff;
+}
+body.dark-mode .member-item {
+	color: #ffffff;
+	border-color: #4a5568;
+}
+body.dark-mode .member-item:hover {
+	background: #2d3748;
+}
+body.dark-mode .member-name {
+	color: #ffffff;
+}
+body.dark-mode .member-role {
+	color: #a0aec0;
+}
+body.dark-mode .popup {
+	background-color: rgba(0, 0, 0, 0.7);
+}
+body.dark-mode .popup-content {
+	background-color: #1a1f2e;
+	border: 1px solid #4a5568;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+body.dark-mode .popup h2 {
+	color: #ffffff;
+}
+body.dark-mode .form-group label {
+	color: #e2e8f0;
+}
+body.dark-mode .form-group input,
+body.dark-mode .form-group textarea {
+	background-color: #2d3748;
+	border-color: #4a5568;
+	color: #ffffff;
+}
+body.dark-mode .form-group input:focus,
+body.dark-mode .form-group textarea:focus {
+	border-color: #60a5fa;
+	box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2);
+}
+body.dark-mode .form-group-checkbox {
+	color: #e2e8f0;
+}
+body.dark-mode .submit-button {
+	background-color: #60a5fa;
+	color: #1a1f2e;
+}
+body.dark-mode .submit-button:hover {
+	background-color: #3b82f6;
+}
+body.dark-mode .cancel-button {
+	background-color: #ef4444;
+	color: #ffffff;
+}
+body.dark-mode .cancel-button:hover {
+	background-color: #dc2626;
+}
+body.dark-mode .group-title {
+	color: #ffffff;
+	border-bottom-color: #4a5568;
+}
+body.dark-mode .welcome-message h1 {
+	color: #ffffff;
+}
+body.dark-mode .welcome-message p {
+	color: #e2e8f0;
+}
+body.dark-mode .posts-section h2 {
+	color: #ffffff;
+}
+body.dark-mode .post-header h3 {
+	color: #ffffff;
+}
+body.dark-mode .post-header small {
+	color: #a0aec0;
+}
+body.dark-mode .member-info {
+	color: #ffffff;
+}
+body.dark-mode .member-info .name {
+	color: #ffffff;
+}
+body.dark-mode .member-info .role {
+	color: #a0aec0;
+}
+body.dark-mode .member-info .email {
+	color: #e2e8f0;
+}
+body.dark-mode .member-info .joined {
+	color: #a0aec0;
+}
+body.dark-mode .member-actions {
+	border-top-color: #4a5568;
+}
+body.dark-mode .member-actions button {
+	color: #ffffff;
+	border-color: #4a5568;
+}
+body.dark-mode .member-actions button:hover {
+	background-color: #2d3748;
+}

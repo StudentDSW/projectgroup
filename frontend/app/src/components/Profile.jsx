@@ -334,12 +334,35 @@ export const Profile = () => {
   };
 
   const handleDeleteComment = async (postId, commentId) => {
+    if (!window.confirm("Are you sure you want to delete this comment?")) return;
+    
     try {
-      const res = await fetch(`${API_URL}/posts/${postId}/comment/${commentId}`, {
+      // Find the post and comment to check permissions
+      const allPosts = [...myPosts, ...commentedPosts, ...likedPosts, ...dislikedPosts];
+      const post = allPosts.find(p => p.id === postId);
+      if (!post) {
+        throw new Error("Post not found");
+      }
+
+      const comment = post.comments?.find(c => c.id === commentId);
+      if (!comment) {
+        throw new Error("Comment not found");
+      }
+
+      // Check if user is comment owner
+      if (comment.user_id !== currentUserId) {
+        throw new Error("You don't have permission to delete this comment");
+      }
+
+      const res = await fetch(`${API_URL}/posts/comment/${commentId}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!res.ok) throw new Error("Failed to delete comment");
+      
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.detail || "Failed to delete comment");
+      }
 
       // Remove the comment from the post in all lists
       const removeComment = (list, setList) => {
@@ -361,18 +384,13 @@ export const Profile = () => {
       removeComment(dislikedPosts, setDislikedPosts);
 
       // Check if post should be removed from commented posts
-      const post = [...myPosts, ...commentedPosts, ...likedPosts, ...dislikedPosts]
-        .find(p => p.id === postId);
-      
-      if (post) {
-        const hasOtherComments = post.comments?.some(c => c.user_id === currentUserId && c.id !== commentId);
-        if (!hasOtherComments) {
-          setCommentedPosts(prev => prev.filter(p => p.id !== postId));
-        }
+      const hasOtherComments = post.comments?.some(c => c.user_id === currentUserId && c.id !== commentId);
+      if (!hasOtherComments) {
+        setCommentedPosts(prev => prev.filter(p => p.id !== postId));
       }
     } catch (err) {
       console.error("Error deleting comment:", err);
-      alert("Failed to delete comment. Please try again.");
+      alert(err.message || "Failed to delete comment. Please try again.");
     }
   };
 

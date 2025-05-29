@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { FaTrash } from 'react-icons/fa';
 import './comment-section.css';
 
 const CommentSection = ({ 
@@ -89,7 +90,7 @@ const CommentSection = ({
                     className="delete-comment-btn"
                     title="Delete comment"
                   >
-                    ×
+                    <FaTrash />
                   </button>
                 )}
               </div>

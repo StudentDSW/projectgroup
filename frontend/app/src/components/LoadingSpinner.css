@@ -1,12 +1,35 @@
+:root {
+  --paynes-gray: #545e75;
+  --argentinian-blue: #63adf2;
+  --uranian-blue: #a7cced;
+  --yinmn-blue: #304d6d;
+  --air-superiority-blue: #82a0bc;
+}
+
 .loading-spinner-container {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100px;
   width: 100%;
+  animation: fadeIn 0.3s ease-in;
 }
 
-/* Optional: Add a fade-in animation */
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--uranian-blue);
+  border-top-color: var(--argentinian-blue);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -16,6 +39,8 @@
   }
 }
 
-.loading-spinner-container {
-  animation: fadeIn 0.3s ease-in;
+/* Dark mode styles */
+body.dark-mode .spinner {
+  border-color: #4a5568;
+  border-top-color: var(--argentinian-blue);
 } 

@@ -230,3 +230,123 @@
 	padding: 20px;
 	font-style: italic;
 }
+
+/* Dark mode styles for posts and comments */
+body.dark-mode .post {
+	background: #2d3748;
+	border-color: #4a5568;
+}
+
+body.dark-mode .post-header {
+	border-bottom-color: #4a5568;
+}
+
+body.dark-mode .author-name {
+	color: #ffffff !important;
+}
+
+body.dark-mode .group-name {
+	color: #a0aec0;
+}
+
+body.dark-mode .group-name:hover {
+	color: var(--argentinian-blue);
+}
+
+body.dark-mode .post-content,
+body.dark-mode .post-content p {
+	color: #ffffff !important;
+}
+
+body.dark-mode .post-timestamp {
+	color: #a0aec0;
+}
+
+body.dark-mode .comments-section {
+	background: #2d3748;
+	border-color: #4a5568;
+}
+
+body.dark-mode .comments-section h4 {
+	color: #e2e8f0;
+}
+
+body.dark-mode .comment {
+	background: #1a1f2e;
+	border: 1px solid #4a5568;
+}
+
+body.dark-mode .comment-author {
+	color: #ffffff !important;
+}
+
+body.dark-mode .comment-time {
+	color: #a0aec0;
+}
+
+body.dark-mode .comment-text,
+body.dark-mode .comment-text p {
+	color: #ffffff !important;
+}
+
+body.dark-mode .add-comment textarea {
+	background: #1a1f2e;
+	border-color: #4a5568;
+	color: #e2e8f0;
+}
+
+body.dark-mode .add-comment textarea:focus {
+	border-color: var(--argentinian-blue);
+	box-shadow: 0 0 0 2px rgba(99, 173, 242, 0.2);
+}
+
+body.dark-mode .submit-comment {
+	background-color: var(--argentinian-blue);
+	color: #1a1f2e;
+}
+
+body.dark-mode .submit-comment:hover {
+	background-color: #3182ce;
+}
+
+body.dark-mode .submit-comment:disabled {
+	background-color: #4a5568;
+	color: #a0aec0;
+}
+
+body.dark-mode .no-posts {
+	color: #a0aec0;
+	background: #2d3748;
+}
+
+body.dark-mode .delete-post-btn {
+	background-color: #ef4444;
+	color: #ffffff;
+}
+
+body.dark-mode .delete-post-btn:hover {
+	background-color: #dc2626;
+}
+
+body.dark-mode .reaction-btn {
+	color: #ffffff;
+}
+
+body.dark-mode .reaction-btn:hover {
+	background-color: #374151;
+}
+
+body.dark-mode .reaction-btn.active {
+	color: #60a5fa;
+	background-color: #1e3a8a;
+}
+
+body.dark-mode .like-btn.active {
+	color: #34d399;
+	background-color: #064e3b;
+}
+
+body.dark-mode .dislike-btn.active {
+	color: #f87171;
+	background-color: #7f1d1d;
+}
