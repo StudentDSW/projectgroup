@@ -91,40 +91,132 @@ const PostFeed = ({
   };
 
   const handleReaction = async (postId, reactionType) => {
+    if (!token) {
+      console.error('No token available');
+      return;
+    }
+
     try {
+      // Optimistically update the UI first
+      setVisiblePosts(prevPosts => 
+        prevPosts.map(post => {
+          if (post.id !== postId) return post;
+          
+          const updatedReactions = [...(post.reactions || [])];
+          const existingReactionIndex = updatedReactions.findIndex(r => r.user_id === currentUserId);
+          
+          // If user already has this reaction, remove it
+          if (existingReactionIndex !== -1 && updatedReactions[existingReactionIndex].type === reactionType) {
+            updatedReactions.splice(existingReactionIndex, 1);
+          } else {
+            // If user has opposite reaction, replace it
+            if (existingReactionIndex !== -1) {
+              updatedReactions[existingReactionIndex] = {
+                ...updatedReactions[existingReactionIndex],
+                type: reactionType
+              };
+            } else {
+              // Add new reaction
+              updatedReactions.push({
+                id: Date.now(),
+                post_id: postId,
+                user_id: currentUserId,
+                type: reactionType
+              });
+            }
+          }
+          
+          return {
+            ...post,
+            reactions: updatedReactions
+          };
+        })
+      );
+
+      // Then make the API call
       const response = await fetch(`http://localhost:8000/posts/${postId}/reaction?reaction_type=${reactionType}`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
       });
 
       if (!response.ok) {
-        throw new Error('Failed to update reaction');
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to update reaction');
       }
 
       const responseData = await response.json();
       
-      // Call the parent component's callback with both postId and reactionType
+      // Call the parent component's callback with postId, reactionType, and response data
       if (onLike) {
         onLike(postId, reactionType, responseData);
       }
+
+      // Update the state with the server response
+      setVisiblePosts(prevPosts => 
+        prevPosts.map(post => {
+          if (post.id !== postId) return post;
+          
+          // If the server indicates the reaction was removed
+          if (responseData.status === "removed") {
+            const updatedReactions = post.reactions.filter(r => r.user_id !== currentUserId);
+            return {
+              ...post,
+              reactions: updatedReactions
+            };
+          }
+          
+          // If the server indicates a new reaction was added
+          const existingReactionIndex = post.reactions.findIndex(r => r.user_id === currentUserId);
+          const updatedReactions = [...post.reactions];
+          
+          if (existingReactionIndex !== -1) {
+            updatedReactions[existingReactionIndex] = {
+              ...updatedReactions[existingReactionIndex],
+              type: reactionType
+            };
+          } else {
+            updatedReactions.push({
+              id: Date.now(),
+              post_id: postId,
+              user_id: currentUserId,
+              type: reactionType
+            });
+          }
+          
+          return {
+            ...post,
+            reactions: updatedReactions
+          };
+        })
+      );
     } catch (error) {
       console.error('Error updating reaction:', error);
       alert('Failed to update reaction. Please try again.');
+      
+      // Revert the optimistic update on error
+      setVisiblePosts(prevPosts => 
+        prevPosts.map(post => {
+          if (post.id !== postId) return post;
+          return {
+            ...post,
+            reactions: post.reactions.filter(r => r.user_id !== currentUserId)
+          };
+        })
+      );
     }
   };
 
   const getAvatarUrl = (avatar) => {
     if (!avatar) return "/default-avatar.jpg";
     if (avatar.startsWith("data:image")) {
-      // If it's already a data URL, return it directly
       return avatar;
     }
     if (avatar.startsWith("http")) {
       return avatar;
     }
-    // If it's a base64 string without the data:image prefix, add it
     if (avatar.match(/^[A-Za-z0-9+/=]+$/)) {
       return `data:image/png;base64,${avatar}`;
     }
