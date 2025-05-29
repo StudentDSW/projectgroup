@@ -286,7 +286,18 @@ const GroupPage = () => {
         }
       );
       if (!res.ok) throw new Error("Failed to add reaction");
-      fetchPosts(currentPage);
+      
+      // Fetch only the updated post
+      const updatedPostRes = await fetch(`${API_URL}/posts/group/${groupData.id}?post_id=${postId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!updatedPostRes.ok) throw new Error("Failed to fetch updated post");
+      const { posts: [updatedPost] } = await updatedPostRes.json();
+      
+      // Update only the specific post in the state
+      setPosts(prev => prev.map(post => 
+        post.id === postId ? updatedPost : post
+      ));
     } catch (err) {
       console.error("Error adding reaction:", err);
     }
@@ -316,8 +327,17 @@ const GroupPage = () => {
         throw new Error(errorData.detail || "Failed to add comment");
       }
 
-      // Refresh posts to get the updated comment
-      await fetchPosts(currentPage);
+      // Fetch only the updated post
+      const updatedPostRes = await fetch(`${API_URL}/posts/group/${groupData.id}?post_id=${postId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!updatedPostRes.ok) throw new Error("Failed to fetch updated post");
+      const { posts: [updatedPost] } = await updatedPostRes.json();
+      
+      // Update only the specific post in the state
+      setPosts(prev => prev.map(post => 
+        post.id === postId ? updatedPost : post
+      ));
       
       // Keep the comments section visible
       setShowComments(prev => ({ ...prev, [postId]: true }));
@@ -334,8 +354,18 @@ const GroupPage = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error("Failed to delete comment");
-      // Refresh the posts to update the comments
-      fetchPosts(currentPage);
+      
+      // Fetch only the updated post
+      const updatedPostRes = await fetch(`${API_URL}/posts/group/${groupData.id}?post_id=${postId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!updatedPostRes.ok) throw new Error("Failed to fetch updated post");
+      const { posts: [updatedPost] } = await updatedPostRes.json();
+      
+      // Update only the specific post in the state
+      setPosts(prev => prev.map(post => 
+        post.id === postId ? updatedPost : post
+      ));
     } catch (err) {
       console.error("Error deleting comment:", err);
       alert("Failed to delete comment. Please try again.");
@@ -355,7 +385,22 @@ const GroupPage = () => {
         }
       );
       if (!res.ok) throw new Error("Failed to add reaction");
-      fetchPosts(currentPage);
+      
+      // Find the post that contains this comment
+      const post = posts.find(p => p.comments?.some(c => c.id === commentId));
+      if (!post) throw new Error("Post not found");
+      
+      // Fetch only the updated post
+      const updatedPostRes = await fetch(`${API_URL}/posts/group/${groupData.id}?post_id=${post.id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!updatedPostRes.ok) throw new Error("Failed to fetch updated post");
+      const { posts: [updatedPost] } = await updatedPostRes.json();
+      
+      // Update only the specific post in the state
+      setPosts(prev => prev.map(p => 
+        p.id === post.id ? updatedPost : p
+      ));
     } catch (err) {
       console.error("Error adding reaction:", err);
     }

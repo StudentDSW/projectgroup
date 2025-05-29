@@ -14,6 +14,7 @@ export const Registration = () => {
 
   const [errors, setErrors] = useState({});
   const [isPopupVisible, setIsPopupVisible] = useState(false);
+  const [countdown, setCountdown] = useState(3);
 
   const navigate = useNavigate();
 
@@ -98,15 +99,31 @@ export const Registration = () => {
 
   useEffect(() => {
     let timeoutId;
+    let countdownInterval;
+    
     if (isPopupVisible) {
+      countdownInterval = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(countdownInterval);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
       timeoutId = setTimeout(() => {
         setIsPopupVisible(false);
         navigate("/login");
-      }, 2000); // Redirect after 2 seconds
+      }, 3000); // Redirect after 3 seconds
     }
+    
     return () => {
       if (timeoutId) {
         clearTimeout(timeoutId);
+      }
+      if (countdownInterval) {
+        clearInterval(countdownInterval);
       }
     };
   }, [isPopupVisible, navigate]);
@@ -132,6 +149,7 @@ export const Registration = () => {
             gap: '10px'
           }}>
             <h3 className="account__created" style={{ margin: 0 }}>Konto utworzone pomyślnie</h3>
+            <p style={{ margin: 0 }}>Przekierowanie do strony logowania za {countdown} sekund...</p>
           </div>
         )}
         <div className="container left">

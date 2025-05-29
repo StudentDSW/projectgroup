@@ -6,6 +6,7 @@ import { Dashboard } from "./components/Dashboard";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { Profile } from "./components/Profile"
 import { GroupPage } from "./components/GroupPage";
+import GoToTop from './components/GoToTop';
 
 import './App.css'
 
@@ -35,6 +36,7 @@ function App() {
         />
         <Route path="/account" element={<Profile />} />
       </Routes>
+      <GoToTop />
     </div>
   );
 }
