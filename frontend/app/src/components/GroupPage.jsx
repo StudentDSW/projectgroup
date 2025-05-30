@@ -15,7 +15,6 @@ const GroupPage = () => {
   const location = useLocation();
   const token = localStorage.getItem("access_token") || "";
   
-  // Decode once:
   const currentUserId = useMemo(() => {
     try {
       if (!token) return null;
@@ -27,12 +26,10 @@ const GroupPage = () => {
     }
   }, [token]);
 
-  // Add isLoggedIn check
   const isLoggedIn = useMemo(() => {
     return !!token && !!currentUserId;
   }, [token, currentUserId]);
 
-  // State with split loading flags
   const [groupData, setGroupData] = useState(location.state?.groupData || null);
   const [isGroupLoading, setIsGroupLoading] = useState(!location.state?.groupData);
   const [posts, setPosts] = useState([]);
@@ -41,7 +38,6 @@ const GroupPage = () => {
   const [userRole, setUserRole] = useState(null);
   const [groups, setGroups] = useState([]);
   const [error, setError] = useState(null);
-  const [newComment, setNewComment] = useState({});
   const [showPostPopup, setShowPostPopup] = useState(false);
   const [isGroupPopupOpen, setIsGroupPopupOpen] = useState(false);
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);
@@ -52,7 +48,36 @@ const GroupPage = () => {
 
   const POSTS_PER_PAGE = 5;
 
-  // Memoized fetch functions
+  // Unified post update function
+  const updatePostInState = useCallback(async (postId) => {
+    try {
+      const res = await fetch(
+        `${API_URL}/posts/group/${groupData.id}?post_id=${postId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (!res.ok) throw new Error("Failed to fetch updated post");
+      
+      const { posts: fetchedPosts } = await res.json();
+      const updatedPost = fetchedPosts.find(p => p.id === postId);
+      
+      if (!updatedPost) {
+        console.error("Updated post not found");
+        return;
+      }
+      
+      setPosts(prev => {
+        const existingIds = new Set(prev.map(p => p.id));
+        if (!existingIds.has(postId)) return prev;
+        
+        return prev.map(p => 
+          p.id === postId ? updatedPost : p
+        );
+      });
+    } catch (err) {
+      console.error("Error updating post:", err);
+    }
+  }, [groupData?.id, token]);
+
   const fetchGroupData = useCallback(async (signal) => {
     if (!groupName) {
       setError("Invalid group name");
@@ -93,32 +118,49 @@ const GroupPage = () => {
     }
   }, [groupName, token]);
 
-  const fetchPosts = useCallback(async (page = 1) => {
-    if (!groupData?.id) return;
-    setIsPostsLoading(true);
-    try {
-      const res = await fetch(
-        `${API_URL}/posts/group/${groupData.id}?page=${page}&limit=${POSTS_PER_PAGE}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      if (!res.ok) {
-        if (res.status === 403) {
-          setPosts([]);
-          return;
+  const fetchPosts = useCallback(
+    async (page = 1, append = false) => {
+      if (!groupData?.id) return;
+      setIsPostsLoading(true);
+      try {
+        const res = await fetch(
+          `${API_URL}/posts/group/${groupData.id}?page=${page}&limit=${POSTS_PER_PAGE}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        if (!res.ok) {
+          if (res.status === 403) {
+            setPosts([]);
+            return;
+          }
+          throw new Error("Failed to fetch posts");
         }
-        throw new Error("Failed to fetch posts");
+        const { posts: newPosts = [] } = await res.json();
+        
+        setPosts(prev => {
+          if (page === 1) return newPosts;
+          
+          // Create a map for existing posts
+          const existingPosts = new Map(prev.map(p => [p.id, p]));
+          
+          // Update existing posts or add new ones
+          newPosts.forEach(newPost => {
+            existingPosts.set(newPost.id, newPost);
+          });
+          
+          return Array.from(existingPosts.values());
+        });
+        
+        setHasMore(newPosts.length === POSTS_PER_PAGE);
+        setCurrentPage(page);
+      } catch (err) {
+        console.error("Error fetching posts:", err);
+        setPosts([]);
+      } finally {
+        setIsPostsLoading(false);
       }
-      const { posts: postsArray = [] } = await res.json();
-      setPosts((prev) => (page === 1 ? postsArray : [...prev, ...postsArray]));
-      setHasMore(postsArray.length === POSTS_PER_PAGE);
-      setCurrentPage(page);
-    } catch (err) {
-      console.error("Error fetching posts:", err);
-      setPosts([]);
-    } finally {
-      setIsPostsLoading(false);
-    }
-  }, [groupData?.id, token]);
+    },
+    [groupData?.id, token]
+  );
 
   const fetchMembers = useCallback(async () => {
     if (!groupData?.id) return;
@@ -145,7 +187,6 @@ const GroupPage = () => {
     }
   }, [groupData?.id, token, currentUserId]);
 
-  // Main effect for initial load
   useEffect(() => {
     let isMounted = true;
     const controller = new AbortController();
@@ -161,7 +202,6 @@ const GroupPage = () => {
         if (!data || !isMounted) return;
         setIsGroupLoading(false);
       }
-      // At this point groupData is guaranteed
       await Promise.all([
         fetchPosts(1),
         fetchMembers()
@@ -175,7 +215,6 @@ const GroupPage = () => {
     };
   }, [groupName, token, groupData, fetchGroupData, fetchPosts, fetchMembers, navigate]);
 
-  // Periodic refresh for both posts and members
   useEffect(() => {
     if (!groupData?.id) return;
     const interval = setInterval(() => {
@@ -191,7 +230,6 @@ const GroupPage = () => {
     return () => clearInterval(interval);
   }, [groupData?.id, currentPage, fetchPosts, fetchMembers]);
 
-  // Group list fetch
   useEffect(() => {
     const fetchGroups = async () => {
       try {
@@ -207,10 +245,8 @@ const GroupPage = () => {
     fetchGroups();
   }, [token]);
 
-  // Add event listener for avatar changes
   useEffect(() => {
     const handleAvatarChange = (event) => {
-      // Update the avatar in posts where the current user is the author
       setPosts(prevPosts => 
         prevPosts.map(post => 
           post.user_id === currentUserId
@@ -226,7 +262,6 @@ const GroupPage = () => {
     };
   }, [currentUserId]);
 
-  /*** HANDLERS ***/
   const handleGroupClick = async (group) => {
     setPosts([]);
     setGroupMembers([]);
@@ -234,7 +269,6 @@ const GroupPage = () => {
     setGroupData(null);
     setError(null);
     setShowComments({});
-    setNewComment({});
     setCurrentPage(1);
     setHasMore(true);
     navigate(`/group/${group.name}`);
@@ -261,13 +295,11 @@ const GroupPage = () => {
     if (!window.confirm("Are you sure you want to delete this post?")) return;
     
     try {
-      // Find the post to check permissions
       const post = posts.find(p => p.id === postId);
       if (!post) {
         throw new Error("Post not found");
       }
 
-      // Check if user is post owner or admin
       const isPostOwner = post.user_id === currentUserId;
       const isAdmin = userRole === "admin";
       
@@ -292,167 +324,130 @@ const GroupPage = () => {
     }
   };
 
-  const handleReaction = async (postId, type) => {
-    try {
-      const res = await fetch(
-        `${API_URL}/posts/${postId}/reaction?reaction_type=${type}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      if (!res.ok) throw new Error("Failed to add reaction");
-      
-      // Fetch only the updated post
-      const updatedPostRes = await fetch(`${API_URL}/posts/group/${groupData.id}?post_id=${postId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!updatedPostRes.ok) throw new Error("Failed to fetch updated post");
-      const { posts: [updatedPost] } = await updatedPostRes.json();
-      
-      // Update only the specific post in the state
-      setPosts(prev => prev.map(post => 
-        post.id === postId ? updatedPost : post
-      ));
-    } catch (err) {
-      console.error("Error adding reaction:", err);
-    }
-  };
+  const handleReaction = useCallback(
+    async (postId, type) => {
+      try {
+        const res = await fetch(
+          `${API_URL}/posts/${postId}/reaction?reaction_type=${type}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        if (!res.ok) throw new Error("Failed to add reaction");
+        
+        await updatePostInState(postId);
+      } catch (err) {
+        console.error("Error adding reaction:", err);
+      }
+    },
+    [token, updatePostInState]
+  );
 
   const toggleComments = (postId) => {
     setShowComments((prev) => ({ ...prev, [postId]: !prev[postId] }));
   };
 
-  const handleComment = async (postId, commentText) => {
-    if (!commentText?.trim() || !isLoggedIn) return;
-    
-    try {
-      const formData = new FormData();
-      formData.append('text', commentText.trim());
-
-      const res = await fetch(`${API_URL}/posts/${postId}/comment`, {
-        method: 'POST',
-        headers: { 
-          'Authorization': `Bearer ${token}`
-        },
-        body: formData
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.detail || "Failed to add comment");
-      }
-
-      // Fetch only the updated post
-      const updatedPostRes = await fetch(`${API_URL}/posts/group/${groupData.id}?post_id=${postId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!updatedPostRes.ok) throw new Error("Failed to fetch updated post");
-      const { posts: [updatedPost] } = await updatedPostRes.json();
+  const handleComment = useCallback(
+    async (postId, commentText) => {
+      if (!commentText?.trim() || !isLoggedIn) return;
       
-      // Update only the specific post in the state
-      setPosts(prev => prev.map(post => 
-        post.id === postId ? updatedPost : post
-      ));
-      
-      // Keep the comments section visible
-      setShowComments(prev => ({ ...prev, [postId]: true }));
-    } catch (err) {
-      console.error("Error adding comment:", err);
-      alert(err.message || "Failed to add comment. Please try again.");
-    }
-  };
+      try {
+        const formData = new FormData();
+        formData.append('text', commentText.trim());
 
-  const handleDeleteComment = async (postId, commentId) => {
-    if (!window.confirm("Are you sure you want to delete this comment?")) return;
-    
-    try {
-      // Find the post and comment to check permissions
-      const post = posts.find(p => p.id === postId);
-      if (!post) {
-        throw new Error("Post not found");
-      }
-
-      const comment = post.comments?.find(c => c.id === commentId);
-      if (!comment) {
-        throw new Error("Comment not found");
-      }
-
-      // Check if user is comment owner or admin
-      const isCommentOwner = comment.user_id === currentUserId;
-      const isAdmin = userRole === "admin";
-      
-      if (!isCommentOwner && !isAdmin) {
-        throw new Error("You don't have permission to delete this comment");
-      }
-
-      const res = await fetch(`${API_URL}/posts/comment/${commentId}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.detail || "Failed to delete comment");
-      }
-      
-      // Fetch only the updated post
-      const updatedPostRes = await fetch(`${API_URL}/posts/group/${groupData.id}?post_id=${postId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      
-      if (!updatedPostRes.ok) {
-        throw new Error("Failed to fetch updated post");
-      }
-      
-      const { posts: [updatedPost] } = await updatedPostRes.json();
-      
-      // Update only the specific post in the state
-      setPosts(prev => prev.map(post => 
-        post.id === postId ? updatedPost : post
-      ));
-    } catch (err) {
-      console.error("Error deleting comment:", err);
-      alert(err.message || "Failed to delete comment. Please try again.");
-    }
-  };
-
-  const handleCommentReaction = async (commentId, type) => {
-    try {
-      const res = await fetch(
-        `${API_URL}/posts/comments/${commentId}/reaction?reaction_type=${type}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
+        const res = await fetch(`${API_URL}/posts/${postId}/comment`, {
+          method: 'POST',
+          headers: { 
+            'Authorization': `Bearer ${token}`
           },
+          body: formData
+        });
+
+        if (!res.ok) {
+          const errorData = await res.json();
+          throw new Error(errorData.detail || "Failed to add comment");
         }
-      );
-      if (!res.ok) throw new Error("Failed to add reaction");
+
+        await updatePostInState(postId);
+        setShowComments(prev => ({ ...prev, [postId]: true }));
+      } catch (err) {
+        console.error("Error adding comment:", err);
+        alert(err.message || "Failed to add comment. Please try again.");
+      }
+    },
+    [token, updatePostInState, isLoggedIn]
+  );
+
+  const handleDeleteComment = useCallback(
+    async (postId, commentId) => {
+      if (!window.confirm("Are you sure you want to delete this comment?")) return;
       
-      // Find the post that contains this comment
-      const post = posts.find(p => p.comments?.some(c => c.id === commentId));
-      if (!post) throw new Error("Post not found");
-      
-      // Fetch only the updated post
-      const updatedPostRes = await fetch(`${API_URL}/posts/group/${groupData.id}?post_id=${post.id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!updatedPostRes.ok) throw new Error("Failed to fetch updated post");
-      const { posts: [updatedPost] } = await updatedPostRes.json();
-      
-      // Update only the specific post in the state
-      setPosts(prev => prev.map(p => 
-        p.id === post.id ? updatedPost : p
-      ));
-    } catch (err) {
-      console.error("Error adding reaction:", err);
-    }
-  };
+      try {
+        const post = posts.find(p => p.id === postId);
+        if (!post) {
+          throw new Error("Post not found");
+        }
+
+        const comment = post.comments?.find(c => c.id === commentId);
+        if (!comment) {
+          throw new Error("Comment not found");
+        }
+
+        const isCommentOwner = comment.user_id === currentUserId;
+        const isAdmin = userRole === "admin";
+        
+        if (!isCommentOwner && !isAdmin) {
+          throw new Error("You don't have permission to delete this comment");
+        }
+
+        const res = await fetch(`${API_URL}/posts/comment/${commentId}`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        
+        if (!res.ok) {
+          const errorData = await res.json();
+          throw new Error(errorData.detail || "Failed to delete comment");
+        }
+        
+        await updatePostInState(postId);
+      } catch (err) {
+        console.error("Error deleting comment:", err);
+        alert(err.message || "Failed to delete comment. Please try again.");
+      }
+    },
+    [token, posts, currentUserId, userRole, updatePostInState]
+  );
+
+  const handleCommentReaction = useCallback(
+    async (commentId, type) => {
+      try {
+        const res = await fetch(
+          `${API_URL}/posts/comments/${commentId}/reaction?reaction_type=${type}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        if (!res.ok) throw new Error("Failed to add reaction");
+        
+        const post = posts.find(p => p.comments?.some(c => c.id === commentId));
+        if (!post) throw new Error("Post not found");
+        
+        await updatePostInState(post.id);
+      } catch (err) {
+        console.error("Error adding reaction:", err);
+      }
+    },
+    [token, posts, updatePostInState]
+  );
 
   const handleDeleteGroup = async () => {
     if (!window.confirm("Are you sure you want to delete this group?")) return;
@@ -527,14 +522,8 @@ const GroupPage = () => {
 
   const getAvatarUrl = (avatar) => {
     if (!avatar) return "/default-avatar.jpg";
-    if (avatar.startsWith("data:image")) {
-      // If it's already a data URL, return it directly
-      return avatar;
-    }
-    if (avatar.startsWith("http")) {
-      return avatar;
-    }
-    // If it's a base64 string without the data:image prefix, add it
+    if (avatar.startsWith("data:image")) return avatar;
+    if (avatar.startsWith("http")) return avatar;
     if (avatar.match(/^[A-Za-z0-9+/=]+$/)) {
       return `data:image/png;base64,${avatar}`;
     }
@@ -592,7 +581,6 @@ const GroupPage = () => {
     );
   };
 
-  /*** MEMOIZED RENDER FUNCTIONS ***/
   const renderPost = useMemo(
     () => (post) => {
       const hasLiked = post.reactions?.some(
@@ -601,10 +589,8 @@ const GroupPage = () => {
       const hasDisliked = post.reactions?.some(
         (r) => r.user_id === currentUserId && r.type === "dislike"
       );
-      const likeCount = post.reactions?.filter((r) => r.type === "like")
-        .length;
-      const dislikeCount = post.reactions?.filter((r) => r.type === "dislike")
-        .length;
+      const likeCount = post.reactions?.filter((r) => r.type === "like").length || 0;
+      const dislikeCount = post.reactions?.filter((r) => r.type === "dislike").length || 0;
       const commentCount = post.comments?.length || 0;
 
       const isAdmin = userRole === "admin";
@@ -695,7 +681,7 @@ const GroupPage = () => {
         </div>
       );
     },
-    [currentUserId, userRole, showComments, groupData, isLoggedIn]
+    [currentUserId, userRole, showComments, isLoggedIn, handleReaction, handleComment, handleDeleteComment, handleCommentReaction]
   );
 
   const renderSettingsMenu = useMemo(() => {
@@ -735,9 +721,8 @@ const GroupPage = () => {
         </button>
       </div>
     );
-  }, [userRole]);
+  }, [userRole, handleDeleteGroup, handleLeaveGroup]);
 
-  /*** RENDER ***/
   if (isGroupLoading) {
     return (
       <div className="wrapper-dashboard">
@@ -917,8 +902,8 @@ const GroupPage = () => {
             ) : (
               <>
                 <div className="posts-grid">
-                  {posts.map((post, index) => (
-                    <div key={`${post.id}-${index}`} className="post-card">
+                  {posts.map((post) => (
+                    <div key={`${post.id}-${post.updated_at}`} className="post-card">
                       {renderPost(post)}
                     </div>
                   ))}
