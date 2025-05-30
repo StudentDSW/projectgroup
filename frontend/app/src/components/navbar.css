@@ -4,6 +4,13 @@
   --uranian-blue: #a7cced;
   --yinmn-blue: #304d6d;
   --air-superiority-blue: #82a0bc;
+  --sunset-orange: #ff7e5f;
+  --text-main: #1a1f2e;
+}
+
+body.dark-mode {
+  background: #1a1f2e !important;
+  color: #e2e8f0 !important;
 }
 
 .wrapper-navbar {
@@ -31,6 +38,7 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  cursor: pointer;
 }
 
 .logo-img {
@@ -48,6 +56,7 @@
   margin: 0;
   background: linear-gradient(135deg, var(--yinmn-blue), var(--argentinian-blue));
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -147,8 +156,8 @@
 
 .search-error {
   padding: 1rem;
-  color: #dc2626;
-  background: #fee2e2;
+  color: var(--yinmn-blue);
+  background: var(--uranian-blue);
   border-radius: 8px;
   margin: 0.5rem;
 }
@@ -209,32 +218,38 @@
 
 .join-button,
 .leave-button {
-  padding: 0.2rem 0.3rem;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  max-width: 60px;
-  transition: all 0.2s ease;
+  padding: 0.2rem 0.7rem;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  max-width: 44px;
+  min-width: 36px;
+  min-height: 28px;
+  height: 28px;
 }
 
 .join-button {
   background: var(--argentinian-blue);
-  color: #ffffff;
+  color: #fff;
   border: none;
+  font-weight: 600;
 }
 
 .join-button:hover {
-  background: var(--yinmn-blue);
+  background: var(--sunset-orange);
+  color: #fff;
 }
 
 .leave-button {
-  background: #ffffff;
+  background: #fff;
   color: var(--paynes-gray);
   border: 1px solid var(--air-superiority-blue);
+  font-weight: 600;
 }
 
 .leave-button:hover {
-  background: var(--uranian-blue);
+  background: var(--sunset-orange);
+  color: #fff;
 }
 
 .no-results {
@@ -253,10 +268,11 @@
 }
 
 .navbar-username {
+  position: relative;
+  z-index: 2100;
   display: flex;
   align-items: center;
   gap: 1rem;
-  position: relative;
   padding: 0.5rem;
   border-radius: 9999px;
   background: rgba(255, 255, 255, 0.9);
@@ -282,6 +298,7 @@
 
 .profile-button-container {
   position: relative;
+  z-index: 2001;
   display: flex;
   align-items: center;
 }
@@ -297,12 +314,21 @@
   align-items: center;
   justify-content: center;
   border: 2px solid transparent;
+  width: 36px;
+  height: 36px;
+  min-width: 32px;
+  min-height: 32px;
   max-width: 40px;
-  border-radius: 50%;
+  max-height: 40px;
 }
 
 .profile-button:hover {
   border-color: var(--argentinian-blue);
+}
+
+.profile-button:focus, .profile-button:hover {
+  border-color: var(--sunset-orange);
+  box-shadow: 0 0 0 2px var(--sunset-orange, #ff7e5f);
 }
 
 .avatar-image {
@@ -343,242 +369,1327 @@
   display: none;
 }
 
-.dropdown-menu {
+/* --- Modern Dropdown Styling & Overlay for Click-Outside --- */
+.dropdown-menu, .settings-dropdown, .group-settings-dropdown {
   position: absolute;
-  top: calc(100% + 0.75rem);
+  top: calc(100% + 8px);
   right: 0;
-  background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px -1px rgba(48, 77, 109, 0.1);
-  min-width: 200px;
-  padding: 0.5rem;
-  z-index: 1000;
-  border: 1px solid var(--uranian-blue);
-  animation: slideDown 0.2s ease;
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.dropdown-menu button,
-.dropdown-menu label {
-  width: 100%;
-  padding: 0.75rem 1rem;
-  text-align: left;
-  background: none;
-  border: none;
+  left: auto;
+  z-index: 2200;
+  min-width: 190px;
+  max-width: 270px;
+  background: #fff;
+  border: 1.5px solid var(--uranian-blue);
+  border-radius: 14px;
+  box-shadow: 0 10px 32px 0 rgba(48,77,109,0.22), 0 2px 8px 0 rgba(48,77,109,0.10);
+  padding: 0.38rem 0.18rem 0.38rem 0.18rem;
+  margin-top: 0.2rem;
+  overflow: visible;
+  display: none;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
   color: var(--yinmn-blue);
-  font-size: 0.875rem;
+  transition: opacity 0.18s cubic-bezier(0.4,0,0.2,1), visibility 0.18s cubic-bezier(0.4,0,0.2,1);
+}
+
+body.dark-mode .dropdown-menu, body.dark-mode .settings-dropdown, body.dark-mode .group-settings-dropdown {
+  background: var(--dark-blue-1, #16213e);
+  border: 1.5px solid #4a5568;
+  color: #e2e8f0;
+  box-shadow: 0 10px 32px 0 rgba(22,33,62,0.32), 0 2px 8px 0 rgba(22,33,62,0.14);
+}
+
+.dropdown-menu:before, .settings-dropdown:before, .group-settings-dropdown:before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  right: 28px;
+  width: 18px;
+  height: 18px;
+  background: inherit;
+  border-left: 1.5px solid var(--uranian-blue);
+  border-top: 1.5px solid var(--uranian-blue);
+  transform: rotate(45deg);
+  z-index: 2;
+  box-shadow: 0 2px 8px rgba(48,77,109,0.10);
+}
+
+body.dark-mode .dropdown-menu:before, body.dark-mode .settings-dropdown:before, body.dark-mode .group-settings-dropdown:before {
+  background: var(--dark-blue-1, #16213e);
+  border-left: 1.5px solid #4a5568;
+  border-top: 1.5px solid #4a5568;
+}
+
+.dropdown-menu button, .dropdown-menu label,
+.settings-dropdown button, .settings-dropdown label,
+.group-settings-dropdown button, .group-settings-dropdown label {
+  display: block;
+  width: 100%;
+  background: none;
+  color: var(--yinmn-blue);
   font-weight: 500;
-  cursor: pointer;
+  font-size: 1.01rem;
   border-radius: 8px;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.dropdown-menu button:hover,
-.dropdown-menu label:hover {
-  background-color: var(--uranian-blue);
-  color: #ffffff;
-}
-
-body.dark-mode {
-  background: #1a1f2e;
-  color: #e2e8f0;
-}
-
-body.dark-mode .wrapper-navbar {
-  background: linear-gradient(to right, #1a1f2e, #2d3748);
-  border-bottom: 1px solid #2d3748;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
-}
-
-body.dark-mode .navbar {
-  background: none;
-}
-
-body.dark-mode .logo p {
-  color: var(--argentinian-blue);
-  -webkit-text-fill-color: var(--argentinian-blue);
-}
-
-body.dark-mode .search-container,
-body.dark-mode .search-input-wrapper {
-  background: none;
-}
-
-body.dark-mode .search-input {
-  background: #2d3748;
-  color: #e2e8f0;
-  border-color: #4a5568;
-}
-
-body.dark-mode .search-input:focus {
-  border-color: var(--argentinian-blue);
-  background: #2d3748;
-  box-shadow: 0 2px 4px rgba(99, 173, 242, 0.2);
-}
-
-body.dark-mode .search-icon {
-  color: #a0aec0;
-}
-
-body.dark-mode .search-results {
-  background: #2d3748;
-  border-color: #4a5568;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
-}
-
-body.dark-mode .search-error {
-  color: #fc8181;
-  background: #742a2a;
-}
-
-body.dark-mode .group-item {
-  background: #2d3748;
-  color: #e2e8f0;
-}
-
-body.dark-mode .group-item:hover {
-  background: #4a5568;
-}
-
-body.dark-mode .group-name {
-  color: #e2e8f0;
-}
-
-body.dark-mode .member-badge {
-  background: #2c5282;
-  color: #90cdf4;
-}
-
-body.dark-mode .member-badge.admin {
-  background: #2b6cb0;
-  color: #ebf8ff;
-}
-
-body.dark-mode .join-button {
-  background: var(--argentinian-blue);
-  color: #1a1f2e;
-}
-
-body.dark-mode .join-button:hover {
-  background: #3182ce;
-}
-
-body.dark-mode .leave-button {
-  background: #4a5568;
-  color: #e2e8f0;
-  border-color: #2d3748;
-}
-
-body.dark-mode .leave-button:hover {
-  background: #2d3748;
-}
-
-body.dark-mode .navbar-right {
-  border-left: 1px solid #4a5568;
-}
-
-body.dark-mode .navbar-username {
-  background: rgba(45, 55, 72, 0.9);
-  border-color: #4a5568;
-}
-
-body.dark-mode .navbar-username p {
-  color: #e2e8f0;
-}
-
-body.dark-mode .profile-button {
-  border-color: var(--argentinian-blue);
-}
-
-body.dark-mode .avatar-image {
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-body.dark-mode .avatar-upload-container {
-  border-bottom-color: #4a5568;
-}
-
-body.dark-mode .avatar-upload-label {
-  color: #e2e8f0;
-}
-
-body.dark-mode .avatar-upload-label:hover {
-  background-color: #4a5568;
-  color: var(--argentinian-blue);
-}
-
-body.dark-mode .dropdown-menu {
-  background: #2d3748;
-  border-color: #4a5568;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
-}
-
-body.dark-mode .dropdown-menu button,
-body.dark-mode .dropdown-menu label {
-  color: #e2e8f0;
-}
-
-body.dark-mode .dropdown-menu button:hover,
-body.dark-mode .dropdown-menu label:hover {
-  background-color: #4a5568;
-  color: var(--argentinian-blue);
-}
-
-body.dark-mode .dark-mode-toggle {
-  color: #a0aec0;
-}
-
-body.dark-mode .dark-mode-toggle:hover {
-  background-color: #4a5568;
-  color: var(--argentinian-blue);
-}
-
-.dark-mode-toggle {
-  background: none;
-  border: none;
+  padding: 0.5rem 1.2rem;
+  margin: 0.12rem 0;
+  text-align: left;
+  transition: background 0.18s, color 0.18s;
   cursor: pointer;
-  font-size: 1.3em;
-  color: var(--paynes-gray);
-  padding: 0.5rem;
+  border: none;
+  letter-spacing: 0.01em;
+}
+
+.dropdown-menu button:hover, .dropdown-menu label:hover,
+.settings-dropdown button:hover, .settings-dropdown label:hover,
+.group-settings-dropdown button:hover, .group-settings-dropdown label:hover {
+  background: var(--sunset-orange);
+  color: #fff;
+}
+
+body.dark-mode .dropdown-menu button, body.dark-mode .dropdown-menu label,
+body.dark-mode .settings-dropdown button, body.dark-mode .settings-dropdown label,
+body.dark-mode .group-settings-dropdown button, body.dark-mode .group-settings-dropdown label {
+  color: #e2e8f0;
+  background: none;
+}
+
+body.dark-mode .dropdown-menu button:hover, body.dark-mode .dropdown-menu label:hover,
+body.dark-mode .settings-dropdown button:hover, body.dark-mode .settings-dropdown label:hover,
+body.dark-mode .group-settings-dropdown button:hover, body.dark-mode .group-settings-dropdown label:hover {
+  background: var(--sunset-orange);
+  color: #fff;
+}
+
+.dropdown-menu .avatar-upload-label {
+  padding: 0.5rem 1.2rem;
+  color: var(--yinmn-blue);
+  font-weight: 500;
+  border-radius: 8px;
+  background: none;
+  transition: background 0.18s, color 0.18s;
+  display: block;
+  margin: 0.12rem 0;
+  cursor: pointer;
+}
+
+body.dark-mode .dropdown-menu .avatar-upload-label {
+  color: #e2e8f0;
+}
+
+.dropdown-menu .avatar-upload-label:hover {
+  background: var(--uranian-blue);
+  color: #fff;
+}
+
+body.dark-mode .dropdown-menu .avatar-upload-label:hover {
+  background: var(--sunset-orange);
+  color: #fff;
+}
+
+/* Overlay for click-outside to close dropdown */
+.dropdown-menu-close-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2100;
+  background: transparent;
+  display: none;
+}
+
+.dropdown-menu.open ~ .dropdown-menu-close-overlay {
+  display: block;
+}
+
+/* Remove duplicate/old dropdown rules below this point */
+.dropdown-menu, .settings-dropdown, .group-settings-dropdown {
+  position: absolute;
+  top: 110%;
+  right: 0;
+  left: auto;
+  z-index: 1001;
+  display: none;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s cubic-bezier(0.4,0,0.2,1), visibility 0.18s cubic-bezier(0.4,0,0.2,1);
+  color: var(--yinmn-blue); /* Use palette color for text */
+}
+
+.profile-button[aria-expanded="true"] + .dropdown-menu,
+.profile-button.open + .dropdown-menu,
+.profile-button-container .dropdown-menu.open,
+.settings-button[aria-expanded="true"] + .settings-dropdown,
+.settings-button.open + .settings-dropdown,
+.settings-button[aria-expanded="true"] + .group-settings-dropdown,
+.settings-button.open + .group-settings-dropdown {
+  display: block;
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.dropdown-menu, .settings-dropdown, .group-settings-dropdown {
+  /* Ensure dropdowns are floating and not clipped by parent */
+  position: absolute;
+  top: 110%;
+  right: 0;
+  left: auto;
+  z-index: 1001;
+  min-width: 170px;
+  max-width: 240px;
+  background: #fff;
+  border: 1px solid var(--uranian-blue);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(48, 77, 109, 0.18);
+  padding: 0.25rem 0.15rem;
+  margin-top: 0.3rem;
+  overflow: visible;
+}
+
+body.dark-mode .dropdown-menu, body.dark-mode .settings-dropdown, body.dark-mode .group-settings-dropdown {
+  background: var(--dark-blue-1, #16213e);
+  border: 1px solid #4a5568;
+  color: #e2e8f0;
+  box-shadow: 0 8px 24px rgba(22, 33, 62, 0.28);
+}
+
+.dropdown-menu:before, .settings-dropdown:before, .group-settings-dropdown:before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  right: 18px;
+  width: 16px;
+  height: 16px;
+  background: #fff;
+  border-left: 1px solid var(--uranian-blue);
+  border-top: 1px solid var(--uranian-blue);
+  transform: rotate(45deg);
+  z-index: 1;
+}
+
+body.dark-mode .dropdown-menu:before, body.dark-mode .settings-dropdown:before, body.dark-mode .group-settings-dropdown:before {
+  background: var(--dark-blue-1, #16213e);
+  border-left: 1px solid #4a5568;
+  border-top: 1px solid #4a5568;
+}
+
+/* Ensure dropdowns do not increase parent height/layout */
+.profile-button-container, .settings-button {
+  position: relative;
+  overflow: visible;
+}
+
+/* Accessibility: focus-visible for dropdown triggers */
+.profile-button:focus-visible, .settings-button:focus-visible {
+  outline: 2px solid var(--sunset-orange);
+  outline-offset: 2px;
+}
+
+.navbar, .navbar-username, .profile-button, .dropdown-menu, .group-list, .group-item, .group-name, .member-badge, .join-button, .leave-button {
+  color: var(--yinmn-blue);
+}
+
+body.dark-mode .navbar, body.dark_mode .navbar-username, body.dark_mode .profile-button, body.dark_mode .dropdown-menu, body.dark_mode .group-list, body.dark_mode .group-item, body.dark_mode .group-name, body.dark_mode .member-badge, body.dark_mode .join-button, body.dark_mode .leave-button {
+  color: var(--text-main);
+}
+
+.dropdown-menu button, .dropdown-menu label {
+  color: var(--text-main);
+}
+
+/*
+  --- GLOBAL IMPROVEMENTS FOR ALL COMPONENTS ---
+  - Use only palette variables for all backgrounds, text, borders, and accents.
+  - Ensure all text is readable and never the same color as the background in both light and dark modes.
+  - All buttons, dropdowns, popups, and interactive elements use palette backgrounds and text, with strong contrast on hover (no green, no non-palette colors).
+  - All main buttons and dropdowns are compact (reduced padding, font size, width) and have modern, rounded corners.
+  - Dropdowns are absolutely positioned, with a shadow, arrow, and not constrained by parent containers.
+  - Popups (create post, create group, etc.) are centered, have a modern shadow, rounded corners, and palette-based backgrounds.
+  - All dark mode overrides are scoped under body.dark-mode and use only palette variables.
+  - Remove any remaining hardcoded or non-palette colors.
+  - Ensure accessibility: text never same color as background, strong contrast, focus-visible outlines, and visible focus for all interactive elements.
+  - Add subtle transitions for hover/focus states for a modern feel.
+*/
+
+
+
+
+/* Button size improvements for icon-only and content-matching buttons */
+
+/* Icon-only buttons: perfectly round, minimal, and content-matching */
+.profile-button {
+  width: 36px;
+  height: 36px;
+  min-width: 32px;
+  min-height: 32px;
+  max-width: 40px;
+  max-height: 40px;
+  padding: 0;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
-  width: 40px;
-  height: 40px;
+  font-size: 1.1rem;
 }
 
-.dark-mode-toggle:hover {
-  background-color: var(--uranian-blue);
+/* General button improvements: match width to content, compact, modern */
+button, .join-button, .leave-button, .dark-mode-toggle {
+  min-width: unset;
+  width: auto;
+  padding: 0.32rem 0.85rem;
+  font-size: 0.92rem;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4em;
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+}
+
+/* If button only contains an icon, shrink padding further */
+button:only-child > svg, .profile-button > svg, .dark-mode-toggle > svg {
+  margin: 0;
+}
+
+button.icon-only, .profile-button.icon-only, .dark-mode-toggle.icon-only {
+  padding: 0.18rem;
+  width: 32px;
+  height: 32px;
+  min-width: 28px;
+  min-height: 28px;
+  border-radius: 50%;
+}
+
+/* Remove forced max-width/min-width for join/leave if not needed */
+.join-button, .leave-button {
+  min-width: unset;
+  max-width: unset;
+  width: auto;
+  height: 32px;
+  padding: 0.32rem 0.85rem;
+  font-size: 0.92rem;
+}
+
+/* Responsive: shrink further on mobile */
+@media (max-width: 600px) {
+  .profile-button, .dark-mode-toggle, .join-button, .leave-button {
+    width: 28px;
+    height: 28px;
+    font-size: 0.85rem;
+    padding: 0.12rem 0.5rem;
+  }
+}
+
+/* Like/Dislike button improvements: icon-only, compact, round, and content-matching */
+.like-button, .dislike-button {
+  width: 32px;
+  height: 32px;
+  min-width: 28px;
+  min-height: 28px;
+  max-width: 36px;
+  max-height: 36px;
+  padding: 0.18rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 2px solid transparent;
   color: var(--yinmn-blue);
+  transition: background 0.18s, color 0.18s, border-color 0.18s, box-shadow 0.18s;
+  font-size: 1.1rem;
 }
 
-/* Focus styles for accessibility */
-.search-input:focus-visible,
-.profile-button:focus-visible,
-.dark-mode-toggle:focus-visible,
-.dropdown-menu button:focus-visible {
-  outline: 2px solid var(--argentinian-blue);
+.like-button:hover, .dislike-button:hover {
+  background: var(--uranian-blue);
+  color: var(--sunset-orange);
+  border-color: var(--sunset-orange);
+}
+
+.like-button.active, .dislike-button.active {
+  background: var(--sunset-orange);
+  color: #fff;
+  border-color: var(--sunset-orange);
+}
+
+body.dark-mode .like-button, body.dark-mode .dislike-button {
+  color: #e2e8f0;
+  background: none;
+  border-color: transparent;
+}
+
+body.dark-mode .like-button:hover, body.dark-mode .dislike-button:hover {
+  background: var(--argentinian-blue);
+  color: var(--sunset-orange);
+  border-color: var(--sunset-orange);
+}
+
+body.dark-mode .like-button.active, body.dark_mode .dislike-button.active {
+  background: var(--sunset-orange);
+  color: #fff;
+  border-color: var(--sunset-orange);
+}
+
+@media (max-width: 600px) {
+  .like-button, .dislike-button {
+    width: 26px;
+    height: 26px;
+    font-size: 1rem;
+    padding: 0.08rem;
+  }
+}
+
+/* --- Dropdown Menu Palette & Behavior Fixes --- */
+.dropdown-menu, .settings-dropdown, .group-settings-dropdown {
+  position: absolute;
+  top: 110%;
+  right: 0;
+  left: auto;
+  z-index: 2200;
+  display: none;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s cubic-bezier(0.4,0,0.2,1), visibility 0.18s cubic-bezier(0.4,0,0.2,1);
+  color: var(--yinmn-blue); /* Use palette color for text */
+}
+
+.profile-button[aria-expanded="true"] + .dropdown-menu,
+.profile-button.open + .dropdown-menu,
+.profile-button-container .dropdown-menu.open,
+.settings-button[aria-expanded="true"] + .settings-dropdown,
+.settings-button.open + .settings-dropdown,
+.settings-button[aria-expanded="true"] + .group-settings-dropdown,
+.settings-button.open + .group-settings-dropdown {
+  display: block;
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.dropdown-menu, .settings-dropdown, .group-settings-dropdown {
+  /* Ensure dropdowns are floating and not clipped by parent */
+  position: absolute;
+  top: 110%;
+  right: 0;
+  left: auto;
+  z-index: 2200;
+  min-width: 190px;
+  max-width: 270px;
+  background: #fff;
+  border: 1.5px solid var(--uranian-blue);
+  border-radius: 14px;
+  box-shadow: 0 10px 32px 0 rgba(48,77,109,0.22), 0 2px 8px 0 rgba(48,77,109,0.10);
+  padding: 0.38rem 0.18rem 0.38rem 0.18rem;
+  margin-top: 0.2rem;
+  overflow: visible;
+  display: none;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  color: var(--yinmn-blue);
+  transition: opacity 0.18s cubic-bezier(0.4,0,0.2,1), visibility 0.18s cubic-bezier(0.4,0,0.2,1);
+}
+
+body.dark-mode .dropdown-menu, body.dark-mode .settings-dropdown, body.dark-mode .group-settings-dropdown {
+  background: var(--dark-blue-1, #16213e);
+  border: 1.5px solid #4a5568;
+  color: #e2e8f0;
+  box-shadow: 0 10px 32px 0 rgba(22,33,62,0.32), 0 2px 8px 0 rgba(22,33,62,0.14);
+}
+
+.dropdown-menu:before, .settings-dropdown:before, .group-settings-dropdown:before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  right: 28px;
+  width: 18px;
+  height: 18px;
+  background: inherit;
+  border-left: 1.5px solid var(--uranian-blue);
+  border-top: 1.5px solid var(--uranian-blue);
+  transform: rotate(45deg);
+  z-index: 2;
+  box-shadow: 0 2px 8px rgba(48,77,109,0.10);
+}
+
+body.dark-mode .dropdown-menu:before, body.dark-mode .settings-dropdown:before, body.dark-mode .group-settings-dropdown:before {
+  background: var(--dark-blue-1, #16213e);
+  border-left: 1.5px solid #4a5568;
+  border-top: 1.5px solid #4a5568;
+}
+
+.dropdown-menu button, .dropdown-menu label,
+.settings-dropdown button, .settings-dropdown label,
+.group-settings-dropdown button, .group-settings-dropdown label {
+  display: block;
+  width: 100%;
+  background: none;
+  color: var(--yinmn-blue);
+  font-weight: 500;
+  font-size: 1.01rem;
+  border-radius: 8px;
+  padding: 0.5rem 1.2rem;
+  margin: 0.12rem 0;
+  text-align: left;
+  transition: background 0.18s, color 0.18s;
+  cursor: pointer;
+  border: none;
+  letter-spacing: 0.01em;
+}
+
+.dropdown-menu button:hover, .dropdown-menu label:hover,
+.settings-dropdown button:hover, .settings-dropdown label:hover,
+.group-settings-dropdown button:hover, .group-settings-dropdown label:hover {
+  background: var(--sunset-orange);
+  color: #fff;
+}
+
+body.dark-mode .dropdown-menu button, body.dark-mode .dropdown-menu label,
+body.dark-mode .settings-dropdown button, body.dark-mode .settings-dropdown label,
+body.dark-mode .group-settings-dropdown button, body.dark-mode .group-settings-dropdown label {
+  color: #e2e8f0;
+  background: none;
+}
+
+body.dark-mode .dropdown-menu button:hover, body.dark-mode .dropdown-menu label:hover,
+body.dark-mode .settings-dropdown button:hover, body.dark-mode .settings-dropdown label:hover,
+body.dark-mode .group-settings-dropdown button:hover, body.dark-mode .group-settings-dropdown label:hover {
+  background: var(--sunset-orange);
+  color: #fff;
+}
+
+.dropdown-menu .avatar-upload-label {
+  padding: 0.5rem 1.2rem;
+  color: var(--yinmn-blue);
+  font-weight: 500;
+  border-radius: 8px;
+  background: none;
+  transition: background 0.18s, color 0.18s;
+  display: block;
+  margin: 0.12rem 0;
+  cursor: pointer;
+}
+
+body.dark-mode .dropdown-menu .avatar-upload-label {
+  color: #e2e8f0;
+}
+
+.dropdown-menu .avatar-upload-label:hover {
+  background: var(--uranian-blue);
+  color: #fff;
+}
+
+body.dark-mode .dropdown-menu .avatar-upload-label:hover {
+  background: var(--sunset-orange);
+  color: #fff;
+}
+
+/* Overlay for click-outside to close dropdown */
+.dropdown-menu-close-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2100;
+  background: transparent;
+  display: none;
+}
+
+.dropdown-menu.open ~ .dropdown-menu-close-overlay {
+  display: block;
+}
+
+/* Remove duplicate/old dropdown rules below this point */
+.dropdown-menu, .settings-dropdown, .group-settings-dropdown {
+  position: absolute;
+  top: 110%;
+  right: 0;
+  left: auto;
+  z-index: 1001;
+  display: none;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s cubic-bezier(0.4,0,0.2,1), visibility 0.18s cubic-bezier(0.4,0,0.2,1);
+  color: var(--yinmn-blue); /* Use palette color for text */
+}
+
+.profile-button[aria-expanded="true"] + .dropdown-menu,
+.profile-button.open + .dropdown-menu,
+.profile-button-container .dropdown-menu.open,
+.settings-button[aria-expanded="true"] + .settings-dropdown,
+.settings-button.open + .settings-dropdown,
+.settings-button[aria-expanded="true"] + .group-settings-dropdown,
+.settings-button.open + .group-settings-dropdown {
+  display: block;
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.dropdown-menu, .settings-dropdown, .group-settings-dropdown {
+  /* Ensure dropdowns are floating and not clipped by parent */
+  position: absolute;
+  top: 110%;
+  right: 0;
+  left: auto;
+  z-index: 1001;
+  min-width: 170px;
+  max-width: 240px;
+  background: #fff;
+  border: 1px solid var(--uranian-blue);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(48, 77, 109, 0.18);
+  padding: 0.25rem 0.15rem;
+  margin-top: 0.3rem;
+  overflow: visible;
+}
+
+body.dark-mode .dropdown-menu, body.dark-mode .settings-dropdown, body.dark-mode .group-settings-dropdown {
+  background: var(--dark-blue-1, #16213e);
+  border: 1px solid #4a5568;
+  color: #e2e8f0;
+  box-shadow: 0 8px 24px rgba(22, 33, 62, 0.28);
+}
+
+.dropdown-menu:before, .settings-dropdown:before, .group-settings-dropdown:before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  right: 18px;
+  width: 16px;
+  height: 16px;
+  background: #fff;
+  border-left: 1px solid var(--uranian-blue);
+  border-top: 1px solid var(--uranian-blue);
+  transform: rotate(45deg);
+  z-index: 1;
+}
+
+body.dark-mode .dropdown-menu:before, body.dark-mode .settings-dropdown:before, body.dark-mode .group-settings-dropdown:before {
+  background: var(--dark-blue-1, #16213e);
+  border-left: 1px solid #4a5568;
+  border-top: 1px solid #4a5568;
+}
+
+/* Ensure dropdowns do not increase parent height/layout */
+.profile-button-container, .settings-button {
+  position: relative;
+  overflow: visible;
+}
+
+/* Accessibility: focus-visible for dropdown triggers */
+.profile-button:focus-visible, .settings-button:focus-visible {
+  outline: 2px solid var(--sunset-orange);
   outline-offset: 2px;
 }
 
-body.dark-mode .search-input:focus-visible,
-body.dark-mode .profile-button:focus-visible,
-body.dark-mode .dark-mode-toggle:focus-visible,
-body.dark-mode .dropdown-menu button:focus-visible {
-  outline-color: var(--argentinian-blue);
+.navbar, .navbar-username, .profile-button, .dropdown-menu, .group-list, .group-item, .group-name, .member-badge, .join-button, .leave-button {
+  color: var(--yinmn-blue);
+}
+
+body.dark-mode .navbar, body.dark_mode .navbar-username, body.dark_mode .profile-button, body.dark_mode .dropdown-menu, body.dark_mode .group-list, body.dark_mode .group-item, body.dark_mode .group-name, body.dark_mode .member-badge, body.dark_mode .join-button, body.dark_mode .leave-button {
+  color: var(--text-main);
+}
+
+.dropdown-menu button, .dropdown-menu label {
+  color: var(--text-main);
+}
+
+/*
+  --- GLOBAL IMPROVEMENTS FOR ALL COMPONENTS ---
+  - Use only palette variables for all backgrounds, text, borders, and accents.
+  - Ensure all text is readable and never the same color as the background in both light and dark modes.
+  - All buttons, dropdowns, popups, and interactive elements use palette backgrounds and text, with strong contrast on hover (no green, no non-palette colors).
+  - All main buttons and dropdowns are compact (reduced padding, font size, width) and have modern, rounded corners.
+  - Dropdowns are absolutely positioned, with a shadow, arrow, and not constrained by parent containers.
+  - Popups (create post, create group, etc.) are centered, have a modern shadow, rounded corners, and palette-based backgrounds.
+  - All dark mode overrides are scoped under body.dark-mode and use only palette variables.
+  - Remove any remaining hardcoded or non-palette colors.
+  - Ensure accessibility: text never same color as background, strong contrast, focus-visible outlines, and visible focus for all interactive elements.
+  - Add subtle transitions for hover/focus states for a modern feel.
+*/
+
+
+
+
+/* Button size improvements for icon-only and content-matching buttons */
+
+/* Icon-only buttons: perfectly round, minimal, and content-matching */
+.profile-button {
+  width: 36px;
+  height: 36px;
+  min-width: 32px;
+  min-height: 32px;
+  max-width: 40px;
+  max-height: 40px;
+  padding: 0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+}
+
+/* General button improvements: match width to content, compact, modern */
+button, .join-button, .leave-button, .dark-mode-toggle {
+  min-width: unset;
+  width: auto;
+  padding: 0.32rem 0.85rem;
+  font-size: 0.92rem;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4em;
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+}
+
+/* If button only contains an icon, shrink padding further */
+button:only-child > svg, .profile-button > svg, .dark-mode-toggle > svg {
+  margin: 0;
+}
+
+button.icon-only, .profile-button.icon-only, .dark-mode-toggle.icon-only {
+  padding: 0.18rem;
+  width: 32px;
+  height: 32px;
+  min-width: 28px;
+  min-height: 28px;
+  border-radius: 50%;
+}
+
+/* Remove forced max-width/min-width for join/leave if not needed */
+.join-button, .leave-button {
+  min-width: unset;
+  max-width: unset;
+  width: auto;
+  height: 32px;
+  padding: 0.32rem 0.85rem;
+  font-size: 0.92rem;
+}
+
+/* Responsive: shrink further on mobile */
+@media (max-width: 600px) {
+  .profile-button, .dark-mode-toggle, .join-button, .leave-button {
+    width: 28px;
+    height: 28px;
+    font-size: 0.85rem;
+    padding: 0.12rem 0.5rem;
+  }
+}
+
+/* Like/Dislike button improvements: icon-only, compact, round, and content-matching */
+.like-button, .dislike-button {
+  width: 32px;
+  height: 32px;
+  min-width: 28px;
+  min-height: 28px;
+  max-width: 36px;
+  max-height: 36px;
+  padding: 0.18rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 2px solid transparent;
+  color: var(--yinmn-blue);
+  transition: background 0.18s, color 0.18s, border-color 0.18s, box-shadow 0.18s;
+  font-size: 1.1rem;
+}
+
+.like-button:hover, .dislike-button:hover {
+  background: var(--uranian-blue);
+  color: var(--sunset-orange);
+  border-color: var(--sunset-orange);
+}
+
+.like-button.active, .dislike-button.active {
+  background: var(--sunset-orange);
+  color: #fff;
+  border-color: var(--sunset-orange);
+}
+
+body.dark-mode .like-button, body.dark-mode .dislike-button {
+  color: #e2e8f0;
+  background: none;
+  border-color: transparent;
+}
+
+body.dark-mode .like-button:hover, body.dark-mode .dislike-button:hover {
+  background: var(--argentinian-blue);
+  color: var(--sunset-orange);
+  border-color: var(--sunset-orange);
+}
+
+body.dark-mode .like-button.active, body.dark_mode .dislike-button.active {
+  background: var(--sunset-orange);
+  color: #fff;
+  border-color: var(--sunset-orange);
+}
+
+@media (max-width: 600px) {
+  .like-button, .dislike-button {
+    width: 26px;
+    height: 26px;
+    font-size: 1rem;
+    padding: 0.08rem;
+  }
+}
+
+/* --- Dropdown Menu Palette & Behavior Fixes --- */
+.dropdown-menu, .settings-dropdown, .group-settings-dropdown {
+  position: absolute;
+  top: 110%;
+  right: 0;
+  left: auto;
+  z-index: 2200;
+  display: none;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s cubic-bezier(0.4,0,0.2,1), visibility 0.18s cubic-bezier(0.4,0,0.2,1);
+  color: var(--yinmn-blue); /* Use palette color for text */
+}
+
+.profile-button[aria-expanded="true"] + .dropdown-menu,
+.profile-button.open + .dropdown-menu,
+.profile-button-container .dropdown-menu.open,
+.settings-button[aria-expanded="true"] + .settings-dropdown,
+.settings-button.open + .settings-dropdown,
+.settings-button[aria-expanded="true"] + .group-settings-dropdown,
+.settings-button.open + .group-settings-dropdown {
+  display: block;
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.dropdown-menu, .settings-dropdown, .group-settings-dropdown {
+  /* Ensure dropdowns are floating and not clipped by parent */
+  position: absolute;
+  top: 110%;
+  right: 0;
+  left: auto;
+  z-index: 2200;
+  min-width: 190px;
+  max-width: 270px;
+  background: #fff;
+  border: 1.5px solid var(--uranian-blue);
+  border-radius: 14px;
+  box-shadow: 0 10px 32px 0 rgba(48,77,109,0.22), 0 2px 8px 0 rgba(48,77,109,0.10);
+  padding: 0.38rem 0.18rem 0.38rem 0.18rem;
+  margin-top: 0.2rem;
+  overflow: visible;
+  display: none;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  color: var(--yinmn-blue);
+  transition: opacity 0.18s cubic-bezier(0.4,0,0.2,1), visibility 0.18s cubic-bezier(0.4,0,0.2,1);
+}
+
+body.dark-mode .dropdown-menu, body.dark-mode .settings-dropdown, body.dark-mode .group-settings-dropdown {
+  background: var(--dark-blue-1, #16213e);
+  border: 1.5px solid #4a5568;
+  color: #e2e8f0;
+  box-shadow: 0 10px 32px 0 rgba(22,33,62,0.32), 0 2px 8px 0 rgba(22,33,62,0.14);
+}
+
+.dropdown-menu:before, .settings-dropdown:before, .group-settings-dropdown:before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  right: 28px;
+  width: 18px;
+  height: 18px;
+  background: inherit;
+  border-left: 1.5px solid var(--uranian-blue);
+  border-top: 1.5px solid var(--uranian-blue);
+  transform: rotate(45deg);
+  z-index: 2;
+  box-shadow: 0 2px 8px rgba(48,77,109,0.10);
+}
+
+body.dark-mode .dropdown-menu:before, body.dark-mode .settings-dropdown:before, body.dark-mode .group-settings-dropdown:before {
+  background: var(--dark-blue-1, #16213e);
+  border-left: 1.5px solid #4a5568;
+  border-top: 1.5px solid #4a5568;
+}
+
+.dropdown-menu button, .dropdown-menu label,
+.settings-dropdown button, .settings-dropdown label,
+.group-settings-dropdown button, .group-settings-dropdown label {
+  display: block;
+  width: 100%;
+  background: none;
+  color: var(--yinmn-blue);
+  font-weight: 500;
+  font-size: 1.01rem;
+  border-radius: 8px;
+  padding: 0.5rem 1.2rem;
+  margin: 0.12rem 0;
+  text-align: left;
+  transition: background 0.18s, color 0.18s;
+  cursor: pointer;
+  border: none;
+  letter-spacing: 0.01em;
+}
+
+.dropdown-menu button:hover, .dropdown-menu label:hover,
+.settings-dropdown button:hover, .settings-dropdown label:hover,
+.group-settings-dropdown button:hover, .group-settings-dropdown label:hover {
+  background: var(--sunset-orange);
+  color: #fff;
+}
+
+body.dark-mode .dropdown-menu button, body.dark-mode .dropdown-menu label,
+body.dark-mode .settings-dropdown button, body.dark-mode .settings-dropdown label,
+body.dark-mode .group-settings-dropdown button, body.dark-mode .group-settings-dropdown label {
+  color: #e2e8f0;
+  background: none;
+}
+
+body.dark-mode .dropdown-menu button:hover, body.dark-mode .dropdown-menu label:hover,
+body.dark-mode .settings-dropdown button:hover, body.dark-mode .settings-dropdown label:hover,
+body.dark-mode .group-settings-dropdown button:hover, body.dark-mode .group-settings-dropdown label:hover {
+  background: var(--sunset-orange);
+  color: #fff;
+}
+
+.dropdown-menu .avatar-upload-label {
+  padding: 0.5rem 1.2rem;
+  color: var(--yinmn-blue);
+  font-weight: 500;
+  border-radius: 8px;
+  background: none;
+  transition: background 0.18s, color 0.18s;
+  display: block;
+  margin: 0.12rem 0;
+  cursor: pointer;
+}
+
+body.dark-mode .dropdown-menu .avatar-upload-label {
+  color: #e2e8f0;
+}
+
+.dropdown-menu .avatar-upload-label:hover {
+  background: var(--uranian-blue);
+  color: #fff;
+}
+
+body.dark-mode .dropdown-menu .avatar-upload-label:hover {
+  background: var(--sunset-orange);
+  color: #fff;
+}
+
+/* Overlay for click-outside to close dropdown */
+.dropdown-menu-close-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2100;
+  background: transparent;
+  display: none;
+}
+
+.dropdown-menu.open ~ .dropdown-menu-close-overlay {
+  display: block;
+}
+
+/* Remove duplicate/old dropdown rules below this point */
+.dropdown-menu, .settings-dropdown, .group-settings-dropdown {
+  position: absolute;
+  top: 110%;
+  right: 0;
+  left: auto;
+  z-index: 1001;
+  display: none;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s cubic-bezier(0.4,0,0.2,1), visibility 0.18s cubic-bezier(0.4,0,0.2,1);
+  color: var(--yinmn-blue); /* Use palette color for text */
+}
+
+.profile-button[aria-expanded="true"] + .dropdown-menu,
+.profile-button.open + .dropdown-menu,
+.profile-button-container .dropdown-menu.open,
+.settings-button[aria-expanded="true"] + .settings-dropdown,
+.settings-button.open + .settings-dropdown,
+.settings-button[aria-expanded="true"] + .group-settings-dropdown,
+.settings-button.open + .group-settings-dropdown {
+  display: block;
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.dropdown-menu, .settings-dropdown, .group-settings-dropdown {
+  /* Ensure dropdowns are floating and not clipped by parent */
+  position: absolute;
+  top: 110%;
+  right: 0;
+  left: auto;
+  z-index: 1001;
+  min-width: 170px;
+  max-width: 240px;
+  background: #fff;
+  border: 1px solid var(--uranian-blue);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(48, 77, 109, 0.18);
+  padding: 0.25rem 0.15rem;
+  margin-top: 0.3rem;
+  overflow: visible;
+}
+
+body.dark-mode .dropdown-menu, body.dark-mode .settings-dropdown, body.dark-mode .group-settings-dropdown {
+  background: var(--dark-blue-1, #16213e);
+  border: 1px solid #4a5568;
+  color: #e2e8f0;
+  box-shadow: 0 8px 24px rgba(22, 33, 62, 0.28);
+}
+
+.dropdown-menu:before, .settings-dropdown:before, .group-settings-dropdown:before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  right: 18px;
+  width: 16px;
+  height: 16px;
+  background: #fff;
+  border-left: 1px solid var(--uranian-blue);
+  border-top: 1px solid var(--uranian-blue);
+  transform: rotate(45deg);
+  z-index: 1;
+}
+
+body.dark-mode .dropdown-menu:before, body.dark-mode .settings-dropdown:before, body.dark-mode .group-settings-dropdown:before {
+  background: var(--dark-blue-1, #16213e);
+  border-left: 1px solid #4a5568;
+  border-top: 1px solid #4a5568;
+}
+
+/* Ensure dropdowns do not increase parent height/layout */
+.profile-button-container, .settings-button {
+  position: relative;
+  overflow: visible;
+}
+
+/* Accessibility: focus-visible for dropdown triggers */
+.profile-button:focus-visible, .settings-button:focus-visible {
+  outline: 2px solid var(--sunset-orange);
+  outline-offset: 2px;
+}
+
+.navbar, .navbar-username, .profile-button, .dropdown-menu, .group-list, .group-item, .group-name, .member-badge, .join-button, .leave-button {
+  color: var(--yinmn-blue);
+}
+
+body.dark-mode .navbar, body.dark_mode .navbar-username, body.dark_mode .profile-button, body.dark_mode .dropdown-menu, body.dark_mode .group-list, body.dark_mode .group-item, body.dark_mode .group-name, body.dark_mode .member-badge, body.dark_mode .join-button, body.dark_mode .leave-button {
+  color: var(--text-main);
+}
+
+.dropdown-menu button, .dropdown-menu label {
+  color: var(--text-main);
+}
+
+/*
+  --- GLOBAL IMPROVEMENTS FOR ALL COMPONENTS ---
+  - Use only palette variables for all backgrounds, text, borders, and accents.
+  - Ensure all text is readable and never the same color as the background in both light and dark modes.
+  - All buttons, dropdowns, popups, and interactive elements use palette backgrounds and text, with strong contrast on hover (no green, no non-palette colors).
+  - All main buttons and dropdowns are compact (reduced padding, font size, width) and have modern, rounded corners.
+  - Dropdowns are absolutely positioned, with a shadow, arrow, and not constrained by parent containers.
+  - Popups (create post, create group, etc.) are centered, have a modern shadow, rounded corners, and palette-based backgrounds.
+  - All dark mode overrides are scoped under body.dark-mode and use only palette variables.
+  - Remove any remaining hardcoded or non-palette colors.
+  - Ensure accessibility: text never same color as background, strong contrast, focus-visible outlines, and visible focus for all interactive elements.
+  - Add subtle transitions for hover/focus states for a modern feel.
+*/
+
+
+
+
+/* Button size improvements for icon-only and content-matching buttons */
+
+/* Icon-only buttons: perfectly round, minimal, and content-matching */
+.profile-button {
+  width: 36px;
+  height: 36px;
+  min-width: 32px;
+  min-height: 32px;
+  max-width: 40px;
+  max-height: 40px;
+  padding: 0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+}
+
+/* General button improvements: match width to content, compact, modern */
+button, .join-button, .leave-button, .dark-mode-toggle {
+  min-width: unset;
+  width: auto;
+  padding: 0.32rem 0.85rem;
+  font-size: 0.92rem;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4em;
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+}
+
+/* If button only contains an icon, shrink padding further */
+button:only-child > svg, .profile-button > svg, .dark-mode-toggle > svg {
+  margin: 0;
+}
+
+button.icon-only, .profile-button.icon-only, .dark-mode-toggle.icon-only {
+  padding: 0.18rem;
+  width: 32px;
+  height: 32px;
+  min-width: 28px;
+  min-height: 28px;
+  border-radius: 50%;
+}
+
+/* Remove forced max-width/min-width for join/leave if not needed */
+.join-button, .leave-button {
+  min-width: unset;
+  max-width: unset;
+  width: auto;
+  height: 32px;
+  padding: 0.32rem 0.85rem;
+  font-size: 0.92rem;
+}
+
+/* Responsive: shrink further on mobile */
+@media (max-width: 600px) {
+  .profile-button, .dark-mode-toggle, .join-button, .leave-button {
+    width: 28px;
+    height: 28px;
+    font-size: 0.85rem;
+    padding: 0.12rem 0.5rem;
+  }
+}
+
+/* Like/Dislike button improvements: icon-only, compact, round, and content-matching */
+.like-button, .dislike-button {
+  width: 32px;
+  height: 32px;
+  min-width: 28px;
+  min-height: 28px;
+  max-width: 36px;
+  max-height: 36px;
+  padding: 0.18rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 2px solid transparent;
+  color: var(--yinmn-blue);
+  transition: background 0.18s, color 0.18s, border-color 0.18s, box-shadow 0.18s;
+  font-size: 1.1rem;
+}
+
+.like-button:hover, .dislike-button:hover {
+  background: var(--uranian-blue);
+  color: var(--sunset-orange);
+  border-color: var(--sunset-orange);
+}
+
+.like-button.active, .dislike-button.active {
+  background: var(--sunset-orange);
+  color: #fff;
+  border-color: var(--sunset-orange);
+}
+
+body.dark-mode .like-button, body.dark-mode .dislike-button {
+  color: #e2e8f0;
+  background: none;
+  border-color: transparent;
+}
+
+body.dark-mode .like-button:hover, body.dark-mode .dislike-button:hover {
+  background: var(--argentinian-blue);
+  color: var(--sunset-orange);
+  border-color: var(--sunset-orange);
+}
+
+body.dark-mode .like-button.active, body.dark_mode .dislike-button.active {
+  background: var(--sunset-orange);
+  color: #fff;
+  border-color: var(--sunset-orange);
+}
+
+@media (max-width: 600px) {
+  .like-button, .dislike-button {
+    width: 26px;
+    height: 26px;
+    font-size: 1rem;
+    padding: 0.08rem;
+  }
+}
+
+/* --- Dropdown Menu Palette & Behavior Fixes --- */
+.dropdown-menu, .settings-dropdown, .group-settings-dropdown {
+  position: absolute;
+  top: 110%;
+  right: 0;
+  left: auto;
+  z-index: 2200;
+  display: none;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s cubic-bezier(0.4,0,0.2,1), visibility 0.18s cubic-bezier(0.4,0,0.2,1);
+  color: var(--yinmn-blue); /* Use palette color for text */
+}
+
+.profile-button[aria-expanded="true"] + .dropdown-menu,
+.profile-button.open + .dropdown-menu,
+.profile-button-container .dropdown-menu.open,
+.settings-button[aria-expanded="true"] + .settings-dropdown,
+.settings-button.open + .settings-dropdown,
+.settings-button[aria-expanded="true"] + .group-settings-dropdown,
+.settings-button.open + .group-settings-dropdown {
+  display: block;
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.dropdown-menu, .settings-dropdown, .group-settings-dropdown {
+  /* Ensure dropdowns are floating and not clipped by parent */
+  position: absolute;
+  top: 110%;
+  right: 0;
+  left: auto;
+  z-index: 2200;
+  min-width: 190px;
+  max-width: 270px;
+  background: #fff;
+  border: 1.5px solid var(--uranian-blue);
+  border-radius: 14px;
+  box-shadow: 0 10px 32px 0 rgba(48,77,109,0.22), 0 2px 8px 0 rgba(48,77,109,0.10);
+  padding: 0.38rem 0.18rem 0.38rem 0.18rem;
+  margin-top: 0.2rem;
+  overflow: visible;
+  display: none;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  color: var(--yinmn-blue);
+  transition: opacity 0.18s cubic-bezier(0.4,0,0.2,1), visibility 0.18s cubic-bezier(0.4,0,0.2,1);
+}
+
+body.dark-mode .dropdown-menu, body.dark-mode .settings-dropdown, body.dark-mode .group-settings-dropdown {
+  background: var(--dark-blue-1, #16213e);
+  border: 1.5px solid #4a5568;
+  color: #e2e8f0;
+  box-shadow: 0 10px 32px 0 rgba(22,33,62,0.32), 0 2px 8px 0 rgba(22,33,62,0.14);
+}
+
+.dropdown-menu:before, .settings-dropdown:before, .group-settings-dropdown:before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  right: 28px;
+  width: 18px;
+  height: 18px;
+  background: inherit;
+  border-left: 1.5px solid var(--uranian-blue);
+  border-top: 1.5px solid var(--uranian-blue);
+  transform: rotate(45deg);
+  z-index: 2;
+  box-shadow: 0 2px 8px rgba(48,77,109,0.10);
+}
+
+body.dark-mode .dropdown-menu:before, body.dark-mode .settings-dropdown:before, body.dark-mode .group-settings-dropdown:before {
+  background: var(--dark-blue-1, #16213e);
+  border-left: 1.5px solid #4a5568;
+  border-top: 1.5px solid #4a5568;
+}
+
+.dropdown-menu button, .dropdown-menu label,
+.settings-dropdown button, .settings-dropdown label,
+.group-settings-dropdown button, .group-settings-dropdown label {
+  display: block;
+  width: 100%;
+  background: none;
+  color: var(--yinmn-blue);
+  font-weight: 500;
+  font-size: 1.01rem;
+  border-radius: 8px;
+  padding: 0.5rem 1.2rem;
+  margin: 0.12rem 0;
+  text-align: left;
+  transition: background 0.18s, color 0.18s;
+  cursor: pointer;
+  border: none;
+  letter-spacing: 0.01em;
+}
+
+.dropdown-menu button:hover, .dropdown-menu label:hover,
+.settings-dropdown button:hover, .settings-dropdown label:hover,
+.group-settings-dropdown button:hover, .group-settings-dropdown label:hover {
+  background: var(--sunset-orange);
+  color: #fff;
+}
+
+body.dark-mode .dropdown-menu button, body.dark-mode .dropdown-menu label,
+body.dark-mode .settings-dropdown button, body.dark-mode .settings-dropdown label,
+body.dark-mode .group-settings-dropdown button, body.dark-mode .group-settings-dropdown label {
+  color: #e2e8f0;
+  background: none;
+}
+
+body.dark-mode .dropdown-menu button:hover, body.dark-mode .dropdown-menu label:hover,
+body.dark-mode .settings-dropdown button:hover, body.dark-mode .settings-dropdown label:hover,
+body.dark-mode .group-settings-dropdown button:hover, body.dark-mode .group-settings-dropdown label:hover {
+  background: var(--sunset-orange);
+  color: #fff;
+}
+
+.dropdown-menu .avatar-upload-label {
+  padding: 0.5rem 1.2rem;
+  color: var(--yinmn-blue);
+  font-weight: 500;
+  border-radius: 8px;
+  background: none;
+  transition: background 0.18s, color 0.18s;
+  display: block;
+  margin: 0.12rem 0;
+  cursor: pointer;
+}
+
+body.dark-mode .dropdown-menu .avatar-upload-label {
+  color: #e2e8f0;
+}
+
+.dropdown-menu .avatar-upload-label:hover {
+  background: var(--uranian-blue);
+  color: #fff;
+}
+
+body.dark-mode .dropdown-menu .avatar-upload-label:hover {
+  background: var(--sunset-orange);
+  color: #fff;
+}
+
+/* Overlay for click-outside to close dropdown */
+.dropdown-menu-close-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2100;
+  background: transparent;
+  display: none;
+}
+
+.dropdown-menu.open ~ .dropdown-menu-close-overlay {
+  display: block;
 }

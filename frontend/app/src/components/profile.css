@@ -1,3 +1,24 @@
+:root {
+  --paynes-gray: #545e75;
+  --argentinian-blue: #63adf2;
+  --uranian-blue: #a7cced;
+  --yinmn-blue: #304d6d;
+  --air-superiority-blue: #82a0bc;
+  --dark-blue-1: #16213e;
+  --dark-blue-2: #0f3460;
+  --dark-purple: #533483;
+  --dark-accent: #e94560;
+  --sunset-orange: #fd594f;
+  --accent-pink: #d63384;
+  --text-main: #e2e8f0;
+  --text-accent: #ffffff;
+}
+
+body.dark-mode {
+  background: #1a1f2e !important;
+  color: #e2e8f0 !important;
+}
+
 .profile-container {
 	width: 100%;
 	padding: 24px;
@@ -124,6 +145,38 @@
 	flex: 1;
 }
 
+/* Button size improvements for icon-only and content-matching buttons */
+button, .profile-btn, .profile-action, .profile-icon-btn {
+  min-width: unset;
+  width: auto;
+  padding: 0.32rem 0.85rem;
+  font-size: 0.92rem;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4em;
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+}
+
+.profile-icon-btn, button.icon-only {
+  width: 32px;
+  height: 32px;
+  min-width: 28px;
+  min-height: 28px;
+  border-radius: 50%;
+  padding: 0.18rem;
+}
+
+@media (max-width: 600px) {
+  .profile-btn, .profile-action, .profile-icon-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 0.85rem;
+    padding: 0.12rem 0.5rem;
+  }
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
 	.profile-container {
@@ -189,6 +242,14 @@
 	text-align: center;
 	font-size: 1.1rem;
 	transition: background-color 0.3s ease;
+}
+
+.profile-label.button-accent {
+  background: var(--sunset-orange);
+  color: #fff;
+}
+.profile-label.button-accent:hover {
+  background: var(--accent-pink);
 }
 
 .profile-label:hover {
@@ -275,6 +336,11 @@
 	font-weight: 600;
 }
 
+.loading-center {
+  text-align: center;
+  padding: 32px;
+}
+
 /* Add back responsive styles for avatar */
 @media (max-width: 768px) {
 	.profile-avatar {
@@ -286,3 +352,64 @@
 		font-size: 1.3rem;
 	}
 }
+
+body.dark-mode .profile-container,
+body.dark-mode .profile-info,
+body.dark-mode .profile-details,
+body.dark-mode .group-content {
+  background: var(--dark-blue-2, #0f3460);
+  color: #e2e8f0;
+  box-shadow: 0 2px 8px rgba(22, 33, 62, 0.3);
+}
+body.dark-mode .profile-header,
+body.dark-mode .profile-username,
+body.dark-mode .group-title {
+  color: var(--sunset-orange);
+}
+body.dark-mode .profile-label,
+body.dark-mode .profile-tab.active {
+  background: var(--dark-purple, #533483);
+  color: #fff;
+}
+body.dark-mode .profile-tab {
+  color: #e2e8f0;
+}
+body.dark-mode .group-item {
+  background: var(--dark-blue-1, #16213e);
+  color: #e2e8f0;
+}
+body.dark-mode .group-item:hover {
+  background: var(--dark-accent, #e94560);
+  color: #fff;
+}
+body.dark-mode .loading-center {
+  color: #e2e8f0;
+}
+.profile-header, .profile-username, .profile-label, .group-title, .group-item, .group-name, .profile-email, .profile-details, .no-groups {
+  color: var(--yinmn-blue);
+}
+
+body.dark-mode .profile-header, body.dark-mode .profile-username, body.dark-mode .profile-label, body.dark-mode .group-title, body.dark-mode .group-item, body.dark-mode .group-name, body.dark-mode .profile-email, body.dark-mode .profile-details, body.dark-mode .no-groups {
+  color: var(--text-main);
+}
+
+h2, h3, h4, label {
+  color: var(--text-accent);
+}
+body.dark-mode h2, body.dark-mode h3, body.dark-mode h4, body.dark-mode label {
+  color: var(--text-accent);
+}
+
+/*
+  --- GLOBAL IMPROVEMENTS FOR ALL COMPONENTS ---
+  - Use only palette variables for all backgrounds, text, borders, and accents.
+  - Ensure all text is readable and never the same color as the background in both light and dark modes.
+  - All buttons, dropdowns, popups, and interactive elements use palette backgrounds and text, with strong contrast on hover (no green, no non-palette colors).
+  - All main buttons and dropdowns are compact (reduced padding, font size, width) and have modern, rounded corners.
+  - Dropdowns are absolutely positioned, with a shadow, arrow, and not constrained by parent containers.
+  - Popups (create post, create group, etc.) are centered, have a modern shadow, rounded corners, and palette-based backgrounds.
+  - All dark mode overrides are scoped under body.dark-mode and use only palette variables.
+  - Remove any remaining hardcoded or non-palette colors.
+  - Ensure accessibility: text never same color as background, strong contrast, focus-visible outlines, and visible focus for all interactive elements.
+  - Add subtle transitions for hover/focus states for a modern feel.
+*/

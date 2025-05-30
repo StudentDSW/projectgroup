@@ -535,7 +535,7 @@ export const Dashboard = () => {
                   toggleComments={toggleComments}
                   formatDate={formatDate}
                 />
-                <div ref={observerTarget} style={{ height: "20px" }}>
+                <div ref={observerTarget} className="observer-target">
                   {isLoading && <div className="loading-more">Loading more posts...</div>}
                 </div>
               </>

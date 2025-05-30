@@ -1,3 +1,17 @@
+/*
+  --- GLOBAL IMPROVEMENTS FOR ALL COMPONENTS ---
+  - Use only palette variables for all backgrounds, text, borders, and accents.
+  - Ensure all text is readable and never the same color as the background in both light and dark modes.
+  - All buttons, dropdowns, popups, and interactive elements use palette backgrounds and text, with strong contrast on hover (no green, no non-palette colors).
+  - All main buttons and dropdowns are compact (reduced padding, font size, width) and have modern, rounded corners.
+  - Dropdowns are absolutely positioned, with a shadow, arrow, and not constrained by parent containers.
+  - Popups (create post, create group, etc.) are centered, have a modern shadow, rounded corners, and palette-based backgrounds.
+  - All dark mode overrides are scoped under body.dark-mode and use only palette variables.
+  - Remove any remaining hardcoded or non-palette colors.
+  - Ensure accessibility: text never same color as background, strong contrast, focus-visible outlines, and visible focus for all interactive elements.
+  - Add subtle transitions for hover/focus states for a modern feel.
+*/
+
 .popup-container {
   position: fixed;
   top: 0;
@@ -200,4 +214,269 @@
   width: 100%;
   text-align: center;
   font-weight: 500;
-} 
+}
+
+body.dark-mode .popup-content,
+body.dark-mode .membership-popup,
+body.dark-mode .create-group-popup,
+body.dark-mode .create-post-popup {
+  background: var(--dark-blue-2, #0f3460) !important;
+  color: #e2e8f0 !important;
+  box-shadow: 0 2px 12px rgba(22, 33, 62, 0.5);
+  border-radius: 12px;
+}
+body.dark-mode .popup-header,
+body.dark-mode .popup-content h2,
+body.dark-mode .popup-content label {
+  color: var(--dark-accent, #e94560) !important;
+}
+body.dark-mode .popup-content input,
+body.dark-mode .popup-content textarea,
+body.dark-mode .popup-content select {
+  background: var(--dark-blue-1, #16213e);
+  color: #e2e8f0;
+  border: 1px solid var(--dark-purple, #533483);
+}
+body.dark-mode .popup-content input:focus,
+body.dark-mode .popup-content textarea:focus,
+body.dark-mode .popup-content select:focus {
+  border-color: var(--dark-accent, #e94560);
+}
+body.dark-mode .close-popup-button {
+  background: var(--dark-accent, #e94560);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  font-size: 1.3em;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+body.dark-mode .close-popup-button:hover {
+  background: #b8324a;
+}
+body.dark-mode .create-post-popup,
+body.dark-mode .popup-content.create-post-popup {
+  background: var(--dark-blue-2, #0f3460) !important;
+  color: #e2e8f0 !important;
+  box-shadow: 0 4px 24px rgba(22, 33, 62, 0.4);
+  border-radius: 14px;
+}
+body.dark-mode .create-post-popup form,
+body.dark-mode .popup-content.create-post-popup form {
+  background: none;
+  color: #e2e8f0;
+}
+body.dark-mode .create-post-popup label,
+body.dark-mode .popup-content.create-post-popup label {
+  color: var(--dark-accent, #e94560);
+}
+body.dark-mode .create-post-popup input,
+body.dark-mode .create-post-popup textarea,
+body.dark-mode .create-post-popup select,
+body.dark-mode .popup-content.create-post-popup input,
+body.dark-mode .popup-content.create-post-popup textarea,
+body.dark-mode .popup-content.create-post-popup select {
+  background: var(--dark-blue-1, #16213e);
+  color: #e2e8f0;
+  border: 1px solid var(--dark-purple, #533483);
+}
+body.dark-mode .create-post-popup input:focus,
+body.dark-mode .create-post-popup textarea:focus,
+body.dark-mode .create-post-popup select:focus,
+body.dark-mode .popup-content.create-post-popup input:focus,
+body.dark-mode .popup-content.create-post-popup textarea:focus,
+body.dark-mode .popup-content.create-post-popup select:focus {
+  border-color: var(--dark-accent, #e94560);
+}
+body.dark-mode .create-post-popup .close-popup-button,
+body.dark-mode .popup-content.create-post-popup .close-popup-button {
+  background: var(--dark-accent, #e94560);
+  color: #fff;
+}
+body.dark-mode .create-post-popup .close-popup-button:hover,
+body.dark-mode .popup-content.create-post-popup .close-popup-button:hover {
+  background: #b8324a;
+}
+.create-post-popup, .popup-content {
+  background: #fff;
+  color: var(--yinmn-blue);
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(48, 77, 109, 0.12);
+}
+
+.create-post-popup h2, .popup-content h2 {
+  color: var(--yinmn-blue);
+}
+
+.create-post-popup input, .create-post-popup textarea {
+  background: #fff;
+  color: var(--yinmn-blue);
+  border: 1px solid var(--air-superiority-blue);
+}
+
+.create-post-popup input:focus, .create-post-popup textarea:focus {
+  border-color: var(--argentinian-blue);
+}
+
+.create-post-popup .submit-button, .create-post-popup .button {
+  background: var(--argentinian-blue);
+  color: #fff;
+  font-weight: 600;
+}
+.create-post-popup .submit-button:hover, .create-post-popup .button:hover {
+  background: var(--sunset-orange);
+  color: #fff;
+}
+
+.create-post-popup .cancel-button {
+  background: #eee;
+  color: var(--yinmn-blue);
+}
+.create-post-popup .cancel-button:hover {
+  background: var(--paynes-gray);
+  color: #fff;
+}
+
+/* Dropdown Styles */
+.dropdown {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+.dropdown-toggle {
+  background-color: var(--argentinian-blue);
+  color: #fff;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.2s;
+  width: 100%;
+  text-align: left;
+  font-weight: 600;
+}
+
+.dropdown-toggle:hover {
+  background-color: var(--sunset-orange);
+  transform: translateY(-1px);
+}
+
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: var(--dark-blue-2);
+  border-radius: 4px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+.dropdown-menu.show {
+  display: block;
+}
+
+.dropdown-item {
+  padding: 0.75rem 1rem;
+  color: #e2e8f0;
+  text-decoration: none;
+  display: block;
+  transition: background-color 0.2s;
+}
+
+.dropdown-item:hover {
+  background-color: var(--dark-accent);
+}
+
+/* Button Group Styles */
+.btn-group {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.btn {
+  flex: 1;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-primary {
+  background-color: #4a90e2;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #357abd;
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background-color: #f5f5f5;
+  color: #666;
+}
+
+.btn-secondary:hover {
+  background-color: #e0e0e0;
+  transform: translateY(-1px);
+}
+
+/* Accessible Focus Styles */
+:focus {
+  outline: 3px solid var(--dark-accent);
+  outline-offset: 2px;
+}
+
+button:focus,
+input:focus,
+textarea:focus,
+select:focus {
+  outline: 3px solid var(--dark-accent);
+  outline-offset: 2px;
+}
+
+/* Button size improvements for icon-only and content-matching buttons */
+
+button, .popup-btn, .popup-action, .popup-icon-btn {
+  min-width: unset;
+  width: auto;
+  padding: 0.32rem 0.85rem;
+  font-size: 0.92rem;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4em;
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+}
+
+.popup-icon-btn, button.icon-only {
+  width: 32px;
+  height: 32px;
+  min-width: 28px;
+  min-height: 28px;
+  border-radius: 50%;
+  padding: 0.18rem;
+}
+
+@media (max-width: 600px) {
+  .popup-btn, .popup-action, .popup-icon-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 0.85rem;
+    padding: 0.12rem 0.5rem;
+  }
+}

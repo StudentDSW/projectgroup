@@ -6,6 +6,11 @@
 	--air-superiority-blue: #82a0bc;
 }
 
+body.dark-mode {
+  background: #1a1f2e !important;
+  color: #e2e8f0 !important;
+}
+
 * {
 	margin: 0;
 	padding: 0;

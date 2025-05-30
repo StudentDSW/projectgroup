@@ -1,3 +1,28 @@
+:root {
+  --paynes-gray: #545e75;
+  --argentinian-blue: #63adf2;
+  --uranian-blue: #a7cced;
+  --yinmn-blue: #304d6d;
+  --air-superiority-blue: #82a0bc;
+  --dark-blue-1: #16213e;
+  --dark-blue-2: #0f3460;
+  --dark-purple: #533483;
+  --dark-accent: #e94560;
+  --sunset-orange: #ff4500;
+  --text-main: #e2e8f0;
+  --text-accent: #ffd700;
+}
+
+body {
+  background: var(--dark-blue-2);
+  color: var(--text-main);
+}
+
+body.dark-mode {
+  background: var(--dark-blue-2) !important;
+  color: var(--text-main) !important;
+}
+
 .popup {
 	position: fixed;
 	top: 0;
@@ -76,11 +101,13 @@
 
 .submit-button,
 .cancel-button {
-	padding: 15px 25px;
-	font-size: 1.1rem;
+	padding: 0.3rem 0.9rem;
+	font-size: 0.92rem;
+	border-radius: 6px;
+	min-width: 36px;
+	min-height: 28px;
+	height: 28px;
 	font-weight: 600;
-	border: none;
-	border-radius: 8px;
 	cursor: pointer;
 	transition: all 0.3s ease;
 	width: 48%;
@@ -88,21 +115,23 @@
 }
 
 .submit-button {
-	background-color: #4caf50;
-	color: white;
+	background: var(--argentinian-blue);
+	color: #fff;
 }
 
 .cancel-button {
-	background-color: #ff6347;
-	color: white;
+	background: #eee;
+	color: var(--yinmn-blue);
 }
 
 .submit-button:hover {
-	background-color: #45a049;
+	background: var(--sunset-orange);
+	color: #fff;
 }
 
 .cancel-button:hover {
-	background-color: #e53e2f;
+	background: var(--paynes-gray);
+	color: #fff;
 }
 
 @keyframes fadeIn {
@@ -147,11 +176,11 @@
 }
 
 .sidebar {
-	background: white;
-	border-radius: 8px;
-	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-	padding: 20px;
-	height: fit-content;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(48, 77, 109, 0.08);
+  padding: 24px;
+  margin-bottom: 24px;
 }
 
 .sidebar .action-buttons {
@@ -451,6 +480,35 @@
 	background-color: #45a049;
 }
 
+.close-popup-button {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: 32px;
+  height: 32px;
+  background: var(--accent-pink, #e94560);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  font-size: 1.3em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s;
+  z-index: 10;
+}
+.close-popup-button:hover {
+  background: var(--deep-purple, #533483);
+}
+body.dark-mode .close-popup-button {
+  background: var(--dark-accent, #e94560);
+  color: #fff;
+}
+body.dark-mode .close-popup-button:hover {
+  background: #b8324a;
+}
+
 @media (max-width: 768px) {
 	.dashboard-container {
 		grid-template-columns: 1fr;
@@ -702,6 +760,10 @@
 	opacity: 1;
 }
 
+.observer-target {
+  height: 20px;
+}
+
 body.dark-mode .wrapper-dashboard {
 	background-color: #181a1b;
 }
@@ -774,108 +836,437 @@ body.dark-mode .dashboard-error {
 	color: #ffd700;
 }
 body.dark-mode .members-section {
-	background: #1a1f2e;
-	border-color: #4a5568;
+	background: var(--dark-blue-2, #0f3460);
+	color: #e2e8f0;
+	box-shadow: 0 2px 8px rgba(22, 33, 62, 0.3);
 }
-body.dark-mode .members-section h3 {
-	color: #ffffff;
+body.dark-mode .members-section h2 {
+	color: var(--dark-accent, #e94560);
 }
-body.dark-mode .member-item {
-	color: #ffffff;
-	border-color: #4a5568;
+.members-category {
+	margin-bottom: 18px;
 }
-body.dark-mode .member-item:hover {
-	background: #2d3748;
+.members-category h3 {
+	color: var(--paynes-gray);
+	font-size: 1.1rem;
+	margin-bottom: 10px;
+	font-weight: 500;
+}
+body.dark-mode .members-category h3 {
+	color: #e2e8f0;
+}
+.membership-item, .group-member-item {
+	display: flex;
+	align-items: center;
+	background: #f7f9fa;
+	border-radius: 8px;
+	padding: 10px 16px;
+	margin-bottom: 10px;
+	box-shadow: 0 1px 3px rgba(48, 77, 109, 0.06);
+}
+body.dark-mode .membership-item, body.dark-mode .group-member-item {
+	background: var(--dark-blue-1, #16213e);
+	color: #e2e8f0;
+	box-shadow: 0 1px 3px rgba(22, 33, 62, 0.15);
+}
+.member-info {
+	display: flex;
+	align-items: center;
+	flex: 1;
+	gap: 12px;
+}
+.member-avatar {
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+	object-fit: cover;
+	margin-right: 12px;
+	border: 2px solid var(--air-superiority-blue);
+}
+body.dark-mode .member-avatar {
+	border: 2px solid var(--dark-accent, #e94560);
+}
+.member-details {
+	display: flex;
+	flex-direction: column;
+}
+.member-name {
+	font-weight: 600;
+	color: var(--yinmn-blue);
 }
 body.dark-mode .member-name {
-	color: #ffffff;
+	color: #fff;
+}
+.member-role {
+	font-size: 0.95em;
+	border-radius: 12px;
+	padding: 2px 12px;
+	margin-top: 2px;
+	font-weight: 500;
+	background: var(--uranian-blue);
+	color: var(--yinmn-blue);
+	text-transform: capitalize;
 }
 body.dark-mode .member-role {
-	color: #a0aec0;
+	background: var(--dark-purple, #533483);
+	color: #fff;
 }
-body.dark-mode .popup {
-	background-color: rgba(0, 0, 0, 0.7);
+.member-role.admin {
+	background: var(--success-green, #4caf50);
+	color: #fff;
 }
-body.dark-mode .popup-content {
-	background-color: #1a1f2e;
-	border: 1px solid #4a5568;
-	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+body.dark-mode .member-role.admin {
+	background: var(--dark-accent, #e94560);
+	color: #fff;
 }
-body.dark-mode .popup h2 {
-	color: #ffffff;
+.member-actions {
+	display: flex;
+	gap: 8px;
+	align-items: center;
 }
-body.dark-mode .form-group label {
-	color: #e2e8f0;
+
+body.dark-mode .no-members {
+  color: var(--dark-accent, #e94560);
+  opacity: 0.85;
 }
-body.dark-mode .form-group input,
-body.dark-mode .form-group textarea {
-	background-color: #2d3748;
-	border-color: #4a5568;
-	color: #ffffff;
+
+.sidebar button,
+.sidebar .button,
+.sidebar .submit-button,
+.sidebar .submit-btn,
+.sidebar .cancel-button,
+.sidebar .cancel-btn {
+  background: var(--argentinian-blue);
+  color: #fff;
+  border-radius: 6px;
+  border: none;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 10px 22px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
 }
-body.dark-mode .form-group input:focus,
-body.dark-mode .form-group textarea:focus {
-	border-color: #60a5fa;
-	box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2);
+.sidebar button:hover,
+.sidebar .button:hover,
+.sidebar .submit-button:hover,
+.sidebar .submit-btn:hover {
+  background: var(--paynes-gray);
 }
-body.dark-mode .form-group-checkbox {
-	color: #e2e8f0;
+.sidebar .cancel-button,
+.sidebar .cancel-btn {
+  background: #eee;
+  color: var(--yinmn-blue);
 }
-body.dark-mode .submit-button {
-	background-color: #60a5fa;
-	color: #1a1f2e;
+.sidebar .cancel-button:hover,
+.sidebar .cancel-btn:hover {
+  background: #ccc;
 }
-body.dark-mode .submit-button:hover {
-	background-color: #3b82f6;
+body.dark-mode .sidebar button,
+body.dark-mode .sidebar .button,
+body.dark-mode .sidebar .submit-button,
+body.dark-mode .sidebar .submit-btn {
+  background: var(--dark-accent, #e94560);
+  color: #fff;
 }
-body.dark-mode .cancel-button {
-	background-color: #ef4444;
-	color: #ffffff;
+body.dark-mode .sidebar button:hover,
+body.dark-mode .sidebar .button:hover,
+body.dark-mode .sidebar .submit-button:hover,
+body.dark-mode .sidebar .submit-btn:hover {
+  background: var(--dark-purple, #533483);
 }
-body.dark-mode .cancel-button:hover {
-	background-color: #dc2626;
+body.dark-mode .sidebar .cancel-button,
+body.dark-mode .sidebar .cancel-btn {
+  background: var(--dark-blue-1, #16213e);
+  color: #e2e8f0;
 }
+body.dark-mode .sidebar .cancel-button:hover,
+body.dark-mode .sidebar .cancel-btn:hover {
+  background: #222b45;
+}
+body.dark-mode .main-content,
+body.dark-mode .dashboard-content,
+body.dark_mode .sidebar,
+body.dark_mode .card,
+body.dark_mode .post,
+body.dark_mode .post-card,
+body.dark_mode .posts-section,
+body.dark_mode .comment,
+body.dark_mode .comments-section,
+body.dark_mode .popup-content,
+body.dark_mode .membership-popup,
+body.dark_mode .create-group-popup,
+body.dark_mode .create-post-popup {
+  background: var(--dark-blue-2, #0f3460) !important;
+  color: #e2e8f0 !important;
+  box-shadow: 0 2px 8px rgba(22, 33, 62, 0.3);
+}
+body.dark-mode h2,
+body.dark-mode h3,
+body.dark-mode label {
+  color: var(--dark-accent, #e94560) !important;
+}
+body.dark-mode input,
+body.dark-mode textarea,
+body.dark-mode select {
+  background: var(--dark-blue-1, #16213e);
+  color: #e2e8f0;
+  border: 1px solid var(--dark-purple, #533483);
+}
+body.dark-mode input:focus,
+body.dark-mode textarea:focus,
+body.dark-mode select:focus {
+  border-color: var(--dark-accent, #e94560);
+}
+body.dark-mode .cancel-button, body.dark-mode .cancel-btn {
+  background: var(--dark-blue-1, #16213e);
+  color: #e2e8f0;
+}
+body.dark-mode .cancel-button:hover, body.dark-mode .cancel-btn:hover {
+  background: #222b45;
+}
+body.dark-mode .submit-button, body.dark-mode .submit-btn, body.dark_mode button, body.dark_mode .button {
+  background: var(--dark-accent, #e94560);
+  color: #fff;
+}
+body.dark-mode .submit-button:hover, body.dark_mode .submit-btn:hover, body.dark_mode button:hover, body.dark_mode .button:hover {
+  background: var(--dark-purple, #533483);
+}
+body.dark-mode .avatar-upload-label,
+body.dark-mode .profile-label {
+  background: var(--dark-purple, #533483);
+  color: #fff;
+}
+body.dark-mode .avatar-upload-label:hover,
+body.dark-mode .profile-label:hover {
+  background: var(--dark-accent, #e94560);
+}
+
+.action-buttons button, .add-group, .create-post {
+  transition: background-color 0.2s, color 0.2s;
+}
+.action-buttons button.button-accent, .add-group.button-accent, .create-post.button-accent {
+  background: var(--sunset-orange);
+  color: #fff;
+}
+.action-buttons button.button-accent:hover, .add-group.button-accent:hover, .create-post.button-accent:hover {
+  background: var(--accent-pink);
+}
+
+.group-title {
+  color: var(--sunset-orange);
+}
+
 body.dark-mode .group-title {
-	color: #ffffff;
-	border-bottom-color: #4a5568;
+  color: var(--sunset-orange);
 }
-body.dark-mode .welcome-message h1 {
-	color: #ffffff;
+
+.dashboard-container, .dashboard-content, .sidebar, .main-content, .group-title, .group-item, .group-name, .welcome-message, .error-message, .no-posts, .members-section, .comment, .comments-section, .post, .post-card, .posts-section, .sidebar, .sidebar * {
+  color: var(--yinmn-blue);
 }
-body.dark-mode .welcome-message p {
-	color: #e2e8f0;
+
+body.dark-mode .dashboard-container, body.dark-mode .dashboard-content, body.dark-mode .sidebar, body.dark-mode .main-content, body.dark-mode .group-title, body.dark-mode .group-item, body.dark-mode .group-name, body.dark-mode .welcome-message, body.dark-mode .error-message, body.dark-mode .no-posts, body.dark-mode .members-section, body.dark_mode .comment, body.dark_mode .comments-section {
+  color: var(--text-main);
 }
-body.dark-mode .posts-section h2 {
-	color: #ffffff;
+
+h2, h3, h4, label {
+  color: var(--text-accent);
 }
-body.dark-mode .post-header h3 {
-	color: #ffffff;
+body.dark-mode h2, body.dark-mode h3, body.dark-mode h4, body.dark-mode label {
+  color: var(--text-accent);
 }
-body.dark-mode .post-header small {
-	color: #a0aec0;
+
+/*
+  --- GLOBAL IMPROVEMENTS FOR ALL COMPONENTS ---
+  - Use only palette variables for all backgrounds, text, borders, and accents.
+  - Ensure all text is readable and never the same color as the background in both light and dark modes.
+  - All buttons, dropdowns, popups, and interactive elements use palette backgrounds and text, with strong contrast on hover (no green, no non-palette colors).
+  - All main buttons and dropdowns are compact (reduced padding, font size, width) and have modern, rounded corners.
+  - Dropdowns are absolutely positioned, with a shadow, arrow, and not constrained by parent containers.
+  - Popups (create post, create group, etc.) are centered, have a modern shadow, rounded corners, and palette-based backgrounds.
+  - All dark mode overrides are scoped under body.dark-mode and use only palette variables.
+  - Remove any remaining hardcoded or non-palette colors.
+  - Ensure accessibility: text never same color as background, strong contrast, focus-visible outlines, and visible focus for all interactive elements.
+  - Add subtle transitions for hover/focus states for a modern feel.
+*/
+
+button, .dashboard-btn, .dashboard-action, .dashboard-icon-btn {
+  min-width: unset;
+  width: auto;
+  padding: 0.32rem 0.85rem;
+  font-size: 0.92rem;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4em;
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s;
 }
-body.dark-mode .member-info {
-	color: #ffffff;
+
+.dashboard-icon-btn, button.icon-only {
+  width: 32px;
+  height: 32px;
+  min-width: 28px;
+  min-height: 28px;
+  border-radius: 50%;
+  padding: 0.18rem;
 }
-body.dark-mode .member-info .name {
-	color: #ffffff;
+
+@media (max-width: 600px) {
+  .dashboard-btn, .dashboard-action, .dashboard-icon-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 0.85rem;
+    padding: 0.12rem 0.5rem;
+  }
 }
-body.dark-mode .member-info .role {
-	color: #a0aec0;
+
+/* Like/Dislike button improvements: icon-only, compact, round, and content-matching */
+.like-button, .dislike-button {
+  width: 32px;
+  height: 32px;
+  min-width: 28px;
+  min-height: 28px;
+  max-width: 36px;
+  max-height: 36px;
+  padding: 0.18rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 2px solid transparent;
+  color: var(--yinmn-blue);
+  transition: background 0.18s, color 0.18s, border-color 0.18s, box-shadow 0.18s;
+  font-size: 1.1rem;
 }
-body.dark-mode .member-info .email {
-	color: #e2e8f0;
+
+.like-button:hover, .dislike-button:hover {
+  background: var(--uranian-blue);
+  color: var(--sunset-orange);
+  border-color: var(--sunset-orange);
 }
-body.dark-mode .member-info .joined {
-	color: #a0aec0;
+
+.like-button.active, .dislike-button.active {
+  background: var(--sunset-orange);
+  color: #fff;
+  border-color: var(--sunset-orange);
 }
-body.dark-mode .member-actions {
-	border-top-color: #4a5568;
+
+body.dark-mode .like-button, body.dark-mode .dislike-button {
+  color: #e2e8f0;
+  background: none;
+  border-color: transparent;
 }
-body.dark-mode .member-actions button {
-	color: #ffffff;
-	border-color: #4a5568;
+
+body.dark-mode .like-button:hover, body.dark-mode .dislike-button:hover {
+  background: var(--argentinian-blue);
+  color: var(--sunset-orange);
+  border-color: var(--sunset-orange);
 }
-body.dark-mode .member-actions button:hover {
-	background-color: #2d3748;
+
+body.dark-mode .like-button.active, body.dark-mode .dislike-button.active {
+  background: var(--sunset-orange);
+  color: #fff;
+  border-color: var(--sunset-orange);
+}
+
+/* Settings dropdown improvements for all settings/option dropdowns */
+
+/* General settings/option dropdown container */
+.settings-dropdown-container, .options-dropdown-container {
+  position: relative;
+  display: inline-block;
+}
+
+/* Modern absolutely positioned dropdown menu */
+.settings-dropdown, .options-dropdown, .group-settings-dropdown {
+  position: absolute;
+  top: 110%;
+  right: 0;
+  left: auto;
+  min-width: 170px;
+  max-width: 240px;
+  z-index: 2000;
+  background: #fff;
+  border: 1px solid var(--uranian-blue);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(48, 77, 109, 0.18);
+  padding: 0.25rem 0.15rem;
+  margin-top: 0.3rem;
+  animation: dropdown-fade-in 0.18s cubic-bezier(0.4,0,0.2,1);
+  overflow: visible;
+}
+
+.settings-dropdown:before, .options-dropdown:before, .group-settings-dropdown:before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  right: 18px;
+  width: 16px;
+  height: 16px;
+  background: #fff;
+  border-left: 1px solid var(--uranian-blue);
+  border-top: 1px solid var(--uranian-blue);
+  transform: rotate(45deg);
+  z-index: 1;
+}
+
+.settings-dropdown button, .settings-dropdown label,
+.options-dropdown button, .options-dropdown label,
+.group-settings-dropdown button, .group-settings-dropdown label {
+  display: block;
+  width: 100%;
+  background: none;
+  color: var(--yinmn-blue);
+  font-weight: 600;
+  font-size: 0.95rem;
+  border-radius: 8px;
+  padding: 0.45rem 1rem;
+  margin: 0.08rem 0;
+  text-align: left;
+  transition: background 0.18s, color 0.18s;
+  cursor: pointer;
+  border: none;
+}
+
+.settings-dropdown button:hover, .settings-dropdown label:hover,
+.options-dropdown button:hover, .options-dropdown label:hover,
+.group-settings-dropdown button:hover, .group-settings-dropdown label:hover {
+  background: var(--sunset-orange);
+  color: #fff;
+}
+
+body.dark-mode .settings-dropdown, body.dark-mode .options-dropdown, body.dark-mode .group-settings-dropdown {
+  background: var(--dark-blue-1, #16213e);
+  border: 1px solid #4a5568;
+  color: #e2e8f0;
+  box-shadow: 0 8px 24px rgba(22, 33, 62, 0.28);
+}
+
+body.dark-mode .settings-dropdown button, body.dark-mode .settings-dropdown label,
+body.dark-mode .options-dropdown button, body.dark-mode .options-dropdown label,
+body.dark-mode .group-settings-dropdown button, body.dark-mode .group-settings-dropdown label {
+  color: #e2e8f0;
+  background: none;
+}
+
+body.dark-mode .settings-dropdown button:hover, body.dark-mode .settings-dropdown label:hover,
+body.dark-mode .options-dropdown button:hover, body.dark-mode .options-dropdown label:hover,
+body.dark-mode .group-settings-dropdown button:hover, body.dark-mode .group-settings-dropdown label:hover {
+  background: var(--sunset-orange);
+  color: #fff;
+}
+
+body.dark-mode .settings-dropdown:before, body.dark-mode .options-dropdown:before, body.dark-mode .group-settings-dropdown:before {
+  background: var(--dark-blue-1, #16213e);
+  border-left: 1px solid #4a5568;
+  border-top: 1px solid #4a5568;
+}
+
+/* Ensure dropdown does not increase parent height */
+.settings-dropdown, .options-dropdown, .group-settings-dropdown {
+  position: absolute !important;
+  top: 110% !important;
+  left: auto !important;
+  right: 0 !important;
 }

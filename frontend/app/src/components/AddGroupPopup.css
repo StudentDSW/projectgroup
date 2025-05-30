@@ -1,3 +1,17 @@
+/*
+  --- GLOBAL IMPROVEMENTS FOR ALL COMPONENTS ---
+  - Use only palette variables for all backgrounds, text, borders, and accents.
+  - Ensure all text is readable and never the same color as the background in both light and dark modes.
+  - All buttons, dropdowns, popups, and interactive elements use palette backgrounds and text, with strong contrast on hover (no green, no non-palette colors).
+  - All main buttons and dropdowns are compact (reduced padding, font size, width) and have modern, rounded corners.
+  - Dropdowns are absolutely positioned, with a shadow, arrow, and not constrained by parent containers.
+  - Popups (create post, create group, etc.) are centered, have a modern shadow, rounded corners, and palette-based backgrounds.
+  - All dark mode overrides are scoped under body.dark-mode and use only palette variables.
+  - Remove any remaining hardcoded or non-palette colors.
+  - Ensure accessibility: text never same color as background, strong contrast, focus-visible outlines, and visible focus for all interactive elements.
+  - Add subtle transitions for hover/focus states for a modern feel.
+*/
+
 .popup {
   position: fixed;
   top: 0;
@@ -12,17 +26,20 @@
 }
 
 .popup-content {
-  background-color: white;
-  padding: 2rem;
-  border-radius: 8px;
-  width: 100%;
-  height: 100%;
-  max-width: none;
-  max-height: none;
-  overflow-y: auto;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  display: flex;
-  flex-direction: column;
+  max-width: 420px;
+  margin: 40px auto;
+  background: #fff;
+  color: var(--yinmn-blue);
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(48, 77, 109, 0.12);
+  padding: 32px 28px 24px 28px;
+  position: relative;
+}
+
+body.dark-mode .popup-content {
+  background: var(--dark-blue-2, #0f3460);
+  color: #e2e8f0;
+  box-shadow: 0 4px 24px rgba(22, 33, 62, 0.4);
 }
 
 .popup-content h2 {
@@ -156,4 +173,131 @@
   border-radius: 4px;
   margin-bottom: 1rem;
   font-size: 0.875rem;
+}
+
+body.dark-mode .popup-content,
+body.dark-mode .membership-popup,
+body.dark-mode .create-group-popup,
+body.dark-mode .create-post-popup {
+  background: var(--dark-blue-2, #0f3460) !important;
+  color: #e2e8f0 !important;
+  box-shadow: 0 2px 12px rgba(22, 33, 62, 0.5);
+  border-radius: 12px;
+}
+
+body.dark-mode .popup-header,
+body.dark-mode .popup-content h2,
+body.dark-mode .popup-content label {
+  color: var(--dark-accent, #e94560) !important;
+}
+
+body.dark-mode .popup-content input,
+body.dark-mode .popup-content textarea,
+body.dark-mode .popup-content select {
+  background: var(--dark-blue-1, #16213e);
+  color: #e2e8f0;
+  border: 1px solid var(--dark-purple, #533483);
+}
+
+body.dark-mode .popup-content input:focus,
+body.dark-mode .popup-content textarea:focus,
+body.dark-mode .popup-content select:focus {
+  border-color: var(--dark-accent, #e94560);
+}
+
+body.dark-mode .close-popup-button {
+  background: var(--dark-accent, #e94560);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  font-size: 1.3em;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+body.dark-mode .close-popup-button:hover {
+  background: #b8324a;
+}
+
+.popup-content form {
+  background: none;
+  color: inherit;
+}
+
+body.dark-mode .popup-content form {
+  background: none;
+  color: #e2e8f0;
+}
+
+.add-group-popup, .popup-content {
+  background: #fff;
+  color: var(--yinmn-blue);
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(48, 77, 109, 0.12);
+}
+
+.add-group-popup h2, .popup-content h2 {
+  color: var(--yinmn-blue);
+}
+
+.add-group-popup input, .add-group-popup textarea {
+  background: #fff;
+  color: var(--yinmn-blue);
+  border: 1px solid var(--air-superiority-blue);
+}
+
+.add-group-popup input:focus, .add-group-popup textarea:focus {
+  border-color: var(--argentinian-blue);
+}
+
+.add-group-popup .submit-button, .add-group-popup .button {
+  background: var(--argentinian-blue);
+  color: #fff;
+  font-weight: 600;
+}
+.add-group-popup .submit-button:hover, .add-group-popup .button:hover {
+  background: var(--sunset-orange);
+  color: #fff;
+}
+
+.add-group-popup .cancel-button {
+  background: #eee;
+  color: var(--yinmn-blue);
+}
+.add-group-popup .cancel-button:hover {
+  background: var(--paynes-gray);
+  color: #fff;
+}
+
+/* Button size improvements for icon-only and content-matching buttons */
+
+button, .popup-btn, .popup-action, .popup-icon-btn {
+  min-width: unset;
+  width: auto;
+  padding: 0.32rem 0.85rem;
+  font-size: 0.92rem;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4em;
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+}
+
+.popup-icon-btn, button.icon-only {
+  width: 32px;
+  height: 32px;
+  min-width: 28px;
+  min-height: 28px;
+  border-radius: 50%;
+  padding: 0.18rem;
+}
+
+@media (max-width: 600px) {
+  .popup-btn, .popup-action, .popup-icon-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 0.85rem;
+    padding: 0.12rem 0.5rem;
+  }
 }

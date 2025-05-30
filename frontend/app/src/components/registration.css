@@ -1,3 +1,23 @@
+:root {
+  --paynes-gray: #545e75;
+  --argentinian-blue: #63adf2;
+  --uranian-blue: #a7cced;
+  --yinmn-blue: #304d6d;
+  --air-superiority-blue: #82a0bc;
+  --success-green: #4CAF50;
+  --dark-purple: #533483;
+  --dark-accent: #e94560;
+  --sunset-orange: #fd5e53;
+  --accent-pink: #ff4081;
+  --text-main: #e2e8f0;
+  --text-accent: #ffffff;
+}
+
+body.dark-mode {
+  background: #1a1f2e !important;
+  color: #e2e8f0 !important;
+}
+
 * {
 	margin: 0;
 	padding: 0;
@@ -13,19 +33,33 @@
 }
 
 .create-account__popup {
-	background-color: #fff;
-	padding: 20px;
-	border-radius: 10px;
-	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-	text-align: center;
-	max-width: 400px;
-	width: 100%;
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  background-color: var(--success-green, #4CAF50);
+  color: white;
+  padding: 15px 30px;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+body.dark-mode .create-account__popup {
+  background-color: var(--dark-purple, #533483);
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(22, 33, 62, 0.4);
 }
 
 .account__created {
 	font-size: 18px;
 	font-weight: bold;
 	margin-bottom: 20px;
+  margin: 0;
 }
 
 .create-account__popup-close {
@@ -37,8 +71,17 @@
 	border-radius: 5px;
 }
 
+body.dark-mode .create-account__popup-close {
+  background-color: var(--dark-accent, #e94560);
+  color: #fff;
+}
+
 .create-account__popup-close:hover {
 	background-color: #45a049;
+}
+
+body.dark-mode .create-account__popup-close:hover {
+  background-color: #b8324a;
 }
 
 .register {
@@ -47,4 +90,317 @@
 .register-link {
 	text-decoration: none;
 	color: royalblue;
+}
+
+.create-account__popup p {
+  margin: 0;
+}
+
+.form-group {
+  margin-bottom: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.form-group label {
+  color: var(--yinmn-blue);
+  font-weight: 500;
+  margin-bottom: 2px;
+}
+body.dark-mode .form-group label {
+  color: #e2e8f0;
+}
+.form-group input[type="text"],
+.form-group textarea,
+.form-group select {
+  padding: 10px 12px;
+  border: 1px solid var(--air-superiority-blue);
+  border-radius: 6px;
+  font-size: 1rem;
+  background: #fff;
+  color: var(--yinmn-blue);
+  transition: border 0.2s;
+}
+body.dark-mode .form-group input[type="text"],
+body.dark-mode .form-group textarea,
+body.dark-mode .form-group select {
+  background: var(--dark-blue-1, #16213e);
+  color: #e2e8f0;
+  border: 1px solid var(--dark-purple, #533483);
+}
+.form-group input[type="text"]:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  border-color: var(--argentinian-blue);
+  outline: none;
+}
+body.dark-mode .form-group input[type="text"]:focus,
+body.dark-mode .form-group textarea:focus,
+body.dark-mode .form-group select:focus {
+  border-color: var(--dark-accent, #e94560);
+}
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.checkbox-group label {
+  font-weight: 500;
+}
+.checkbox-group input[type="checkbox"] {
+  accent-color: var(--argentinian-blue);
+  width: 18px;
+  height: 18px;
+}
+body.dark-mode .checkbox-group input[type="checkbox"] {
+  accent-color: var(--dark-accent, #e94560);
+}
+.button-group, .button-container {
+  display: flex;
+  gap: 12px;
+  margin-top: 10px;
+}
+.submit-button, .submit-btn {
+  background: var(--argentinian-blue);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 22px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.submit-button.button-accent {
+  background: var(--sunset-orange);
+  color: #fff;
+}
+.submit-button.button-accent:hover {
+  background: var(--accent-pink);
+}
+.submit-button:hover, .submit-btn:hover {
+  background: var(--paynes-gray);
+}
+body.dark-mode .submit-button, body.dark-mode .submit-btn {
+  background: var(--dark-accent, #e94560);
+  color: #fff;
+}
+body.dark-mode .submit-button:hover, body.dark-mode .submit-btn:hover {
+  background: var(--dark-purple, #533483);
+}
+.cancel-button, .cancel-btn {
+  background: #eee;
+  color: var(--yinmn-blue);
+  border: none;
+  border-radius: 6px;
+  padding: 10px 22px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.cancel-button:hover, .cancel-btn:hover {
+  background: #ccc;
+}
+body.dark-mode .cancel-button, body.dark-mode .cancel-btn {
+  background: var(--dark-blue-1, #16213e);
+  color: #e2e8f0;
+}
+body.dark-mode .cancel-button:hover, body.dark-mode .cancel-btn:hover {
+  background: #222b45;
+}
+.file-input {
+  margin-top: 4px;
+}
+/* Popup windows (create group, create post, manage group members) dark mode fix */
+body.dark-mode .popup-content,
+body.dark-mode .membership-popup,
+body.dark-mode .create-group-popup,
+body.dark-mode .create-post-popup {
+  background: var(--dark-blue-2, #0f3460) !important;
+  color: #e2e8f0 !important;
+  box-shadow: 0 2px 12px rgba(22, 33, 62, 0.5);
+  border-radius: 12px;
+}
+body.dark-mode .popup-header,
+body.dark-mode .popup-content h2,
+body.dark-mode .popup-content label {
+  color: var(--dark-accent, #e94560) !important;
+}
+body.dark-mode .popup-content input,
+body.dark-mode .popup-content textarea,
+body.dark-mode .popup-content select {
+  background: var(--dark-blue-1, #16213e);
+  color: #e2e8f0;
+  border: 1px solid var(--dark-purple, #533483);
+}
+body.dark-mode .popup-content input:focus,
+body.dark-mode .popup-content textarea:focus,
+body.dark-mode .popup-content select:focus {
+  border-color: var(--dark-accent, #e94560);
+}
+body.dark-mode .close-popup-button {
+  background: var(--dark-accent, #e94560);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  font-size: 1.3em;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+body.dark-mode .close-popup-button:hover {
+  background: #b8324a;
+}
+body.dark-mode .main-content,
+body.dark-mode .dashboard-content,
+body.dark-mode .sidebar,
+body.dark-mode .group-content,
+body.dark-mode .card,
+body.dark-mode .post,
+body.dark-mode .post-card,
+body.dark-mode .posts-section,
+body.dark-mode .comment,
+body.dark-mode .comments-section {
+  background: var(--dark-blue-2, #0f3460) !important;
+  color: #e2e8f0 !important;
+  box-shadow: 0 2px 8px rgba(22, 33, 62, 0.3);
+}
+body.dark-mode h2,
+body.dark-mode h3,
+body.dark-mode label {
+  color: var(--dark-accent, #e94560) !important;
+}
+body.dark-mode input,
+body.dark-mode textarea,
+body.dark-mode select {
+  background: var(--dark-blue-1, #16213e);
+  color: #e2e8f0;
+  border: 1px solid var(--dark-purple, #533483);
+}
+body.dark-mode input:focus,
+body.dark-mode textarea:focus,
+body.dark-mode select:focus {
+  border-color: var(--dark-accent, #e94560);
+}
+body.dark-mode .cancel-button, body.dark-mode .cancel-btn {
+  background: var(--dark-blue-1, #16213e);
+  color: #e2e8f0;
+}
+body.dark-mode .cancel-button:hover, body.dark-mode .cancel-btn:hover {
+  background: #222b45;
+}
+body.dark-mode .submit-button, body.dark-mode .submit-btn, body.dark-mode button, body.dark-mode .button {
+  background: var(--dark-accent, #e94560);
+  color: #fff;
+}
+body.dark-mode .submit-button:hover, body.dark-mode .submit-btn:hover, body.dark-mode button:hover, body.dark-mode .button:hover {
+  background: var(--dark-purple, #533483);
+}
+body.dark-mode .avatar-upload-label,
+body.dark-mode .profile-label {
+  background: var(--dark-purple, #533483);
+  color: #fff;
+}
+body.dark-mode .avatar-upload-label:hover,
+body.dark-mode .profile-label:hover {
+  background: var(--dark-accent, #e94560);
+}
+.form-title, .registration-title {
+  color: var(--sunset-orange);
+}
+
+body.dark-mode .form-title, body.dark-mode .registration-title {
+  color: var(--sunset-orange);
+}
+
+.registration-title, .form-title, .form-group label, .submit-button, .cancel-button, .registration-message {
+  color: var(--text-main);
+}
+
+body.dark-mode .registration-title, body.dark-mode .form-title, body.dark-mode .form-group label, body.dark-mode .submit-button, body.dark-mode .cancel-button, body.dark-mode .registration-message {
+  color: var(--text-main);
+}
+
+h2, h3, h4, label {
+  color: var(--text-accent);
+}
+body.dark-mode h2, body.dark-mode h3, body.dark-mode h4, body.dark-mode label {
+  color: var(--text-accent);
+}
+.submit-button, .cancel-button, .popup-content button, .popup-content .button, .popup-content .submit-button, .popup-content .cancel-button {
+  padding: 0.3rem 0.9rem;
+  font-size: 0.92rem;
+  border-radius: 6px;
+  min-width: 36px;
+  min-height: 28px;
+  height: 28px;
+  font-weight: 600;
+}
+
+.submit-button, .popup-content .submit-button, .popup-content .button {
+  background: var(--argentinian-blue);
+  color: #fff;
+}
+.submit-button:hover, .popup-content .submit-button:hover, .popup-content .button:hover {
+  background: var(--sunset-orange);
+  color: #fff;
+}
+
+.cancel-button, .popup-content .cancel-button {
+  background: #eee;
+  color: var(--yinmn-blue);
+}
+.cancel-button:hover, .popup-content .cancel-button:hover {
+  background: var(--paynes-gray);
+  color: #fff;
+}
+
+body.dark-mode .submit-button, body.dark-mode .popup-content .submit-button, body.dark-mode .popup-content .button {
+  background: var(--argentinian-blue);
+  color: #1a1f2e;
+}
+body.dark-mode .submit-button:hover, body.dark-mode .popup-content .submit-button:hover, body-dark-mode .popup-content .button:hover {
+  background: var(--sunset-orange);
+  color: #fff;
+}
+body.dark-mode .cancel-button, body.dark-mode .popup-content .cancel-button {
+  background: #4a5568;
+  color: #fff;
+}
+body.dark-mode .cancel-button:hover, body.dark-mode .popup-content .cancel-button:hover {
+  background: var(--sunset-orange);
+  color: #fff;
+}
+
+/* Button size improvements for icon-only and content-matching buttons */
+
+button, .registration-btn, .registration-action, .registration-icon-btn {
+  min-width: unset;
+  width: auto;
+  padding: 0.32rem 0.85rem;
+  font-size: 0.92rem;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4em;
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+}
+
+.registration-icon-btn, button.icon-only {
+  width: 32px;
+  height: 32px;
+  min-width: 28px;
+  min-height: 28px;
+  border-radius: 50%;
+  padding: 0.18rem;
+}
+
+@media (max-width: 600px) {
+  .registration-btn, .registration-action, .registration-icon-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 0.85rem;
+    padding: 0.12rem 0.5rem;
+  }
 }

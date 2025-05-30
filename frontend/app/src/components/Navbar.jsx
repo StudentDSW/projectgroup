@@ -311,7 +311,7 @@ export const Navbar = ({ onJoinGroup, onLeaveGroup }) => {
   return (
     <div className="wrapper-navbar">
       <div className="navbar">
-        <Link to="/dashboard" className="logo" style={{ cursor: 'pointer' }}>
+        <Link to="/dashboard" className="logo">
           <div className="logo-img" />
           <p>GroupApp</p>
         </Link>
@@ -393,7 +393,7 @@ export const Navbar = ({ onJoinGroup, onLeaveGroup }) => {
           )}
         </div>
 
-        <div className="navbar-right" ref={dropdownRef}>
+        <div className="navbar-right">
           <button
             className="dark-mode-toggle"
             onClick={toggleDarkMode}
@@ -413,45 +413,44 @@ export const Navbar = ({ onJoinGroup, onLeaveGroup }) => {
               >
                 <img src={avatar} alt={`${username}'s avatar`} className="avatar-image" />
               </button>
-            </div>
-
-            {dropdownOpen && (
-              <div className="dropdown-menu">
-                {!isAccountPage ? (
+              {dropdownOpen && (
+                <div className="dropdown-menu" ref={dropdownRef}>
+                  {!isAccountPage ? (
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate("/account");
+                        setDropdownOpen(false);
+                      }}
+                    >
+                      Profile
+                    </button>
+                  ) : (
+                    <div className="avatar-upload-container">
+                      <input
+                        id="avatar-upload"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileChange}
+                        className="profile-file-input"
+                      />
+                      <label htmlFor="avatar-upload" className="avatar-upload-label">
+                        Change Avatar
+                      </label>
+                    </div>
+                  )}
                   <button 
                     onClick={(e) => {
                       e.stopPropagation();
-                      navigate("/account");
+                      handleLogout();
                       setDropdownOpen(false);
                     }}
                   >
-                    Profile
+                    Wyloguj
                   </button>
-                ) : (
-                  <div className="avatar-upload-container">
-                    <input
-                      id="avatar-upload"
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileChange}
-                      className="profile-file-input"
-                    />
-                    <label htmlFor="avatar-upload" className="avatar-upload-label">
-                      Change Avatar
-                    </label>
-                  </div>
-                )}
-                <button 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleLogout();
-                    setDropdownOpen(false);
-                  }}
-                >
-                  Wyloguj
-                </button>
-              </div>
-            )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

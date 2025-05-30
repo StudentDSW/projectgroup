@@ -132,24 +132,9 @@ export const Registration = () => {
     <>
       <div className="body">
         {isPopupVisible && (
-          <div className="create-account__popup" style={{
-            position: 'fixed',
-            top: '20px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            zIndex: 1000,
-            backgroundColor: '#4CAF50',
-            color: 'white',
-            padding: '15px 30px',
-            borderRadius: '5px',
-            boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '10px'
-          }}>
-            <h3 className="account__created" style={{ margin: 0 }}>Konto utworzone pomyślnie</h3>
-            <p style={{ margin: 0 }}>Przekierowanie do strony logowania za {countdown} sekund...</p>
+          <div className="create-account__popup">
+            <h3 className="account__created">Konto utworzone pomyślnie</h3>
+            <p>Przekierowanie do strony logowania za {countdown} sekund...</p>
           </div>
         )}
         <div className="container left">

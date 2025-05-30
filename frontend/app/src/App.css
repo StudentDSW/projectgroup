@@ -1,3 +1,22 @@
+/* Removed broken import of palette.scss. All palette variables are now defined in theme.css. */
+
+:root {
+  --paynes-gray: #545e75;
+  --argentinian-blue: #63adf2;
+  --uranian-blue: #a7cced;
+  --yinmn-blue: #304d6d;
+  --air-superiority-blue: #82a0bc;
+}
+
+body {
+  background: var(--uranian-blue);
+  color: var(--yinmn-blue);
+}
+body.dark-mode {
+  background: #1a1f2e;
+  color: #e2e8f0;
+}
+
 .wrapper {
 	background-color: rgb(190, 188, 188);
 	border-radius: 5%;

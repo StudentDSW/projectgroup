@@ -342,7 +342,7 @@ export const Profile = () => {
         <Navbar />
         <div className="dashboard-container">
           <div className="group-content">
-            <div style={{ textAlign: "center", padding: 32 }}>Loading…</div>
+            <div className="loading-center">Loading…</div>
           </div>
         </div>
       </div>

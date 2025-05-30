@@ -6,6 +6,11 @@
   --air-superiority-blue: #82a0bc;
 }
 
+body.dark-mode {
+  background: #1a1f2e !important;
+  color: #e2e8f0 !important;
+}
+
 .go-to-top {
   position: fixed;
   bottom: 30px;
@@ -104,4 +109,4 @@ body.dark-mode .go-to-top:hover {
 
 body.dark-mode .go-to-top:active {
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-} 
+}
